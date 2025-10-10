@@ -85,11 +85,12 @@
 body {
   color: var(--color-foreground);
   background: var(--color-background);
+  overflow: hidden;
   font-feature-settings: "rlig" 1, "calt" 1;
 }
 
 html {
-  scroll-behavior: smooth;
+  overflow: hidden;
 }
 
 ::-webkit-scrollbar {
@@ -107,4 +108,13 @@ html {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #a1a1aa;
+}
+
+/* ScrollArea scrollbar styling */
+[data-slot="scroll-area-scrollbar"] {
+  background-color: #f1f5f9 !important;
+}
+
+[data-slot="scroll-area-thumb"] {
+  background-color: #318d43 !important;
 }

@@ -32,7 +32,6 @@ import { CRC, CRCWithDistance, UserLocation } from "@/types/crc";
 import { crcs } from "@/data/crcs";
 import { calculateDistance } from "@/lib/geo-utils";
 import { CRCCard } from "./crc-card";
-import { PopularClassesSection } from "./popular-classes-section";
 
 export function CRCFinderSection() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -78,7 +77,10 @@ export function CRCFinderSection() {
   const hasInteracted =
     userLocation !== null || searchQuery !== "" || selectedCity !== "all";
 
-  const filteredCRCs = useMemo((): (CRC | CRCWithDistance)[] => {
+  const { filteredCRCs, totalResults } = useMemo((): {
+    filteredCRCs: (CRC | CRCWithDistance)[];
+    totalResults: number;
+  } => {
     let filtered = crcs;
 
     filtered = filtered.filter((crc: CRC) => {
@@ -93,7 +95,10 @@ export function CRCFinderSection() {
       return matchesSearch && matchesCity;
     });
 
-    if (userLocation) {
+    const totalResults = filtered.length;
+
+    // Only use location-based sorting if user has location AND hasn't selected a specific city
+    if (userLocation && selectedCity === "all") {
       const crcsWithDistance: CRCWithDistance[] = filtered.map((crc: CRC) => ({
         ...crc,
         distance: calculateDistance(
@@ -103,12 +108,18 @@ export function CRCFinderSection() {
           crc.lng
         ),
       }));
-      return crcsWithDistance
-        .sort((a, b) => a.distance - b.distance)
-        .slice(0, 3);
+      return {
+        filteredCRCs: crcsWithDistance
+          .sort((a, b) => a.distance - b.distance)
+          .slice(0, 4),
+        totalResults,
+      };
     }
 
-    return filtered;
+    return {
+      filteredCRCs: filtered.slice(0, 4),
+      totalResults,
+    };
   }, [searchQuery, selectedCity, userLocation]);
 
   return (
@@ -250,13 +261,13 @@ export function CRCFinderSection() {
                 {/* Results Count */}
                 {hasInteracted && (
                   <motion.div
-                    className="pt-4 border-t border-gray-200"
+                    className="pt-4 border-t border-gray-200 space-y-2"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.2 }}
                   >
                     <p className="text-sm text-gray-600">
-                      {filteredCRCs.length === 0 ? (
+                      {totalResults === 0 ? (
                         "No CRCs found"
                       ) : (
                         <>
@@ -264,11 +275,22 @@ export function CRCFinderSection() {
                           <span className="font-semibold text-primary">
                             {filteredCRCs.length}
                           </span>{" "}
-                          {filteredCRCs.length === 1 ? "CRC" : "CRCs"}
-                          {userLocation && " (nearest to you)"}
+                          of{" "}
+                          <span className="font-semibold text-primary">
+                            {totalResults}
+                          </span>{" "}
+                          {totalResults === 1 ? "CRC" : "CRCs"}
+                          {userLocation &&
+                            selectedCity === "all" &&
+                            " (nearest to you)"}
                         </>
                       )}
                     </p>
+                    {totalResults > 4 && (
+                      <p className="text-xs text-gray-500">
+                        Narrow your search to see more specific results
+                      </p>
+                    )}
                   </motion.div>
                 )}
               </CardContent>
@@ -291,10 +313,6 @@ export function CRCFinderSection() {
                       <CardTitle className="text-2xl md:text-3xl">
                         What is a Community Resource Center?
                       </CardTitle>
-                      <CardDescription className="text-base">
-                        Free programs and resources to strengthen your family
-                        and community
-                      </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
                       <p className="text-lg leading-relaxed text-gray-700">
@@ -374,9 +392,9 @@ export function CRCFinderSection() {
                         </div>
                       </div>
 
-                      <div className="mt-6 p-5 bg-primary/5 rounded-lg border border-primary/20">
-                        <p className="text-center font-medium text-primary flex items-center justify-center gap-2">
-                          <ArrowLeft className="h-5 w-5" />
+                      <div className="mt-6 p-5 bg-primary/5 rounded-lg border border-primary/20 hidden md:block">
+                        <p className="text-center font-medium text-primary flex items-center justify-center gap-2 ">
+                          <ArrowLeft className="h-5 w-5 md:block hidden" />
                           Use the search panel to find your nearest CRC and
                           explore available classes
                         </p>
@@ -386,7 +404,9 @@ export function CRCFinderSection() {
                 </motion.div>
               ) : (
                 <motion.div
-                  key="search-results"
+                  key={`search-results-${selectedCity}-${searchQuery}-${
+                    userLocation ? "located" : "manual"
+                  }`}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
@@ -395,6 +415,7 @@ export function CRCFinderSection() {
                 >
                   {filteredCRCs.length > 0 ? (
                     <motion.div
+                      key={`results-grid-${selectedCity}-${searchQuery}`}
                       className="grid gap-6 sm:grid-cols-2"
                       initial="hidden"
                       animate="visible"

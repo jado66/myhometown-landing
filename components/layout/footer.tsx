@@ -5,17 +5,37 @@ import type React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useState, useMemo } from "react";
 import MyHometownLogo from "../logo/my-hometown";
+import { crcs } from "@/data/crcs";
 
 export function Footer() {
   const [email, setEmail] = useState("");
+  const [selectedCity, setSelectedCity] = useState<string>("all");
+
+  const cities = useMemo(() => {
+    const uniqueCities = Array.from(
+      new Set(crcs.map((crc) => crc.city))
+    ).sort();
+    return uniqueCities;
+  }, []);
 
   const handleNewsletterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    console.log("Newsletter signup:", email);
+    console.log("Newsletter signup:", {
+      email,
+      city: selectedCity === "all" ? "All Cities" : selectedCity,
+    });
     setEmail("");
+    // Keep the city selection for user convenience
   };
 
   return (
@@ -30,22 +50,47 @@ export function Footer() {
           </p>
           <form
             onSubmit={handleNewsletterSubmit}
-            className="flex gap-3 max-w-md mx-auto"
+            className="space-y-3 max-w-lg mx-auto"
           >
-            <Input
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="flex-1"
-            />
-            <Button
-              type="submit"
-              className="bg-[#318d43] hover:bg-[#246340] text-white"
-            >
-              Subscribe
-            </Button>
+            {/* City Selection Label */}
+            <div className="text-left">
+              <label className="text-sm font-medium text-gray-700">
+                Select Your City
+              </label>
+            </div>
+
+            {/* Inline City Selection, Email Input and Submit */}
+            <div className="flex gap-3">
+              <Select value={selectedCity} onValueChange={setSelectedCity}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Choose a city" />
+                </SelectTrigger>
+                <SelectContent className="bg-white">
+                  <SelectItem value="all">All Cities</SelectItem>
+                  {cities.map((city) => (
+                    <SelectItem key={city} value={city}>
+                      {city}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Input
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="flex-1"
+              />
+
+              <Button
+                type="submit"
+                className="bg-[#318d43] hover:bg-[#246340] text-white"
+              >
+                Subscribe
+              </Button>
+            </div>
           </form>
         </div>
 
