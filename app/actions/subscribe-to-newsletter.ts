@@ -1,7 +1,7 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { supabaseServer } from "@/util/supabase-server";
 
 export type NewsletterSubscriptionResult = {
   success: boolean;
@@ -23,20 +23,19 @@ export async function subscribeToNewsletter(
       };
     }
 
-    const supabase = await createClient();
-
     // Determine if subscribing to all cities or a specific city
     const subscribedToAll = citySelection === "all";
     const cityId = subscribedToAll ? null : citySelection;
     const cityName = subscribedToAll ? "All Cities" : citySelection;
 
     // Check if this email + city combination already exists
-    const { data: existingSubscription, error: checkError } = await supabase
-      .from("newsletter_subscriptions")
-      .select("id, is_active")
-      .eq("email", email)
-      .eq("city_id", cityId)
-      .maybeSingle();
+    const { data: existingSubscription, error: checkError } =
+      await supabaseServer
+        .from("newsletter_subscriptions")
+        .select("id, is_active")
+        .eq("email", email)
+        .eq("city_id", cityId)
+        .maybeSingle();
 
     if (checkError && checkError.code !== "PGRST116") {
       // PGRST116 is "no rows returned" which is fine
@@ -58,7 +57,7 @@ export async function subscribeToNewsletter(
 
     // If subscription exists but is inactive, reactivate it
     if (existingSubscription && !existingSubscription.is_active) {
-      const { error: updateError } = await supabase
+      const { error: updateError } = await supabaseServer
         .from("newsletter_subscriptions")
         .update({ is_active: true })
         .eq("id", existingSubscription.id);
@@ -79,7 +78,7 @@ export async function subscribeToNewsletter(
     }
 
     // Create new subscription
-    const { error: insertError } = await supabase
+    const { error: insertError } = await supabaseServer
       .from("newsletter_subscriptions")
       .insert({
         email,
