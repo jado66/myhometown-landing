@@ -85,12 +85,11 @@
 body {
   color: var(--color-foreground);
   background: var(--color-background);
-  overflow: hidden;
   font-feature-settings: "rlig" 1, "calt" 1;
 }
 
 html {
-  overflow: hidden;
+  scroll-behavior: smooth;
 }
 
 ::-webkit-scrollbar {

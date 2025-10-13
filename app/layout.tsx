@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import { getCitySelectOptions, getAllCitySelectOptions } from "@/lib/cities";
+import { MainLayoutClient } from "@/layout/main-layout-client";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,15 +22,21 @@ export const metadata: Metadata = {
     "Volunteer-driven neighborhood revitalization across Utah: home repairs, clean-ups, landscape renewal, resource center classes, and cooperative partnerships.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const visibleCities = await getCitySelectOptions();
+  const allCities = await getAllCitySelectOptions();
+
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body className="font-sans antialiased">
-        {children} <Toaster />
+        <MainLayoutClient visibleCities={visibleCities} allCities={allCities}>
+          {children}
+        </MainLayoutClient>
+        <Toaster position="top-center" closeButton richColors theme="light" />
       </body>
     </html>
   );

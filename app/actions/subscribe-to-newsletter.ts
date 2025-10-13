@@ -23,10 +23,31 @@ export async function subscribeToNewsletter(
       };
     }
 
-    // Determine if subscribing to all cities or a specific city
-    const subscribedToAll = citySelection === "all";
-    const cityId = subscribedToAll ? null : citySelection;
-    const cityName = subscribedToAll ? "All Cities" : citySelection;
+    // Validate city selection
+    if (!citySelection) {
+      return {
+        success: false,
+        message: "Please select a city.",
+      };
+    }
+
+    // Get city name for the selected city
+    const { data: cityData, error: cityError } = await supabaseServer
+      .from("cities")
+      .select("name")
+      .eq("id", citySelection)
+      .single();
+
+    if (cityError || !cityData) {
+      return {
+        success: false,
+        message: "Invalid city selection. Please try again.",
+      };
+    }
+
+    const cityId = citySelection;
+    const cityName = cityData.name;
+    const subscribedToAll = false;
 
     // Check if this email + city combination already exists
     const { data: existingSubscription, error: checkError } =

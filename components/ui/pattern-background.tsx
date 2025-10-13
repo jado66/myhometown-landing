@@ -8,6 +8,7 @@ interface PatternBackgroundProps {
   color?: string;
   backgroundColor?: string;
   children?: React.ReactNode;
+  id?: string;
 }
 
 const PatternBackground = ({
@@ -16,11 +17,12 @@ const PatternBackground = ({
   opacity = 0.1,
   color = "#308d43",
   backgroundColor = "#ffffff",
+  id,
   children,
 }: PatternBackgroundProps) => {
-  const patternId = `hometown-pattern-${Math.random()
-    .toString(36)
-    .substr(2, 9)}`;
+  const patternId = `hometown-pattern-${
+    id || Math.random().toString(36).substr(2, 9)
+  }`;
 
   return (
     <div className={cn("relative", className)}>

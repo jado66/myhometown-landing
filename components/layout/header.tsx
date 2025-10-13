@@ -9,23 +9,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown, Menu } from "lucide-react";
-import MyHometownLogo from "../logo/my-hometown";
+import { MyHometownLogo } from "../logo/my-hometown";
+import { CitySelectOption } from "@/lib/cities";
 
 interface HeaderProps {
   onMobileMenuOpen: () => void;
+  cities: CitySelectOption[];
 }
 
-const cities = [
-  { name: "Layton", slug: "layton" },
-  { name: "Ogden", slug: "ogden" },
-  { name: "Orem", slug: "orem" },
-  { name: "Provo", slug: "provo" },
-  { name: "Salt Lake City", slug: "salt-lake-city" },
-  { name: "Santaquin", slug: "santaquin" },
-  { name: "West Valley City", slug: "west-valley-city" },
-];
-
-export function Header({ onMobileMenuOpen }: HeaderProps) {
+export function Header({ onMobileMenuOpen, cities }: HeaderProps) {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-[#1b75bc] shadow-md">
       <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
@@ -56,21 +48,57 @@ export function Header({ onMobileMenuOpen }: HeaderProps) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="bg-white border shadow-lg">
-                {cities.map((city) => (
-                  <DropdownMenuItem key={city.slug} asChild>
-                    <Link
-                      href={`/utah/${city.slug}`}
-                      className="text-gray-900 font-medium hover:bg-gray-100 cursor-pointer"
-                    >
-                      {city.name}
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
+                {cities
+                  .filter((city) => city.visibility !== false)
+                  .map((city) => {
+                    const slug = city.name.toLowerCase().replace(/\s+/g, "-");
+
+                    return (
+                      <DropdownMenuItem key={city.id} asChild>
+                        <Link
+                          href={`/utah/${slug}`}
+                          className="text-gray-900 font-medium hover:bg-gray-100 cursor-pointer"
+                        >
+                          {city.name}
+                        </Link>
+                      </DropdownMenuItem>
+                    );
+                  })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="text-white font-semibold text-base hover:text-white/80 hover:bg-white/10 transition-colors"
+                >
+                  Volunteer
+                  <ChevronDown className="ml-1 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-white border shadow-lg">
+                <DropdownMenuItem asChild>
+                  <Link
+                    href="/volunteer"
+                    className="text-gray-900 font-medium hover:bg-gray-100 cursor-pointer"
+                  >
+                    Volunteer
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link
+                    href="/days-of-service"
+                    className="text-gray-900 font-medium hover:bg-gray-100 cursor-pointer"
+                  >
+                    Days of Service
+                  </Link>
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
             <Link
-              href="#classes"
+              href="classes"
               className="text-white font-semibold text-base hover:text-white/80 transition-colors"
             >
               Find Classes

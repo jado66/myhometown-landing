@@ -13,25 +13,17 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { ChevronDown, X } from "lucide-react";
-import MyHometownLogo from "../logo/my-hometown";
+import { X } from "lucide-react";
+import { MyHometownLogo } from "../logo/my-hometown";
+import { CitySelectOption } from "@/lib/cities";
 
 interface MobileNavProps {
   open: boolean;
   onClose: () => void;
+  cities: CitySelectOption[];
 }
 
-const cities = [
-  { name: "Layton", slug: "layton" },
-  { name: "Ogden", slug: "ogden" },
-  { name: "Orem", slug: "orem" },
-  { name: "Provo", slug: "provo" },
-  { name: "Salt Lake City", slug: "salt-lake-city" },
-  { name: "Santaquin", slug: "santaquin" },
-  { name: "West Valley City", slug: "west-valley-city" },
-];
-
-export function MobileNav({ open, onClose }: MobileNavProps) {
+export function MobileNav({ open, onClose, cities }: MobileNavProps) {
   return (
     <Sheet open={open} onOpenChange={onClose}>
       <SheetContent
@@ -69,23 +61,53 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
               </AccordionTrigger>
               <AccordionContent className="pb-2">
                 <div className="flex flex-col ml-4 mt-2 space-y-1">
-                  {cities.map((city) => (
-                    <Link
-                      key={city.slug}
-                      href={`/utah/${city.slug}`}
-                      onClick={onClose}
-                      className="text-white/90 font-medium hover:text-white hover:bg-white/10 rounded-md px-3 py-2 transition-colors"
-                    >
-                      {city.name}
-                    </Link>
-                  ))}
+                  {cities
+                    .filter((city) => city.visibility !== false)
+                    .map((city) => {
+                      const slug = city.name.toLowerCase().replace(/\s+/g, "-");
+
+                      return (
+                        <Link
+                          key={city.id}
+                          href={`/utah/${slug}`}
+                          onClick={onClose}
+                          className="text-white/90 font-medium hover:text-white hover:bg-white/10 rounded-md px-3 py-2 transition-colors"
+                        >
+                          {city.name}
+                        </Link>
+                      );
+                    })}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="volunteer" className="border-none">
+              <AccordionTrigger className="text-white font-semibold text-lg hover:no-underline hover:text-white/80 hover:bg-white/10 rounded-lg px-4 py-3 transition-colors [&[data-state=open]]:bg-white/10">
+                Volunteer
+              </AccordionTrigger>
+              <AccordionContent className="pb-2">
+                <div className="flex flex-col ml-4 mt-2 space-y-1">
+                  <Link
+                    href="/volunteer"
+                    onClick={onClose}
+                    className="text-white/90 font-medium hover:text-white hover:bg-white/10 rounded-md px-3 py-2 transition-colors"
+                  >
+                    Volunteer
+                  </Link>
+                  <Link
+                    href="/days-of-service"
+                    onClick={onClose}
+                    className="text-white/90 font-medium hover:text-white hover:bg-white/10 rounded-md px-3 py-2 transition-colors"
+                  >
+                    Days of Service
+                  </Link>
                 </div>
               </AccordionContent>
             </AccordionItem>
           </Accordion>
 
           <Link
-            href="#classes"
+            href="classes"
             onClick={onClose}
             className="text-white font-semibold text-lg hover:text-white/80 hover:bg-white/10 rounded-lg px-4 py-3 transition-colors"
           >

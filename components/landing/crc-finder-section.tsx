@@ -140,162 +140,156 @@ export function CRCFinderSection() {
 
         <div className="grid lg:grid-cols-[380px_1fr] gap-8 mb-16">
           {/* Left Sidebar - Search Controls */}
-          <motion.div
-            className="lg:sticky lg:top-24 h-fit"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <Card className="shadow-lg border-2">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-xl">Search for a CRC</CardTitle>
-                <CardDescription>
-                  Use your location or search manually
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Use My Location Button */}
-                <Button
-                  size="lg"
-                  onClick={handleUseMyLocation}
-                  disabled={isLoadingLocation}
-                  className="w-full bg-primary hover:bg-primary/90 text-white h-12"
-                >
-                  {isLoadingLocation ? (
-                    <>
-                      <LoaderPinwheel className="mr-2 h-5 w-5 animate-spin" />
-                      Finding location...
-                    </>
-                  ) : (
-                    <>
-                      <LocateIcon className="mr-2 h-5 w-5" />
-                      Use My Location
-                    </>
-                  )}
-                </Button>
 
-                {/* Location Status Messages */}
-                <AnimatePresence mode="wait">
-                  {locationError && (
-                    <motion.div
-                      className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-md"
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      {locationError}
-                    </motion.div>
-                  )}
+          <Card className="shadow-lg border-2 h-fit">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl">Search for a CRC</CardTitle>
+              <CardDescription>
+                Use your location or search manually
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Use My Location Button */}
+              <Button
+                size="lg"
+                onClick={handleUseMyLocation}
+                disabled={isLoadingLocation}
+                className="w-full bg-primary hover:bg-primary/90 text-white h-12"
+              >
+                {isLoadingLocation ? (
+                  <>
+                    <LoaderPinwheel className="mr-2 h-5 w-5 animate-spin" />
+                    Finding location...
+                  </>
+                ) : (
+                  <>
+                    <LocateIcon className="mr-2 h-5 w-5" />
+                    Use My Location
+                  </>
+                )}
+              </Button>
 
-                  {userLocation && (
-                    <motion.div
-                      className="text-sm text-green-700 bg-green-50 px-3 py-2 rounded-md flex items-center justify-between"
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <div className="flex items-center gap-2">
-                        <MapPinCheck className="h-4 w-4" />
-                        <span>Location enabled</span>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setUserLocation(null)}
-                        className="h-auto py-1 px-2 text-xs hover:bg-green-100"
-                      >
-                        Clear
-                      </Button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                {/* Divider */}
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-200" />
-                  </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="bg-white px-2 text-gray-500">
-                      or search manually
-                    </span>
-                  </div>
-                </div>
-
-                {/* Search Input */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">
-                    Search
-                  </label>
-                  <Input
-                    type="text"
-                    placeholder="Name, city, or address..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="h-11"
-                  />
-                </div>
-
-                {/* City Filter */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">
-                    Filter by City
-                  </label>
-                  <Select value={selectedCity} onValueChange={setSelectedCity}>
-                    <SelectTrigger className="h-11">
-                      <SelectValue placeholder="All cities" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white">
-                      <SelectItem value="all">All Cities</SelectItem>
-                      {cities.map((city) => (
-                        <SelectItem key={city} value={city}>
-                          {city}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Results Count */}
-                {hasInteracted && (
+              {/* Location Status Messages */}
+              <AnimatePresence mode="wait">
+                {locationError && (
                   <motion.div
-                    className="pt-4 border-t border-gray-200 space-y-2"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.2 }}
+                    className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-md"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
                   >
-                    <p className="text-sm text-gray-600">
-                      {totalResults === 0 ? (
-                        "No CRCs found"
-                      ) : (
-                        <>
-                          Showing{" "}
-                          <span className="font-semibold text-primary">
-                            {filteredCRCs.length}
-                          </span>{" "}
-                          of{" "}
-                          <span className="font-semibold text-primary">
-                            {totalResults}
-                          </span>{" "}
-                          {totalResults === 1 ? "CRC" : "CRCs"}
-                          {userLocation &&
-                            selectedCity === "all" &&
-                            " (nearest to you)"}
-                        </>
-                      )}
-                    </p>
-                    {totalResults > 4 && (
-                      <p className="text-xs text-gray-500">
-                        Narrow your search to see more specific results
-                      </p>
-                    )}
+                    {locationError}
                   </motion.div>
                 )}
-              </CardContent>
-            </Card>
-          </motion.div>
+
+                {userLocation && (
+                  <motion.div
+                    className="text-sm text-green-700 bg-green-50 px-3 py-2 rounded-md flex items-center justify-between"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <MapPinCheck className="h-4 w-4" />
+                      <span>Location enabled</span>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setUserLocation(null)}
+                      className="h-auto py-1 px-2 text-xs hover:bg-green-100"
+                    >
+                      Clear
+                    </Button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Divider */}
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200" />
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="bg-white px-2 text-gray-500">
+                    or search manually
+                  </span>
+                </div>
+              </div>
+
+              {/* Search Input */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">
+                  Search
+                </label>
+                <Input
+                  type="text"
+                  placeholder="Name, city, or address..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="h-11"
+                />
+              </div>
+
+              {/* City Filter */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">
+                  Filter by City
+                </label>
+                <Select value={selectedCity} onValueChange={setSelectedCity}>
+                  <SelectTrigger className="h-11">
+                    <SelectValue placeholder="All cities" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white">
+                    <SelectItem value="all">All Cities</SelectItem>
+                    {cities.map((city) => (
+                      <SelectItem key={city} value={city}>
+                        {city}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Results Count */}
+              {hasInteracted && (
+                <motion.div
+                  className="pt-4 border-t border-gray-200 space-y-2"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <p className="text-sm text-gray-600">
+                    {totalResults === 0 ? (
+                      "No CRCs found"
+                    ) : (
+                      <>
+                        Showing{" "}
+                        <span className="font-semibold text-primary">
+                          {filteredCRCs.length}
+                        </span>{" "}
+                        of{" "}
+                        <span className="font-semibold text-primary">
+                          {totalResults}
+                        </span>{" "}
+                        {totalResults === 1 ? "CRC" : "CRCs"}
+                        {userLocation &&
+                          selectedCity === "all" &&
+                          " (nearest to you)"}
+                      </>
+                    )}
+                  </p>
+                  {totalResults > 4 && (
+                    <p className="text-xs text-gray-500">
+                      Narrow your search to see more specific results
+                    </p>
+                  )}
+                </motion.div>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Right Content Area - Info or Results */}
           <div className="min-h-[500px]">
@@ -433,13 +427,15 @@ export function CRCFinderSection() {
                     </motion.div>
                   ) : (
                     <Card className="border-2 border-dashed">
-                      <CardContent className="text-center py-12">
+                      <CardContent className="text-center pt-12">
                         <h3 className="text-lg font-semibold text-gray-900 mb-2">
                           No CRCs Found
                         </h3>
                         <p className="text-gray-600 mb-4">
                           Try adjusting your search or filters
                         </p>
+                        {/* Dont see your city here */}
+
                         <Button
                           variant="outline"
                           onClick={() => {
@@ -450,6 +446,19 @@ export function CRCFinderSection() {
                         >
                           Clear All Filters
                         </Button>
+
+                        <div className="mt-10 mb-4 text-center">
+                          <p className="text-sm text-muted-foreground">
+                            Don&apos;t see your city?{" "}
+                            <a
+                              href="/contact"
+                              className="text-primary hover:underline font-medium"
+                            >
+                              Contact us
+                            </a>{" "}
+                            to learn about upcoming opportunities in your area.
+                          </p>
+                        </div>
                       </CardContent>
                     </Card>
                   )}

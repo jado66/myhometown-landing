@@ -45,8 +45,10 @@ export function ContentSection() {
           <div className="relative h-[400px] md:h-[500px] rounded-lg overflow-hidden shadow-xl">
             <Image
               src="https://myhometown-bucket.s3.us-west-1.amazonaws.com/MHT+landing+page+photos/Photos+1/iStock-1164938630.jpg"
+              blurDataURL={`/_next/image?url=${"https://myhometown-bucket.s3.us-west-1.amazonaws.com/MHT+landing+page+photos/Photos+1/iStock-1164938630.jpg"}&w=16&q=1`}
               alt="Volunteers working together in the community"
               fill
+              placeholder="blur"
               className="object-cover"
             />
           </div>

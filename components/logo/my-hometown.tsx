@@ -7,7 +7,11 @@ interface MyHometownLogoProps {
   size?: number;
 }
 
-const MyHometownLogo = ({ type, className, size }: MyHometownLogoProps) => {
+export const MyHometownLogo = ({
+  type,
+  className,
+  size,
+}: MyHometownLogoProps) => {
   if (type === "h") {
     return (
       <svg
@@ -158,5 +162,3 @@ const MyHometownLogo = ({ type, className, size }: MyHometownLogoProps) => {
 
   return <span>Wrong Type {type}</span>;
 };
-
-export default MyHometownLogo;

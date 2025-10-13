@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import React from "react";
 
-const base = "max-w-7xl mx-auto shadow-lg";
+const base = "max-w-6xl mx-auto shadow-lg";
 
 interface ContainerProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string;
@@ -19,5 +19,3 @@ export const Container: React.FC<ContainerProps> = ({
     </div>
   );
 };
-
-export default Container;
