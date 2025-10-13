@@ -99,10 +99,7 @@ export async function verifyMissionaryToken(email: string, token: string) {
     return { success: false, error: "Code expired. Request a new one." };
   }
 
-  const incomingHash = crypto
-    .createHash("sha256")
-    .update(token)
-    .digest("hex");
+  const incomingHash = crypto.createHash("sha256").update(token).digest("hex");
 
   if (incomingHash !== record.token_hash) {
     return { success: false, error: "Incorrect code" };
@@ -146,7 +143,10 @@ export async function sendMissionaryToken(email: string) {
 
   const token = Math.floor(100000 + Math.random() * 900000).toString();
   const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
-  const ttlMinutes = parseInt(process.env.MISSIONARY_TOKEN_TTL_MINUTES || "10", 10);
+  const ttlMinutes = parseInt(
+    process.env.MISSIONARY_TOKEN_TTL_MINUTES || "10",
+    10
+  );
   const expiresAt = new Date(Date.now() + ttlMinutes * 60_000).toISOString();
 
   // Optional: invalidate previous unused tokens for this email (cleanup)
