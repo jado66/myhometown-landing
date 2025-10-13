@@ -135,7 +135,7 @@ export default function VolunteerPage() {
             <div className="max-w-5xl mx-auto">
               <div className="text-center mb-12">
                 <h2 className="text-4xl font-bold mb-4 text-foreground text-balance">
-                  What You'll Do as a Volunteer
+                  What You&apos;ll Do as a Volunteer
                 </h2>
                 <p className="text-lg text-muted-foreground text-pretty leading-relaxed max-w-3xl mx-auto">
                   Choose from a variety of meaningful opportunities that fit
@@ -276,9 +276,9 @@ export default function VolunteerPage() {
                   Ready to Make a Difference?
                 </h2>
                 <p className="text-lg text-muted-foreground text-pretty leading-relaxed">
-                  Complete the form below to join our volunteer network. We'll
-                  match you with opportunities that fit your interests and
-                  availability.
+                  Complete the form below to join our volunteer network.
+                  We&apos;ll match you with opportunities that fit your
+                  interests and availability.
                 </p>
               </div>
               <Card className="border-2">
@@ -289,8 +289,9 @@ export default function VolunteerPage() {
 
               <div className="mt-8 text-center text-sm text-muted-foreground">
                 <p className="text-pretty leading-relaxed">
-                  After signing up, you'll receive a welcome email with next
-                  steps and information about upcoming volunteer opportunities.
+                  After signing up, you&apos;ll receive a welcome email with
+                  next steps and information about upcoming volunteer
+                  opportunities.
                 </p>
               </div>
             </div>
@@ -331,9 +332,9 @@ export default function VolunteerPage() {
                       </div>
                     </div>
                     <p className="text-foreground leading-relaxed italic text-center transition-colors">
-                      "Volunteering with myHometown has been incredibly
-                      rewarding. I've met amazing neighbors and helped make our
-                      community stronger."
+                      &quot;Volunteering with myHometown has been incredibly
+                      rewarding. I&apos;ve met amazing neighbors and helped make
+                      our community stronger.&quot;
                     </p>
                   </CardContent>
                 </Card>
@@ -357,9 +358,9 @@ export default function VolunteerPage() {
                       </div>
                     </div>
                     <p className="text-foreground leading-relaxed italic text-center transition-colors">
-                      "The flexibility is perfect for my schedule. I can
+                      &quot;The flexibility is perfect for my schedule. I can
                       volunteer when it works for me, and every opportunity
-                      feels meaningful."
+                      feels meaningful.&quot;
                     </p>
                   </CardContent>
                 </Card>
@@ -382,9 +383,9 @@ export default function VolunteerPage() {
                       </div>
                     </div>
                     <p className="text-foreground leading-relaxed italic text-center transition-colors">
-                      "I love seeing the direct impact of my work. From park
-                      cleanups to helping elderly neighbors, every moment
-                      counts."
+                      &quot;I love seeing the direct impact of my work. From
+                      park cleanups to helping elderly neighbors, every moment
+                      counts.&quot;
                     </p>
                   </CardContent>
                 </Card>

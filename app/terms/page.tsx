@@ -164,8 +164,8 @@ export default function TermsOfService() {
                 Disclaimer of Warranties
               </h2>
               <p className="text-gray-700 leading-relaxed">
-                Our services are provided "as is" without warranties of any
-                kind. We do not guarantee:
+                Our services are provided &quot;as is&quot; without warranties
+                of any kind. We do not guarantee:
               </p>
               <ul className="list-disc pl-6 space-y-2 text-gray-700">
                 <li>The availability or continuity of classes and programs</li>
