@@ -62,7 +62,7 @@ export async function getCitiesWithCommunities(): Promise<
 > {
   try {
     // First try the view, if it doesn't exist, fall back to cities table
-    let { data, error } = await supabase
+    const { data, error } = await supabase
       .from("cities_with_communities")
       .select("*")
       .eq("visibility", true)

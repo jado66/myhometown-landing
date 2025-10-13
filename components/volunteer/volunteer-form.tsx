@@ -100,7 +100,10 @@ export function VolunteerForm() {
     specialAccommodations: "",
   });
 
-  const updateFormData = (field: keyof FormData, value: any) => {
+  const updateFormData = (
+    field: keyof FormData,
+    value: FormData[keyof FormData]
+  ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
     if (errors[field]) {
@@ -236,8 +239,8 @@ export function VolunteerForm() {
             Thank You for Signing Up!
           </h3>
           <p className="text-muted-foreground text-pretty leading-relaxed max-w-md mx-auto text-lg">
-            We've received your application and will be in touch within 24 hours
-            with next steps and upcoming volunteer opportunities.
+            We&apos;ve received your application and will be in touch within 24
+            hours with next steps and upcoming volunteer opportunities.
           </p>
         </div>
         <div className="pt-4">
