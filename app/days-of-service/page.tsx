@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -45,7 +45,7 @@ import { ChevronDown } from "lucide-react";
 import { Container } from "@/layout/container";
 import { format, parseISO, startOfDay } from "date-fns";
 
-export default function DaysOfServicePage() {
+function DaysOfServicePageInner() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCity, setSelectedCity] = useState<string>("all");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
@@ -718,5 +718,13 @@ export default function DaysOfServicePage() {
         </section>
       </div>
     </Container>
+  );
+}
+
+export default function DaysOfServicePage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center">Loading...</div>}>
+      <DaysOfServicePageInner />
+    </Suspense>
   );
 }
