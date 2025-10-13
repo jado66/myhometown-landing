@@ -431,7 +431,7 @@ export function LoginForm() {
                 Account Not Found
               </p>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                We couldn't find an account associated with{" "}
+                We couldn&apos;t find an account associated with{" "}
                 <span className="font-medium text-foreground">{email}</span>.
                 Please check your email address or contact your administrator
                 for access.
