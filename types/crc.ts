@@ -1,10 +1,12 @@
 export interface CRC {
-  id: number;
+  id: number | string;
   name: string;
   city: string;
   address: string;
+  state?: string;
+  zip?: string;
   phone: string;
-  classes: string[];
+  classes?: string[];
   lat: number;
   lng: number;
 }

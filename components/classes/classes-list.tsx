@@ -25,7 +25,7 @@ export function ClassesList({ selectedCRC }: ClassesListProps) {
   const [levelFilter, setLevelFilter] = useState<string>("all");
 
   const crcClasses = useMemo(() => {
-    return classes.filter((c) => c.crcId === selectedCRC.id);
+    return classes.filter((c) => c.crcId === String(selectedCRC.id));
   }, [selectedCRC.id]);
 
   const filteredClasses = useMemo(() => {

@@ -148,9 +148,7 @@ export default function ClassesPage() {
                         </h3>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <MapPin className="w-4 h-4" />
-                          <span>
-                            {selectedCRC.city}, {selectedCRC.state}
-                          </span>
+                          <span>{selectedCRC.city}</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Calendar className="w-4 h-4" />

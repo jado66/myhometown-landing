@@ -1,6 +1,8 @@
 "use server";
 
 import { supabaseServer } from "@/util/supabase-server";
+import { twilioClient } from "@/util/twilio";
+import crypto from "crypto";
 
 export type UserType = "auth_user" | "missionary" | "not_found";
 
@@ -52,11 +54,78 @@ export async function signInWithPassword(email: string, password: string) {
 }
 
 export async function verifyMissionaryToken(email: string, token: string) {
-  // Verify the token matches what was sent
-  // For now, this is a placeholder - you'll integrate Twilio later
+  // Basic validation first
+  if (!/^\d{6}$/.test(token)) {
+    return { success: false, error: "Invalid code format" };
+  }
+
+  // Ensure missionary exists
+  const { data: missionary, error: missionaryError } = await supabaseServer
+    .from("missionaries")
+    .select("id,email")
+    .eq("email", email)
+    .single();
+
+  if (missionaryError || !missionary) {
+    return { success: false, error: "Missionary not found" };
+  }
+
+  // Fetch latest unused token for this email
+  const { data: tokens, error: tokenQueryError } = await supabaseServer
+    .from("missionary_tokens")
+    .select("id, token_hash, expires_at")
+    .eq("email", email)
+    .eq("used", false)
+    .order("created_at", { ascending: false })
+    .limit(1);
+
+  if (tokenQueryError) {
+    // If table doesn't exist or other error, provide helpful message
+    return {
+      success: false,
+      error:
+        "Verification service unavailable. Please contact support or request a new code.",
+    };
+  }
+
+  if (!tokens || tokens.length === 0) {
+    return { success: false, error: "No active code. Request a new one." };
+  }
+
+  const record = tokens[0];
+  const now = Date.now();
+  const expiresAt = new Date(record.expires_at).getTime();
+  if (now > expiresAt) {
+    return { success: false, error: "Code expired. Request a new one." };
+  }
+
+  const incomingHash = crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
+
+  if (incomingHash !== record.token_hash) {
+    return { success: false, error: "Incorrect code" };
+  }
+
+  // Mark token as used
+  await supabaseServer
+    .from("missionary_tokens")
+    .update({ used: true })
+    .eq("id", record.id);
+
+  return { success: true, missionary };
+}
+
+/**
+ * Generate, store, and send a 6-digit verification code to a missionary's phone.
+ * Creates a new row in `missionary_tokens` table with hashed token and expiry.
+ */
+export async function sendMissionaryToken(email: string) {
+  // Locate missionary & phone number (attempt multiple possible field names)
   const { data: missionary, error } = await supabaseServer
     .from("missionaries")
-    .select("*")
+    .select("id,email,phone,phone_number,phoneNumber,mobile,mobile_number")
     .eq("email", email)
     .single();
 
@@ -64,11 +133,68 @@ export async function verifyMissionaryToken(email: string, token: string) {
     return { success: false, error: "Missionary not found" };
   }
 
-  // TODO: Verify token with Twilio or your token storage
-  // For now, we'll accept any 6-digit token as valid
-  if (token.length === 6 && /^\d+$/.test(token)) {
-    return { success: true, missionary };
+  const phone: string | undefined =
+    (missionary as any).phone ||
+    (missionary as any).phone_number ||
+    (missionary as any).phoneNumber ||
+    (missionary as any).mobile ||
+    (missionary as any).mobile_number;
+
+  if (!phone) {
+    return { success: false, error: "No phone number on file" };
   }
 
-  return { success: false, error: "Invalid token" };
+  const token = Math.floor(100000 + Math.random() * 900000).toString();
+  const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+  const ttlMinutes = parseInt(process.env.MISSIONARY_TOKEN_TTL_MINUTES || "10", 10);
+  const expiresAt = new Date(Date.now() + ttlMinutes * 60_000).toISOString();
+
+  // Optional: invalidate previous unused tokens for this email (cleanup)
+  await supabaseServer
+    .from("missionary_tokens")
+    .update({ used: true })
+    .eq("email", email)
+    .eq("used", false);
+
+  const insertPayload = {
+    email,
+    token_hash: tokenHash,
+    expires_at: expiresAt,
+    used: false,
+  };
+
+  const { error: insertError } = await supabaseServer
+    .from("missionary_tokens")
+    .insert(insertPayload);
+
+  if (insertError) {
+    return { success: false, error: "Failed to store code" };
+  }
+
+  // Send SMS via Twilio
+  try {
+    if (!process.env.TWILIO_FROM_NUMBER) {
+      return { success: false, error: "Missing Twilio FROM number env" };
+    }
+    await twilioClient.messages.create({
+      to: phone,
+      from: process.env.TWILIO_FROM_NUMBER,
+      body: `Your MyHometown verification code is ${token}. It expires in ${ttlMinutes} minutes.`,
+    });
+  } catch (smsError: any) {
+    return {
+      success: false,
+      error: smsError?.message || "Failed to send SMS",
+    };
+  }
+
+  return { success: true };
+}
+
+/**
+ * Convenience: request a new token (resend) while invalidating current one.
+ */
+export async function resendMissionaryToken(email: string) {
+  // Just call sendMissionaryToken (it invalidates previous unused tokens)
+  return sendMissionaryToken(email);
 }

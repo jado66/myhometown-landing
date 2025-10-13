@@ -32,6 +32,8 @@ import {
   checkEmailExists,
   signInWithPassword,
   verifyMissionaryToken,
+  sendMissionaryToken,
+  resendMissionaryToken,
   type UserType,
 } from "@/app/actions/auth/auth-actions";
 import { toast } from "sonner";
@@ -58,6 +60,9 @@ export function LoginForm() {
   const [email, setEmail] = useState("");
   const [userType, setUserType] = useState<UserType>("not_found");
   const [isLoading, setIsLoading] = useState(false);
+  const [sendingCode, setSendingCode] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0); // seconds
+  const RESEND_INTERVAL = 45; // seconds
 
   const emailForm = useForm<z.infer<typeof emailSchema>>({
     resolver: zodResolver(emailSchema),
@@ -85,7 +90,16 @@ export function LoginForm() {
         setStep("password");
       } else if (result.userType === "missionary") {
         setStep("token");
-        toast.info("A 6-digit code has been sent to your phone");
+        // Trigger sending token
+        setSendingCode(true);
+        const sendResult = await sendMissionaryToken(values.email);
+        if (sendResult.success) {
+          toast.info("A 6-digit code has been sent to your phone");
+          startResendCountdown();
+        } else {
+          toast.error(sendResult.error || "Failed to send code");
+        }
+        setSendingCode(false);
       } else {
         setStep("not_found");
       }
@@ -94,6 +108,32 @@ export function LoginForm() {
     } finally {
       setIsLoading(false);
     }
+  }
+
+  function startResendCountdown() {
+    setResendCooldown(RESEND_INTERVAL);
+    const interval = setInterval(() => {
+      setResendCooldown((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }
+
+  async function handleResend() {
+    if (resendCooldown > 0 || sendingCode) return;
+    setSendingCode(true);
+    const result = await resendMissionaryToken(email);
+    if (result.success) {
+      toast.success("New code sent");
+      startResendCountdown();
+    } else {
+      toast.error(result.error || "Failed to resend code");
+    }
+    setSendingCode(false);
   }
 
   async function onPasswordSubmit(values: z.infer<typeof passwordSchema>) {
@@ -300,21 +340,55 @@ export function LoginForm() {
                             containerClassName="flex items-center gap-4"
                           >
                             <InputOTPGroup className="gap-2">
-                              <InputOTPSlot index={0} className="h-12 w-12 text-xl font-semibold bg-background border-border/60" />
-                              <InputOTPSlot index={1} className="h-12 w-12 text-xl font-semibold bg-background border-border/60" />
-                              <InputOTPSlot index={2} className="h-12 w-12 text-xl font-semibold bg-background border-border/60" />
+                              <InputOTPSlot
+                                index={0}
+                                className="h-12 w-12 text-xl font-semibold bg-background border-border/60"
+                              />
+                              <InputOTPSlot
+                                index={1}
+                                className="h-12 w-12 text-xl font-semibold bg-background border-border/60"
+                              />
+                              <InputOTPSlot
+                                index={2}
+                                className="h-12 w-12 text-xl font-semibold bg-background border-border/60"
+                              />
                             </InputOTPGroup>
                             <InputOTPSeparator />
                             <InputOTPGroup className="gap-2">
-                              <InputOTPSlot index={3} className="h-12 w-12 text-xl font-semibold bg-background border-border/60" />
-                              <InputOTPSlot index={4} className="h-12 w-12 text-xl font-semibold bg-background border-border/60" />
-                              <InputOTPSlot index={5} className="h-12 w-12 text-xl font-semibold bg-background border-border/60" />
+                              <InputOTPSlot
+                                index={3}
+                                className="h-12 w-12 text-xl font-semibold bg-background border-border/60"
+                              />
+                              <InputOTPSlot
+                                index={4}
+                                className="h-12 w-12 text-xl font-semibold bg-background border-border/60"
+                              />
+                              <InputOTPSlot
+                                index={5}
+                                className="h-12 w-12 text-xl font-semibold bg-background border-border/60"
+                              />
                             </InputOTPGroup>
                           </InputOTP>
                         </div>
                         <p className="text-xs text-muted-foreground text-center">
                           Enter the code sent to your phone
                         </p>
+                        <div className="flex justify-center">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            disabled={sendingCode || resendCooldown > 0}
+                            onClick={handleResend}
+                            className="text-xs"
+                          >
+                            {sendingCode
+                              ? "Sending..."
+                              : resendCooldown > 0
+                              ? `Resend in ${resendCooldown}s`
+                              : "Resend Code"}
+                          </Button>
+                        </div>
                       </div>
                     </FormControl>
                     <FormMessage />

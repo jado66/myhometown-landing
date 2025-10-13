@@ -59,7 +59,7 @@ export function CRCCard({ crc }: CRCCardProps) {
               Featured Classes:
             </p>
             <div className="flex flex-wrap gap-2">
-              {crc.classes.map((cls) => (
+              {crc.classes?.map((cls) => (
                 <span
                   key={cls}
                   className="inline-block px-2.5 py-1 text-xs font-medium bg-stone-100 text-gray-700 rounded-full"

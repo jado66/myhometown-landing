@@ -26,7 +26,7 @@ export interface DayOfService {
   short_id: string;
   partner_stakes: string[] | null;
   partner_wards: string[] | null;
-  partner_stakes_json: PartnerStake[] | null;
+  partner_stakes_json?: PartnerStake[] | null;
   check_in_location: string | null;
   is_locked: boolean;
 }
