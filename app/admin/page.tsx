@@ -10,38 +10,18 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from "@/components/ui/table";
-import { Separator } from "@/components/ui/separator";
-import {
-  FileText,
   Download,
   Database,
   Table2,
   Loader2,
   RefreshCw,
+  BarChart3,
+  Sparkles,
 } from "lucide-react";
 import {
   getSchemaData,
   getTableData,
-  type SimpleFilter,
   type AdvancedFilter,
   type SortSpec,
 } from "@/app/actions/schema";
@@ -51,7 +31,7 @@ import { exportToPDF } from "@/components/pdf";
 import { toast } from "sonner";
 import {
   ReportTemplatesCard,
-  TemplateInfo,
+  type TemplateInfo,
 } from "@/components/admin/report-templates-card";
 import { DataSourceCard } from "@/components/admin/data-source-card";
 import { FiltersSortingCard } from "@/components/admin/filters-sorting-card";
@@ -643,25 +623,36 @@ export default function ReportBuilderPage() {
   ]);
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-              <FileText className="h-5 w-5 text-primary-foreground" />
+      <header className="border-b border-border/50 bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5 backdrop-blur-sm">
+        <div className="container mx-auto px-6 py-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-white shadow-primary/20">
+                <BarChart3 className="h-7 w-7 text-primary-foreground" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-foreground tracking-tight text-balance">
+                  Report Builder
+                </h1>
+                <p className="text-base text-muted-foreground mt-1">
+                  Create powerful data reports with advanced filtering and
+                  export
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-xl font-semibold text-foreground">
-                Global Reporting Tool
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Generate CSV and PDF reports from your data
-              </p>
+            <div className="flex items-center gap-3">
+              <Badge
+                variant="secondary"
+                className="px-3 py-1.5 text-sm font-medium "
+              >
+                {schema.length} Tables
+              </Badge>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-6 py-8">
+      <main className="container mx-auto px-6 py-10">
         <div className="space-y-8">
           <ReportTemplatesCard
             templates={combinedTemplates}
@@ -701,21 +692,22 @@ export default function ReportBuilderPage() {
             />
           </div>
 
-          {/* Data Preview Row */}
-          <div className="space-y-6 ">
-            <Card>
-              <CardHeader>
+          <div className="space-y-6">
+            <Card className="border-border/50 shadow-lg shadow-primary/5">
+              <CardHeader className="border-b border-border/50 bg-gradient-to-r from-muted/30 to-transparent">
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="flex items-center gap-2">
-                      <Table2 className="h-5 w-5" />
+                    <CardTitle className="flex items-center gap-3 text-xl">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                        <Table2 className="h-5 w-5 text-primary" />
+                      </div>
                       Data Preview
                     </CardTitle>
-                    <CardDescription>
-                      Preview your report data before export
+                    <CardDescription className="mt-2 text-base">
+                      Review your data before exporting to CSV or PDF
                     </CardDescription>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-3">
                     <Button
                       variant="ghost"
                       size="sm"
@@ -725,6 +717,7 @@ export default function ReportBuilderPage() {
                         selectedColumns.length === 0 ||
                         loadingPreview
                       }
+                      className="h-10"
                     >
                       <RefreshCw
                         className={`h-4 w-4 ${
@@ -741,9 +734,10 @@ export default function ReportBuilderPage() {
                         selectedColumns.length === 0 ||
                         previewData.length === 0
                       }
+                      className="h-10 px-4 bg-transparent"
                     >
                       <Download className="mr-2 h-4 w-4" />
-                      CSV
+                      Export CSV
                     </Button>
                     <Button
                       size="sm"
@@ -754,146 +748,174 @@ export default function ReportBuilderPage() {
                         previewData.length === 0 ||
                         exportingPDF
                       }
+                      className="h-10 px-4 text-white hover:from-primary/90 hover:to-accent/90 shadow-md shadow-primary/20"
                     >
                       {exportingPDF ? (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       ) : (
                         <Download className="mr-2 h-4 w-4" />
                       )}
-                      PDF
+                      Export PDF
                     </Button>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="max-w-full overflow-auto">
+              <CardContent className="p-0">
                 {loading ? (
-                  <div className="flex h-[400px] items-center justify-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                  <div className="flex h-[500px] items-center justify-center">
+                    <div className="text-center space-y-4">
+                      <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto" />
+                      <p className="text-sm text-muted-foreground">
+                        Loading schema...
+                      </p>
+                    </div>
                   </div>
                 ) : !selectedTable ? (
-                  <div className="flex h-[400px] items-center justify-center rounded-lg border-2 border-dashed border-border">
-                    <div className="text-center">
-                      <Database className="mx-auto h-12 w-12 text-muted-foreground" />
-                      <h3 className="mt-4 text-lg font-medium text-foreground">
-                        No table selected
-                      </h3>
-                      <p className="mt-2 text-sm text-muted-foreground">
-                        Select a table from the sidebar to preview data
-                      </p>
+                  <div className="flex h-[500px] items-center justify-center">
+                    <div className="text-center space-y-4 max-w-md">
+                      <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-muted mx-auto">
+                        <Database className="h-10 w-10 text-muted-foreground" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-semibold text-foreground">
+                          No table selected
+                        </h3>
+                        <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                          Choose a data source from the left panel to begin
+                          building your report
+                        </p>
+                      </div>
                     </div>
                   </div>
                 ) : selectedColumns.length === 0 ? (
-                  <div className="flex h-[400px] items-center justify-center rounded-lg border-2 border-dashed border-border">
-                    <div className="text-center">
-                      <Table2 className="mx-auto h-12 w-12 text-muted-foreground" />
-                      <h3 className="mt-4 text-lg font-medium text-foreground">
-                        No columns selected
-                      </h3>
-                      <p className="mt-2 text-sm text-muted-foreground">
-                        Select at least one column to preview data
-                      </p>
+                  <div className="flex h-[500px] items-center justify-center">
+                    <div className="text-center space-y-4 max-w-md">
+                      <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-muted mx-auto">
+                        <Table2 className="h-10 w-10 text-muted-foreground" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-semibold text-foreground">
+                          No columns selected
+                        </h3>
+                        <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                          Select at least one column to preview your data
+                        </p>
+                      </div>
                     </div>
                   </div>
                 ) : (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="secondary">
+                  <div className="space-y-0">
+                    <div className="flex items-center justify-between px-6 py-4 bg-muted/30 border-b border-border/50">
+                      <div className="flex items-center gap-3">
+                        <Badge
+                          variant="secondary"
+                          className="px-3 py-1.5 font-medium"
+                        >
                           {formatIdentifier(selectedTable)}
                         </Badge>
-                        <Badge variant="outline">
+                        <Badge variant="outline" className="px-3 py-1.5">
                           {displayedColumns.length} columns
                         </Badge>
+                        {includeRelations && (
+                          <Badge
+                            variant="outline"
+                            className="px-3 py-1.5 bg-accent/10 text-accent-foreground border-accent/20"
+                          >
+                            With relations
+                          </Badge>
+                        )}
                       </div>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm font-medium text-muted-foreground">
                         {previewData.length}{" "}
                         {previewData.length === 100 ? "(limited)" : ""} rows
                       </p>
                     </div>
-                    <div className="rounded-lg border border-border">
-                      <div className="max-h-[500px] overflow-x-auto overflow-y-auto">
-                        {loadingPreview ? (
-                          <div className="flex h-[400px] items-center justify-center">
-                            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                          </div>
-                        ) : previewData.length === 0 ? (
-                          <div className="flex h-[400px] items-center justify-center">
+                    <div className="max-h-[600px] overflow-auto">
+                      {loadingPreview ? (
+                        <div className="flex h-[500px] items-center justify-center">
+                          <div className="text-center space-y-4">
+                            <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto" />
                             <p className="text-sm text-muted-foreground">
-                              No data found
+                              Loading preview...
                             </p>
                           </div>
-                        ) : (
-                          <table className="w-full table-auto border-collapse">
-                            <thead className="sticky top-0 bg-muted z-10">
-                              <tr>
-                                {displayedColumns.map((col) => (
-                                  <th
-                                    key={col}
-                                    className="border-b border-border px-4 py-3 text-left text-sm font-medium text-muted-foreground whitespace-nowrap"
-                                  >
-                                    {formatIdentifier(col)}
-                                  </th>
-                                ))}
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {previewData.map((row, idx) => (
-                                <tr
-                                  key={idx}
-                                  className="border-b border-border last:border-0 hover:bg-muted/50"
+                        </div>
+                      ) : previewData.length === 0 ? (
+                        <div className="flex h-[500px] items-center justify-center">
+                          <p className="text-sm text-muted-foreground">
+                            No data found
+                          </p>
+                        </div>
+                      ) : (
+                        <table className="w-full table-auto border-collapse">
+                          <thead className="sticky top-0 bg-muted/80 backdrop-blur-sm z-10 border-b border-border/50">
+                            <tr>
+                              {displayedColumns.map((col) => (
+                                <th
+                                  key={col}
+                                  className="px-6 py-4 text-left text-sm font-semibold text-foreground whitespace-nowrap"
                                 >
-                                  {displayedColumns.map((col) => {
-                                    // Resolve value (root or related table column path)
-                                    let value: any;
-                                    if (col.includes(".")) {
-                                      const [rt, rc] = col.split(".");
-                                      const relObj = row[rt];
-                                      value = relObj ? relObj[rc] : null;
-                                    } else {
-                                      value = row[col];
-                                    }
-                                    return (
-                                      <td
-                                        key={col}
-                                        className="px-4 py-3 text-sm text-foreground whitespace-nowrap"
-                                      >
-                                        {value === null ||
-                                        value === undefined ? (
-                                          <span className="text-muted-foreground italic">
-                                            null
-                                          </span>
-                                        ) : typeof value === "object" ? (
-                                          <span
-                                            className="text-muted-foreground"
-                                            title={JSON.stringify(value)}
-                                          >
-                                            {(() => {
-                                              const obj = value;
-                                              if (!obj) return "null";
-                                              const preferred =
-                                                obj.name || obj.title || obj.id;
-                                              if (preferred)
-                                                return String(
-                                                  preferred
-                                                ).substring(0, 50);
-                                              const json = JSON.stringify(obj);
-                                              return json.length > 50
-                                                ? json.substring(0, 50) + "..."
-                                                : json;
-                                            })()}
-                                          </span>
-                                        ) : (
-                                          String(value)
-                                        )}
-                                      </td>
-                                    );
-                                  })}
-                                </tr>
+                                  {formatIdentifier(col)}
+                                </th>
                               ))}
-                            </tbody>
-                          </table>
-                        )}
-                      </div>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {previewData.map((row, idx) => (
+                              <tr
+                                key={idx}
+                                className="border-b border-border/30 last:border-0 hover:bg-muted/30 transition-colors"
+                              >
+                                {displayedColumns.map((col) => {
+                                  // Resolve value (root or related table column path)
+                                  let value: any;
+                                  if (col.includes(".")) {
+                                    const [rt, rc] = col.split(".");
+                                    const relObj = row[rt];
+                                    value = relObj ? relObj[rc] : null;
+                                  } else {
+                                    value = row[col];
+                                  }
+                                  return (
+                                    <td
+                                      key={col}
+                                      className="px-6 py-4 text-sm text-foreground whitespace-nowrap"
+                                    >
+                                      {value === null || value === undefined ? (
+                                        <span className="text-muted-foreground italic text-xs">
+                                          null
+                                        </span>
+                                      ) : typeof value === "object" ? (
+                                        <span
+                                          className="text-muted-foreground text-xs"
+                                          title={JSON.stringify(value)}
+                                        >
+                                          {(() => {
+                                            const obj = value;
+                                            if (!obj) return "null";
+                                            const preferred =
+                                              obj.name || obj.title || obj.id;
+                                            if (preferred)
+                                              return String(
+                                                preferred
+                                              ).substring(0, 50);
+                                            const json = JSON.stringify(obj);
+                                            return json.length > 50
+                                              ? json.substring(0, 50) + "..."
+                                              : json;
+                                          })()}
+                                        </span>
+                                      ) : (
+                                        String(value)
+                                      )}
+                                    </td>
+                                  );
+                                })}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      )}
                     </div>
                   </div>
                 )}

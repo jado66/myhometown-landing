@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Filter, Table2, X } from "lucide-react";
+import { Filter, ArrowUpDown, X, Plus, Sliders } from "lucide-react";
 import { formatIdentifier } from "@/lib/reporting";
 import type { AdvancedFilter, SortSpec } from "@/app/actions/schema";
 
@@ -100,15 +100,19 @@ export function FiltersSortingCard({
   };
 
   return (
-    <Card className="col-span-1">
-      <CardHeader>
+    <Card className="col-span-1 border-border/50 shadow-md hover:shadow-lg transition-shadow">
+      <CardHeader className="border-b border-border/50 ">
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Filter className="h-4 w-4" />
+            <CardTitle className="flex items-center gap-3 text-lg">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
+                <Sliders className="h-4.5 w-4.5 text-primary" />
+              </div>
               Filters & Sorting
             </CardTitle>
-            <CardDescription>Optional filtering and ordering</CardDescription>
+            <CardDescription className="mt-2">
+              Filter and sort your data
+            </CardDescription>
           </div>
           <ButtonGroup>
             <Button
@@ -116,34 +120,48 @@ export function FiltersSortingCard({
               size="sm"
               onClick={() => setMode(mode === "filter" ? null : "filter")}
               disabled={!selectedTable}
+              className="h-9 px-3"
             >
-              <Filter className="h-3 w-3 mr-1" />
-              Add Filter
+              <Plus className="h-3.5 w-3.5 mr-1.5" />
+              Filter
             </Button>
             <Button
               variant={mode === "sort" ? "default" : "outline"}
               size="sm"
               onClick={() => setMode(mode === "sort" ? null : "sort")}
               disabled={!selectedTable || selectableColumns.length === 0}
+              className="h-9 px-3"
             >
-              <Table2 className="h-3 w-3 mr-1" />
-              Add Sort
+              <Plus className="h-3.5 w-3.5 mr-1.5" />
+              Sort
             </Button>
           </ButtonGroup>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-5 pt-6">
         {/* Filter Form */}
         {mode === "filter" && (
-          <div className="space-y-3 p-4 border rounded-lg bg-muted/50">
+          <div className="space-y-4 p-5 border border-border/50 rounded-xl bg-gradient-to-br from-muted/50 to-muted/30 shadow-sm">
+            <div className="flex items-center gap-2 mb-2">
+              <Filter className="h-4 w-4 text-primary" />
+              <Label className="text-sm font-semibold">Add Filter Rule</Label>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="filter-column">Column</Label>
+                <Label
+                  htmlFor="filter-column"
+                  className="text-xs font-medium text-muted-foreground"
+                >
+                  Column
+                </Label>
                 <Select
                   value={filterColumn}
                   onValueChange={(v) => setFilterColumn(v)}
                 >
-                  <SelectTrigger id="filter-column">
+                  <SelectTrigger
+                    id="filter-column"
+                    className="h-10 bg-background border-border/50"
+                  >
                     <SelectValue placeholder="Select column" />
                   </SelectTrigger>
                   <SelectContent>
@@ -156,13 +174,21 @@ export function FiltersSortingCard({
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="filter-operator">Operator</Label>
+                <Label
+                  htmlFor="filter-operator"
+                  className="text-xs font-medium text-muted-foreground"
+                >
+                  Operator
+                </Label>
                 <Select
                   disabled={!filterColumn}
                   value={filterOperator}
                   onValueChange={(v) => setFilterOperator(v)}
                 >
-                  <SelectTrigger id="filter-operator">
+                  <SelectTrigger
+                    id="filter-operator"
+                    className="h-10 bg-background border-border/50"
+                  >
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -186,20 +212,24 @@ export function FiltersSortingCard({
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="filter-value">
+                <Label
+                  htmlFor="filter-value"
+                  className="text-xs font-medium text-muted-foreground"
+                >
                   Value{filterOperator === "between" ? " From" : ""}
                 </Label>
                 <Input
                   id="filter-value"
-                  placeholder="Value"
+                  placeholder="Enter value"
                   value={filterValue}
                   onChange={(e) => setFilterValue(e.target.value)}
                   disabled={!filterColumn}
+                  className="h-10 bg-background border-border/50"
                 />
                 {filterOperator === "between" && (
                   <Input
                     id="filter-value-to"
-                    className="mt-2"
+                    className="h-10 bg-background border-border/50"
                     placeholder="Value To"
                     value={filterValueTo}
                     onChange={(e) => setFilterValueTo(e.target.value)}
@@ -208,8 +238,13 @@ export function FiltersSortingCard({
                 )}
               </div>
             </div>
-            <div className="flex gap-2 justify-end">
-              <Button variant="outline" size="sm" onClick={() => setMode(null)}>
+            <div className="flex gap-2 justify-end pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setMode(null)}
+                className="h-9"
+              >
                 Cancel
               </Button>
               <Button
@@ -220,6 +255,7 @@ export function FiltersSortingCard({
                   !filterValue ||
                   (filterOperator === "between" && !filterValueTo)
                 }
+                className="h-9 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
               >
                 Add Filter
               </Button>
@@ -229,15 +265,27 @@ export function FiltersSortingCard({
 
         {/* Sort Form */}
         {mode === "sort" && (
-          <div className="space-y-3 p-4 border rounded-lg bg-muted/50">
+          <div className="space-y-4 p-5 border border-border/50 rounded-xl bg-gradient-to-br from-muted/50 to-muted/30 shadow-sm">
+            <div className="flex items-center gap-2 mb-2">
+              <ArrowUpDown className="h-4 w-4 text-primary" />
+              <Label className="text-sm font-semibold">Add Sort Rule</Label>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="sort-column">Column</Label>
+                <Label
+                  htmlFor="sort-column"
+                  className="text-xs font-medium text-muted-foreground"
+                >
+                  Column
+                </Label>
                 <Select
                   value={sortColumn}
                   onValueChange={(v) => setSortColumn(v)}
                 >
-                  <SelectTrigger id="sort-column">
+                  <SelectTrigger
+                    id="sort-column"
+                    className="h-10 bg-background border-border/50"
+                  >
                     <SelectValue placeholder="Select column" />
                   </SelectTrigger>
                   <SelectContent>
@@ -250,27 +298,45 @@ export function FiltersSortingCard({
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="sort-direction">Direction</Label>
+                <Label
+                  htmlFor="sort-direction"
+                  className="text-xs font-medium text-muted-foreground"
+                >
+                  Direction
+                </Label>
                 <Select
                   value={sortDirection}
                   onValueChange={(v) => setSortDirection(v as "asc" | "desc")}
                   disabled={!sortColumn}
                 >
-                  <SelectTrigger id="sort-direction">
+                  <SelectTrigger
+                    id="sort-direction"
+                    className="h-10 bg-background border-border/50"
+                  >
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="asc">Ascending</SelectItem>
-                    <SelectItem value="desc">Descending</SelectItem>
+                    <SelectItem value="asc">Ascending ↑</SelectItem>
+                    <SelectItem value="desc">Descending ↓</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
-            <div className="flex gap-2 justify-end">
-              <Button variant="outline" size="sm" onClick={() => setMode(null)}>
+            <div className="flex gap-2 justify-end pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setMode(null)}
+                className="h-9"
+              >
                 Cancel
               </Button>
-              <Button size="sm" onClick={handleAddSort} disabled={!sortColumn}>
+              <Button
+                size="sm"
+                onClick={handleAddSort}
+                disabled={!sortColumn}
+                className="h-9 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
+              >
                 Add Sort
               </Button>
             </div>
@@ -279,16 +345,19 @@ export function FiltersSortingCard({
 
         {/* Combined Active Filters and Sorts */}
         {(filters.length > 0 || sorts.length > 0) && (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {filters.length > 0 && (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label className="text-sm font-medium">Active Filters</Label>
+                  <Label className="text-sm font-semibold flex items-center gap-2">
+                    <Filter className="h-4 w-4 text-primary" />
+                    Active Filters ({filters.length})
+                  </Label>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => setFilters([])}
-                    className="h-auto p-0 text-xs text-muted-foreground hover:text-destructive"
+                    className="h-8 px-3 text-xs hover:text-destructive"
                   >
                     Clear all
                   </Button>
@@ -298,7 +367,7 @@ export function FiltersSortingCard({
                     <Badge
                       key={f.column}
                       variant="secondary"
-                      className="flex items-center gap-1"
+                      className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium bg-primary/10 text-primary border-primary/20"
                     >
                       <Filter className="h-3 w-3" />
                       <span>
@@ -309,10 +378,10 @@ export function FiltersSortingCard({
                       </span>
                       <button
                         type="button"
-                        className="ml-1 text-xs hover:text-destructive"
+                        className="ml-1 hover:text-destructive transition-colors"
                         onClick={() => removeFilter(f.column)}
                       >
-                        ×
+                        <X className="h-3 w-3" />
                       </button>
                     </Badge>
                   ))}
@@ -320,14 +389,17 @@ export function FiltersSortingCard({
               </div>
             )}
             {sorts.length > 0 && (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label className="text-sm font-medium">Active Sorts</Label>
+                  <Label className="text-sm font-semibold flex items-center gap-2">
+                    <ArrowUpDown className="h-4 w-4 text-accent" />
+                    Active Sorts ({sorts.length})
+                  </Label>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => setSorts([])}
-                    className="h-auto p-0 text-xs text-muted-foreground hover:text-destructive"
+                    className="h-8 px-3 text-xs hover:text-destructive"
                   >
                     Clear all
                   </Button>
@@ -337,19 +409,19 @@ export function FiltersSortingCard({
                     <Badge
                       key={s.column}
                       variant="secondary"
-                      className="flex items-center gap-1"
+                      className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium bg-accent/10 text-accent-foreground border-accent/20"
                     >
-                      <Table2 className="h-3 w-3" />
+                      <ArrowUpDown className="h-3 w-3" />
                       <span>
                         {formatIdentifier(s.column)}{" "}
                         {s.direction === "asc" ? "↑" : "↓"}
                       </span>
                       <button
                         type="button"
-                        className="ml-1 text-xs hover:text-destructive"
+                        className="ml-1 hover:text-destructive transition-colors"
                         onClick={() => removeSort(s.column)}
                       >
-                        ×
+                        <X className="h-3 w-3" />
                       </button>
                     </Badge>
                   ))}
@@ -361,8 +433,15 @@ export function FiltersSortingCard({
 
         {/* Empty state */}
         {!mode && filters.length === 0 && sorts.length === 0 && (
-          <div className="flex items-center justify-center h-32 text-muted-foreground text-sm">
-            <p>No filters or sorts applied</p>
+          <div className="flex items-center justify-center h-[400px] text-center">
+            <div className="space-y-3">
+              <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-muted mx-auto">
+                <Filter className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <p className="text-sm text-muted-foreground max-w-[200px]">
+                No filters or sorts applied
+              </p>
+            </div>
           </div>
         )}
       </CardContent>

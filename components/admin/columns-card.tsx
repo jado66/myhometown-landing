@@ -13,6 +13,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import type { TableSchema } from "@/types/schema";
 import { formatIdentifier } from "@/lib/reporting";
+import { Columns3, CheckSquare, Square } from "lucide-react";
 
 interface ColumnsCardProps {
   schema: TableSchema[];
@@ -58,22 +59,34 @@ export function ColumnsCard({
   };
 
   return (
-    <Card className="col-span-1">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
+    <Card className="col-span-1 border-border/50 shadow-md hover:shadow-lg transition-shadow">
+      <CardHeader className="border-b border-border/50 ">
+        <CardTitle className="flex items-center gap-3 text-lg">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent/10">
+            <Columns3 className="h-4.5 w-4.5 text-accent" />
+          </div>
           Columns
         </CardTitle>
-        <CardDescription>Select columns to include in report</CardDescription>
+        <CardDescription className="mt-2">
+          Choose which columns to include in your report
+        </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-6">
         {!currentTable ? (
-          <div className="flex items-center justify-center h-[400px] text-muted-foreground">
-            <p>Select a table to view available columns</p>
+          <div className="flex items-center justify-center h-[400px] text-center">
+            <div className="space-y-3">
+              <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-muted mx-auto">
+                <Columns3 className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <p className="text-sm text-muted-foreground max-w-[200px]">
+                Select a table see columns
+              </p>
+            </div>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <Label>
+              <Label className="text-sm font-semibold">
                 Available Columns (
                 {currentTable.columns.length +
                   (includeRelations
@@ -101,8 +114,9 @@ export function ColumnsCard({
                       setRelatedSelections(allRelated);
                     }
                   }}
-                  className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground"
+                  className="h-8 px-3 text-xs font-medium hover:text-primary"
                 >
+                  <CheckSquare className="h-3.5 w-3.5 mr-1.5" />
                   Select all
                 </Button>
                 <Button
@@ -112,25 +126,30 @@ export function ColumnsCard({
                     setSelectedColumns([]);
                     setRelatedSelections({});
                   }}
-                  className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground"
+                  className="h-8 px-3 text-xs font-medium hover:text-destructive"
                 >
+                  <Square className="h-3.5 w-3.5 mr-1.5" />
                   Clear
                 </Button>
               </div>
             </div>
-            <ScrollArea className="h-[400px] rounded-md border border-border p-3">
+            <ScrollArea className="h-[300px] rounded-lg border border-border/50 bg-muted/20 p-4">
               <div className="space-y-2">
                 {/* Main table columns */}
                 {currentTable.columns.map((column) => (
-                  <div key={column.name} className="flex items-start space-x-2">
+                  <div
+                    key={column.name}
+                    className="flex items-start space-x-3 p-2.5 rounded-md hover:bg-background/80 transition-colors"
+                  >
                     <Checkbox
                       id={`col-${column.name}`}
                       checked={selectedColumns.includes(column.name)}
                       onCheckedChange={() => toggleColumn(column.name)}
+                      className="mt-0.5 border-border/50 text-white"
                     />
                     <Label
                       htmlFor={`col-${column.name}`}
-                      className="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      className="text-sm font-normal leading-relaxed peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-1"
                     >
                       {formatIdentifier(column.name)}
                     </Label>
@@ -146,16 +165,16 @@ export function ColumnsCard({
                       const selectedForTable = relatedSelections[rt] || [];
                       return (
                         <div key={rt}>
-                          <Separator className="my-3" />
-                          <div className="mb-2">
-                            <span className="text-sm font-medium text-muted-foreground">
+                          <Separator className="my-4" />
+                          <div className="mb-3 px-2.5">
+                            <span className="text-sm font-semibold text-primary">
                               {formatIdentifier(rt)}
                             </span>
                           </div>
                           {relMeta.columns.map((c) => (
                             <div
                               key={c.name}
-                              className="flex items-start space-x-2"
+                              className="flex items-start space-x-3 p-2.5 rounded-md hover:bg-background/80 transition-colors"
                             >
                               <Checkbox
                                 id={`rel-${rt}-${c.name}`}
@@ -163,10 +182,11 @@ export function ColumnsCard({
                                 onCheckedChange={() =>
                                   toggleRelatedColumn(rt, c.name)
                                 }
+                                className="mt-0.5 border-border/50 text-white"
                               />
                               <Label
                                 htmlFor={`rel-${rt}-${c.name}`}
-                                className="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                className="text-sm font-normal leading-relaxed peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-1"
                               >
                                 {formatIdentifier(c.name)}
                               </Label>

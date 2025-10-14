@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Database } from "lucide-react";
+import { Database, Link2 } from "lucide-react";
 import type { TableSchema } from "@/types/schema";
 import { formatIdentifier } from "@/lib/reporting";
 import { ColumnsCard } from "./columns-card";
@@ -84,25 +84,34 @@ export function DataSourceCard({
 
   return (
     <>
-      <Card className="col-span-1">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Database className="h-4 w-4" />
+      <Card className="col-span-1 border-border/50 shadow-md hover:shadow-lg transition-shadow">
+        <CardHeader className="border-b border-border/50 ">
+          <CardTitle className="flex items-center gap-3 text-lg">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
+              <Database className="h-4.5 w-4.5 text-primary" />
+            </div>
             Data Source
           </CardTitle>
-          <CardDescription>Select table and relations</CardDescription>
+          <CardDescription className="mt-2">
+            Select your primary table and configure relationships
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
+        <CardContent className="space-y-6 pt-6">
+          <div className="space-y-3">
             <div className="flex items-center gap-4">
               <div className="flex-1 space-y-2">
-                <Label htmlFor="table-select">Table</Label>
+                <Label htmlFor="table-select" className="text-sm font-semibold">
+                  Primary Table
+                </Label>
                 <Select
                   value={selectedTable}
                   onValueChange={setSelectedTable}
                   disabled={loading}
                 >
-                  <SelectTrigger id="table-select">
+                  <SelectTrigger
+                    id="table-select"
+                    className="h-11 bg-background border-border/50"
+                  >
                     <SelectValue
                       placeholder={
                         loading ? "Loading tables..." : "Select a table"
@@ -132,26 +141,38 @@ export function DataSourceCard({
             {selectedTable &&
               currentTable &&
               currentTable.foreignKeys?.length > 0 && (
-                <div className="flex justify-end">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium">
-                      Include related tables
+                <div className="pt-4 border-t border-border/50">
+                  <div className="space-y-3">
+                    <Label className="text-sm font-semibold flex items-center gap-2">
+                      <Link2 className="h-4 w-4 text-primary" />
+                      Related Tables
                     </Label>
                     {currentTable.foreignKeys.map((fk, idx) => (
-                      <div key={idx} className="flex items-center space-x-2">
+                      <div
+                        key={idx}
+                        className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
+                      >
                         <Checkbox
                           id={`include-relation-${idx}`}
                           checked={includeRelations}
                           onCheckedChange={(checked) =>
                             setIncludeRelations(!!checked)
                           }
+                          className="border-border/50 text-white"
                         />
                         <Label
                           htmlFor={`include-relation-${idx}`}
-                          className="text-xs text-muted-foreground font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          className="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-1"
                         >
-                          {formatIdentifier(fk.columnName)} →{" "}
-                          {formatIdentifier(fk.referencedTable)}
+                          <span className="font-medium text-foreground">
+                            {formatIdentifier(fk.columnName)}
+                          </span>
+                          <span className="text-muted-foreground mx-1.5">
+                            →
+                          </span>
+                          <span className="text-primary font-medium">
+                            {formatIdentifier(fk.referencedTable)}
+                          </span>
                         </Label>
                       </div>
                     ))}
