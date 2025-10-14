@@ -1,6 +1,5 @@
 "use client";
 
-import { VolunteerForm } from "@/components/volunteer/volunteer-form";
 import {
   Heart,
   Users,
@@ -14,6 +13,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Container } from "@/layout/container";
 import PatternBackground from "@/components/ui/pattern-background";
 import { useEffect, useRef, useState } from "react";
+import { VolunteerSignupForm } from "@/components/volunteer/simplified-volunteer-form";
 
 function AnimatedNumber({
   value,
@@ -283,7 +283,7 @@ export default function VolunteerPage() {
               </div>
               <Card className="border-2">
                 <CardContent className="p-8">
-                  <VolunteerForm />
+                  <VolunteerSignupForm />
                 </CardContent>
               </Card>
 

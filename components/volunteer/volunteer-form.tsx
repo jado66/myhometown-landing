@@ -187,10 +187,14 @@ export function VolunteerForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateStep(currentStep)) return;
+    // Block all form submissions - navigation and final submit must use explicit buttons
+  };
 
+  const handleFinalSubmit = async () => {
+    // Only called by the Submit button on the final step
+    if (!validateStep(currentStep)) return;
     setIsSubmitting(true);
-    // Simulate form submission
+    // Simulate form submission (replace with server action when ready)
     await new Promise((resolve) => setTimeout(resolve, 1500));
     setIsSubmitting(false);
     setSubmitted(true);
@@ -275,7 +279,21 @@ export function VolunteerForm() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <form
+        onSubmit={handleSubmit}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            if (currentStep < STEPS.length) {
+              if (validateStep(currentStep)) {
+                setCurrentStep((prev) => Math.min(prev + 1, STEPS.length));
+              }
+            }
+            // On review step, do nothing; user must click the Submit button.
+          }
+        }}
+        className="space-y-8"
+      >
         {/* Step 1: Personal Information */}
         {currentStep === 1 && (
           <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
@@ -1154,7 +1172,8 @@ export function VolunteerForm() {
             </Button>
           ) : (
             <Button
-              type="submit"
+              type="button"
+              onClick={handleFinalSubmit}
               disabled={isSubmitting}
               className="flex items-center gap-2 px-8 h-11 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all disabled:opacity-70"
             >
