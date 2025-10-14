@@ -188,8 +188,8 @@ export function VolunteerSignupForm() {
             Thank You for Signing Up!
           </h3>
           <p className="text-muted-foreground text-pretty leading-relaxed max-w-md mx-auto text-lg">
-            We've received your volunteer application and will be in touch soon
-            with next steps.
+            We&apos;ve received your volunteer application and will be in touch
+            soon with next steps.
           </p>
         </div>
         <div className="pt-4">
