@@ -1,5 +1,6 @@
 import { supabaseServer } from "@/util/supabase-server";
 import { AnimatedNumber } from "./animated-number";
+import { getNamespaceT } from "@/i18n/server";
 
 interface Stat {
   value: number;
@@ -7,17 +8,18 @@ interface Stat {
   suffix?: string;
 }
 
-async function fetchSiteStats(): Promise<Stat[]> {
+async function fetchSiteStats(): Promise<Stat[] | null> {
   try {
     const { data, error } = await supabaseServer
       .from("site_stats")
       .select("*")
       .eq("is_active", true)
+      .like("stat_key", "home_%")
       .order("display_order", { ascending: true });
 
     if (error) throw error;
 
-    if (!data) return getDefaultStats();
+    if (!data) return null;
 
     return data.map((stat) => ({
       value: stat.stat_value,
@@ -26,29 +28,34 @@ async function fetchSiteStats(): Promise<Stat[]> {
     }));
   } catch (error) {
     console.error("Error fetching site stats:", error);
-    return getDefaultStats();
+    return null;
   }
 }
 
-function getDefaultStats(): Stat[] {
+function getDefaultStats(t: (key: string) => string): Stat[] {
   return [
-    { value: 15000, label: "Volunteers Engaged", suffix: "+" },
-    { value: 2500, label: "Homes Improved", suffix: "+" },
-    { value: 7, label: "Cities Served", suffix: "" },
-    { value: 50000, label: "Service Hours", suffix: "+" },
+    { value: 15000, label: t("labels.volunteersEngaged"), suffix: "+" },
+    { value: 2500, label: t("labels.homesImproved"), suffix: "+" },
+    { value: 7, label: t("labels.citiesServed"), suffix: "" },
+    { value: 50000, label: t("labels.serviceHours"), suffix: "+" },
   ];
 }
 
 export async function StatsSection() {
-  const stats = await fetchSiteStats();
+  const { t } = await getNamespaceT("home.stats");
+  const statsFromDb = await fetchSiteStats();
+  const stats =
+    statsFromDb && statsFromDb.length ? statsFromDb : getDefaultStats(t);
 
   return (
     <section className="pb-16 md:pb-24 bg-gray-50">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Our Impact</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            {t("heading")}
+          </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Together, we&apos;re making a real difference in Utah communities
+            {t("subheading")}
           </p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">

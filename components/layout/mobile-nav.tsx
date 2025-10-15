@@ -16,6 +16,7 @@ import {
 import { X } from "lucide-react";
 import { MyHometownLogo } from "../logo/my-hometown";
 import { CitySelectOption } from "@/lib/cities";
+import { useTranslations } from "next-intl";
 
 interface MobileNavProps {
   open: boolean;
@@ -24,6 +25,8 @@ interface MobileNavProps {
 }
 
 export function MobileNav({ open, onClose, cities }: MobileNavProps) {
+  const headerT = useTranslations("header");
+  const navT = useTranslations("nav");
   return (
     <Sheet open={open} onOpenChange={onClose}>
       <SheetContent
@@ -32,7 +35,7 @@ export function MobileNav({ open, onClose, cities }: MobileNavProps) {
         hideCloseButton
       >
         <SheetHeader className="p-0 m-0">
-          <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+          <SheetTitle className="sr-only">{navT("menuTitle")}</SheetTitle>
           {/* Header matching the main header */}
           <div className="bg-[#1b75bc] ">
             <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
@@ -45,7 +48,7 @@ export function MobileNav({ open, onClose, cities }: MobileNavProps) {
                 <button
                   onClick={onClose}
                   className="md:hidden p-2 text-white hover:text-white/80 transition-colors"
-                  aria-label="Close menu"
+                  aria-label={navT("closeMenu")}
                 >
                   <X className="h-6 w-6" />
                 </button>
@@ -57,7 +60,7 @@ export function MobileNav({ open, onClose, cities }: MobileNavProps) {
           <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="cities" className="border-none">
               <AccordionTrigger className="text-white font-semibold text-lg hover:no-underline hover:text-white/80 hover:bg-white/10 rounded-lg px-4 py-3 transition-colors [&[data-state=open]]:bg-white/10">
-                Our Cities
+                {headerT("cities")}
               </AccordionTrigger>
               <AccordionContent className="pb-2">
                 <div className="flex flex-col ml-4 mt-2 space-y-1">
@@ -83,7 +86,7 @@ export function MobileNav({ open, onClose, cities }: MobileNavProps) {
 
             <AccordionItem value="volunteer" className="border-none">
               <AccordionTrigger className="text-white font-semibold text-lg hover:no-underline hover:text-white/80 hover:bg-white/10 rounded-lg px-4 py-3 transition-colors [&[data-state=open]]:bg-white/10">
-                Volunteer
+                {headerT("volunteer")}
               </AccordionTrigger>
               <AccordionContent className="pb-2">
                 <div className="flex flex-col ml-4 mt-2 space-y-1">
@@ -92,14 +95,14 @@ export function MobileNav({ open, onClose, cities }: MobileNavProps) {
                     onClick={onClose}
                     className="text-white/90 font-medium hover:text-white hover:bg-white/10 rounded-md px-3 py-2 transition-colors"
                   >
-                    Volunteer
+                    {headerT("volunteer_menu")}
                   </Link>
                   <Link
                     href="/days-of-service"
                     onClick={onClose}
                     className="text-white/90 font-medium hover:text-white hover:bg-white/10 rounded-md px-3 py-2 transition-colors"
                   >
-                    Days of Service
+                    {headerT("days_of_service")}
                   </Link>
                 </div>
               </AccordionContent>
@@ -111,7 +114,7 @@ export function MobileNav({ open, onClose, cities }: MobileNavProps) {
             onClick={onClose}
             className="text-white font-semibold text-lg hover:text-white/80 hover:bg-white/10 rounded-lg px-4 py-3 transition-colors"
           >
-            Find Classes
+            {headerT("classes")}
           </Link>
 
           <Link
@@ -119,7 +122,7 @@ export function MobileNav({ open, onClose, cities }: MobileNavProps) {
             onClick={onClose}
             className="text-white font-semibold text-lg hover:text-white/80 hover:bg-white/10 rounded-lg px-4 py-3 transition-colors"
           >
-            What We Do
+            {headerT("what_we_do")}
           </Link>
 
           <Link
@@ -127,7 +130,7 @@ export function MobileNav({ open, onClose, cities }: MobileNavProps) {
             onClick={onClose}
             className="text-white font-semibold text-lg hover:text-white/80 hover:bg-white/10 rounded-lg px-4 py-3 transition-colors"
           >
-            Login
+            {headerT("login")}
           </Link>
         </nav>
       </SheetContent>

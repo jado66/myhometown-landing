@@ -1,0 +1,141 @@
+{
+  "header": {
+    "cities": "Our Cities",
+    "volunteer": "Volunteer",
+    "volunteer_menu": "Volunteer",
+    "days_of_service": "Days of Service",
+    "classes": "Find Classes",
+    "what_we_do": "What We Do",
+    "login": "Login"
+  },
+  "stats": {
+    "activeVolunteers": "Active Volunteers",
+    "hoursServed": "Hours Served",
+    "eventsThisYear": "Events This Year",
+    "neighborhoodsHelped": "Neighborhoods Helped"
+  },
+  "home": {
+    "hero": {
+      "title_part1": "Feel the love in",
+      "volunteer_cta": "Sign Up to Volunteer",
+      "classes_cta": "Sign Up for Classes",
+      "subtitle": "Join thousands of volunteers strengthening Utah neighborhoods through service, partnership, and community action."
+    },
+    "features": {
+      "heading": "Why My Hometown Works",
+      "subheading": "Our approach combines community partnerships with hands-on service to create lasting impact",
+      "cards": {
+        "cooperative_title": "A Cooperative Partnership",
+        "cooperative_desc": "My Hometown brings together local governments, faith-based organizations, businesses, non-profits, and residents in a unified effort to strengthen our communities. Through collaborative partnerships, we coordinate resources, volunteers, and expertise to create lasting positive change in neighborhoods across Utah.",
+        "difference_title": "How We Make a Difference",
+        "difference_desc": "From April to October, we organize volunteer-driven projects including neighborhood clean-ups, landscape renewal, home repairs, and community beautification. Our Community Resource Centers offer classes and support services, while our online platform makes it easy to find projects, sign up to volunteer, and connect with neighbors. Every project strengthens bonds and improves quality of life."
+      }
+    },
+    "dos": {
+      "heading": "Days of Service",
+      "intro": "Join hundreds of neighbors in making our community stronger, one Saturday at a time. Together, we create lasting change through hands-on service.",
+      "highlights": {
+        "transform_title": "Transform Neighborhoods Together",
+        "transform_desc": "Every Saturday morning from spring through summer, volunteers unite to revitalize local communities. We tackle home repairs, landscape beautification, and neighborhood clean-ups that make a visible difference. From painting fences to planting gardens, each project strengthens the fabric of our community and creates lasting bonds between neighbors.",
+        "impact_title": "Make Your Impact Count",
+        "impact_desc": "Whether you have a few hours or the whole morning, your contribution matters. Join us for hands-on projects that range from tree planting and park restoration to home upgrades for families in need. No special skills required—just bring your energy and willingness to serve. We provide all tools, training, and refreshments."
+      },
+      "upcoming_heading": "Upcoming Service Days",
+      "selectCityHelp": "Select a city and choose an upcoming service day to see details and sign up.",
+      "chooseCityPlaceholder": "Choose a city",
+      "allCities": "All Cities",
+      "noUpcomingInCity": "No upcoming service days in this city",
+      "serviceDayFallback": "Service Day - {city}",
+      "registrationClosed": "Registration Closed",
+      "registrationOpen": "Registration Open",
+      "checkInPrefix": "Check-in",
+      "atLocation": "at {location}",
+      "locationTBA": "location to be announced",
+      "startsAt": "Starts at {time}",
+      "participatingCommunities": "Participating Communities:",
+      "moreCount": "+{count} more",
+      "emptySelectServiceDay": "Select a Service Day",
+      "emptySelectServiceDayHelp": "Choose from the available dates to see details and sign up",
+      "noCityLine": "Don't see your city?",
+      "contactUs": "Contact us",
+      "noCityTail": "to learn about upcoming opportunities in your area."
+    },
+    "cta": {
+      "heading": "Ready to Make a Difference?",
+      "body": "Join us in strengthening Utah neighborhoods. Find a project near you and start making an impact today.",
+      "button": "Volunteer Today"
+    },
+    "stats": {
+      "heading": "Our Impact",
+      "subheading": "Together, we're making a real difference in Utah communities",
+      "labels": {
+        "volunteersEngaged": "Volunteers Engaged",
+        "homesImproved": "Homes Improved",
+        "citiesServed": "Cities Served",
+        "serviceHours": "Service Hours"
+      }
+    },
+    "crcFinder": {
+      "heading": "Find Your Community Resource Center",
+      "subheading": "Discover free classes, programs, and resources at your local CRC",
+      "searchPanel": {
+        "searchCardTitle": "Search for a CRC",
+        "searchCardDesc": "Use your location or search manually",
+        "useMyLocation": "Use My Location",
+        "findingLocation": "Finding location...",
+        "locationEnabled": "Location enabled",
+        "clear": "Clear",
+        "orSearchManually": "or search manually",
+        "searchLabel": "Search",
+        "searchPlaceholder": "Name, city, or address...",
+        "filterByCity": "Filter by City",
+        "allCities": "All Cities",
+        "noResults": "No CRCs found",
+        "narrowResultsHint": "Narrow your search to see more specific results",
+        "resultsShowing": "Showing",
+        "of": "of",
+        "crcSingular": "CRC",
+        "crcPlural": "CRCs",
+        "nearestToYou": "(nearest to you)",
+        "whatIsHeading": "What is a Community Resource Center?",
+        "whatIsDescription": "Community Resource Centers (CRCs) are welcoming neighborhood hubs that provide free classes, programs, and resources to strengthen individuals and families throughout Utah.",
+        "useSearchPanelHint": "Use the search panel to find your nearest CRC and explore available classes",
+        "noCrCsFoundTitle": "No CRCs Found",
+        "noCrCsFoundBody": "Try adjusting your search or filters",
+        "clearAllFilters": "Clear All Filters"
+      }
+    }
+  },
+  "footer": {
+    "stayConnected": "Stay Connected",
+    "intro": "Get updates on upcoming service projects and community events in your area.",
+    "selectYourCity": "Select Your City",
+    "cityPlaceholder": "Choose a city",
+    "emailPlaceholder": "Enter your email",
+    "subscribe": "Subscribe",
+    "subscribing": "Subscribing...",
+    "errors": {
+      "invalidEmail": "Please enter a valid email address.",
+      "noCity": "Please select a city."
+    },
+    "about": "Strengthening neighborhoods through service and community partnerships.",
+    "ourCities": "Our Cities",
+    "comingSoon": "Coming Soon",
+    "quickLinks": "Quick Links",
+    "links": {
+      "whatWeDo": "What We Do",
+      "findClasses": "Find Classes",
+      "volunteer": "Volunteer",
+      "daysOfService": "Days of Service",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "poweredBy": "Powered by Platinum Programming"
+    },
+    "contact": "Get in Touch",
+    "copyright": "Copyright © 2023 - {year} myHometown Utah. All rights reserved."
+  },
+  "nav": {
+    "menuTitle": "Navigation Menu",
+    "closeMenu": "Close menu"
+  }
+}

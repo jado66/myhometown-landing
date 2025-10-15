@@ -4,21 +4,20 @@ import { useEffect, useState } from "react";
 import type { SiteStat } from "@/types/site-stats";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export default function SiteStatsEditor() {
   const [stats, setStats] = useState<SiteStat[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editingStat, setEditingStat] = useState<SiteStat | null>(null);
-  const [saving, setSaving] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editedStats, setEditedStats] = useState<Record<string, SiteStat>>({});
 
   useEffect(() => {
     fetchStats();
@@ -38,10 +37,22 @@ export default function SiteStatsEditor() {
     }
   }
 
-  async function handleSave() {
-    if (!editingStat) return;
+  function handleEdit(stat: SiteStat) {
+    setEditingId(stat.id);
+    setEditedStats({ ...editedStats, [stat.id]: { ...stat } });
+  }
 
-    setSaving(true);
+  function handleCancel(id: string) {
+    setEditingId(null);
+    const newEdited = { ...editedStats };
+    delete newEdited[id];
+    setEditedStats(newEdited);
+  }
+
+  async function handleSave(id: string) {
+    const editedStat = editedStats[id];
+    if (!editedStat) return;
+
     try {
       const response = await fetch("/api/site-stats", {
         method: "PATCH",
@@ -49,11 +60,11 @@ export default function SiteStatsEditor() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          id: editingStat.id,
-          stat_value: editingStat.stat_value,
-          stat_label: editingStat.stat_label,
-          stat_suffix: editingStat.stat_suffix,
-          is_active: editingStat.is_active,
+          id: editedStat.id,
+          stat_value: editedStat.stat_value,
+          stat_label: editedStat.stat_label,
+          stat_suffix: editedStat.stat_suffix,
+          is_active: editedStat.is_active,
         }),
       });
 
@@ -63,14 +74,24 @@ export default function SiteStatsEditor() {
 
       // Update local state
       setStats(stats.map((s) => (s.id === updatedStat.id ? updatedStat : s)));
-      setEditingStat(null);
-      alert("Stat updated successfully!");
+      setEditingId(null);
+      const newEdited = { ...editedStats };
+      delete newEdited[id];
+      setEditedStats(newEdited);
     } catch (error) {
       console.error("Error updating stat:", error);
       alert("Error updating stat");
-    } finally {
-      setSaving(false);
     }
+  }
+
+  function updateEditedStat(id: string, field: keyof SiteStat, value: any) {
+    setEditedStats({
+      ...editedStats,
+      [id]: {
+        ...editedStats[id],
+        [field]: value,
+      },
+    });
   }
 
   if (loading) {
@@ -84,126 +105,114 @@ export default function SiteStatsEditor() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Site Stats Editor</h1>
+      <h1 className="text-3xl font-bold mb-6">Site Stats Editor</h1>
 
-      <div className="grid gap-4">
-        {stats.map((stat) => (
-          <Card key={stat.id}>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center justify-between">
-                <span>
-                  {stat.stat_label} ({stat.stat_key})
-                </span>
-                <Button
-                  onClick={() => setEditingStat(stat)}
-                  variant="outline"
-                  size="sm"
-                >
-                  Edit
-                </Button>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-[#318d43]">
-                {stat.stat_value.toLocaleString()}
-                {stat.stat_suffix}
-              </div>
-              <div className="text-sm text-gray-500 mt-2">
-                Order: {stat.display_order} | Status:{" "}
-                {stat.is_active ? "Active" : "Inactive"}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Label</TableHead>
+              <TableHead>Value</TableHead>
+              <TableHead>Suffix</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {stats.map((stat) => {
+              const isEditing = editingId === stat.id;
+              const currentStat = isEditing ? editedStats[stat.id] : stat;
+
+              return (
+                <TableRow key={stat.id}>
+                  <TableCell>
+                    {isEditing ? (
+                      <Input
+                        value={currentStat.stat_label}
+                        onChange={(e) =>
+                          updateEditedStat(
+                            stat.id,
+                            "stat_label",
+                            e.target.value
+                          )
+                        }
+                        className="h-8"
+                      />
+                    ) : (
+                      stat.stat_label
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {isEditing ? (
+                      <Input
+                        type="number"
+                        value={currentStat.stat_value}
+                        onChange={(e) =>
+                          updateEditedStat(
+                            stat.id,
+                            "stat_value",
+                            parseInt(e.target.value) || 0
+                          )
+                        }
+                        className="h-8 w-24"
+                      />
+                    ) : (
+                      <span className="font-semibold">
+                        {stat.stat_value.toLocaleString()}
+                      </span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {isEditing ? (
+                      <Input
+                        value={currentStat.stat_suffix || ""}
+                        onChange={(e) =>
+                          updateEditedStat(
+                            stat.id,
+                            "stat_suffix",
+                            e.target.value
+                          )
+                        }
+                        className="h-8 w-16"
+                        placeholder="+"
+                      />
+                    ) : (
+                      stat.stat_suffix
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {isEditing ? (
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          onClick={() => handleSave(stat.id)}
+                          size="sm"
+                          variant="default"
+                        >
+                          Save
+                        </Button>
+                        <Button
+                          onClick={() => handleCancel(stat.id)}
+                          size="sm"
+                          variant="outline"
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button
+                        onClick={() => handleEdit(stat)}
+                        size="sm"
+                        variant="outline"
+                      >
+                        Edit
+                      </Button>
+                    )}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
       </div>
-
-      {/* Edit Dialog */}
-      <Dialog
-        open={!!editingStat}
-        onOpenChange={(open) => !open && setEditingStat(null)}
-      >
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Edit Stat: {editingStat?.stat_key}</DialogTitle>
-          </DialogHeader>
-
-          {editingStat && (
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="stat_label">Label</Label>
-                <Input
-                  id="stat_label"
-                  value={editingStat.stat_label}
-                  onChange={(e) =>
-                    setEditingStat({
-                      ...editingStat,
-                      stat_label: e.target.value,
-                    })
-                  }
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="stat_value">Value</Label>
-                <Input
-                  id="stat_value"
-                  type="number"
-                  value={editingStat.stat_value}
-                  onChange={(e) =>
-                    setEditingStat({
-                      ...editingStat,
-                      stat_value: parseInt(e.target.value) || 0,
-                    })
-                  }
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="stat_suffix">Suffix (e.g., +)</Label>
-                <Input
-                  id="stat_suffix"
-                  value={editingStat.stat_suffix || ""}
-                  onChange={(e) =>
-                    setEditingStat({
-                      ...editingStat,
-                      stat_suffix: e.target.value,
-                    })
-                  }
-                />
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="is_active"
-                  checked={editingStat.is_active}
-                  onChange={(e) =>
-                    setEditingStat({
-                      ...editingStat,
-                      is_active: e.target.checked,
-                    })
-                  }
-                  className="w-4 h-4"
-                />
-                <Label htmlFor="is_active">Active (shown on site)</Label>
-              </div>
-            </div>
-          )}
-
-          <DialogFooter>
-            <Button
-              onClick={() => setEditingStat(null)}
-              variant="outline"
-              disabled={saving}
-            >
-              Cancel
-            </Button>
-            <Button onClick={handleSave} disabled={saving}>
-              {saving ? "Saving..." : "Save"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

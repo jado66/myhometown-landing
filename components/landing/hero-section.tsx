@@ -1,10 +1,9 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { getNamespaceT } from "@/i18n/server";
 
-export function HeroSection() {
-  console.log("[v0] HeroSection rendering");
+export async function HeroSection() {
+  const { t } = await getNamespaceT("home.hero");
 
   return (
     <section className="relative">
@@ -28,12 +27,11 @@ export function HeroSection() {
       <div className="bg-white px-4 py-12 md:py-16">
         <div className="text-center max-w-4xl mx-auto">
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 text-balance">
-            Feel the love in{" "}
+            {t("title_part1")}{" "}
             <span style={{ color: "#318d43" }}>myHometown</span>
           </h1>
           <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto text-pretty">
-            Join thousands of volunteers strengthening Utah neighborhoods
-            through service, partnership, and community action.
+            {t("subtitle")}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
@@ -41,7 +39,7 @@ export function HeroSection() {
               size="lg"
               className="bg-[#318d43] hover:bg-[#246340] text-white text-lg px-8 py-6"
             >
-              <Link href="/volunteer">Sign Up to Volunteer</Link>
+              <Link href="/volunteer">{t("volunteer_cta")}</Link>
             </Button>
             <Button
               asChild
@@ -49,7 +47,7 @@ export function HeroSection() {
               variant="outline"
               className="border-[#318d43] text-[#318d43] hover:bg-[#318d43] hover:text-white text-lg px-8 py-6"
             >
-              <Link href="/classes">Sign Up for Classes</Link>
+              <Link href="/classes">{t("classes_cta")}</Link>
             </Button>
           </div>
         </div>

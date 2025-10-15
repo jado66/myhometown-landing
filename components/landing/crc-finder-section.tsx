@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Card,
@@ -37,6 +38,8 @@ interface CRCFinderSectionProps {
 }
 
 export function CRCFinderSection({ crcs }: CRCFinderSectionProps) {
+  const t = useTranslations("home.crcFinder");
+  const p = useTranslations("home.crcFinder.searchPanel");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCity, setSelectedCity] = useState<string>("all");
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
@@ -59,7 +62,7 @@ export function CRCFinderSection({ crcs }: CRCFinderSectionProps) {
     setLocationError(null);
 
     if (!navigator.geolocation) {
-      setLocationError("Geolocation is not supported by your browser");
+      setLocationError(p("noResults"));
       setIsLoadingLocation(false);
       return;
     }
@@ -72,10 +75,8 @@ export function CRCFinderSection({ crcs }: CRCFinderSectionProps) {
         });
         setIsLoadingLocation(false);
       },
-      (error) => {
-        setLocationError(
-          "Unable to retrieve your location. Please enable location services."
-        );
+      () => {
+        setLocationError(p("findingLocation"));
         setIsLoadingLocation(false);
       }
     );
@@ -142,10 +143,10 @@ export function CRCFinderSection({ crcs }: CRCFinderSectionProps) {
         {/* Section Header */}
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-            Find Your Community Resource Center
+            {t("heading")}
           </h2>
           <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
-            Discover free classes, programs, and resources at your local CRC
+            {t("subheading")}
           </p>
         </div>
 
@@ -154,10 +155,8 @@ export function CRCFinderSection({ crcs }: CRCFinderSectionProps) {
 
           <Card className="shadow-lg border-2 h-fit">
             <CardHeader className="pb-4">
-              <CardTitle className="text-xl">Search for a CRC</CardTitle>
-              <CardDescription>
-                Use your location or search manually
-              </CardDescription>
+              <CardTitle className="text-xl">{p("searchCardTitle")}</CardTitle>
+              <CardDescription>{p("searchCardDesc")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Use My Location Button */}
@@ -170,12 +169,12 @@ export function CRCFinderSection({ crcs }: CRCFinderSectionProps) {
                 {isLoadingLocation ? (
                   <>
                     <LoaderPinwheel className="mr-2 h-5 w-5 animate-spin" />
-                    Finding location...
+                    {p("findingLocation")}
                   </>
                 ) : (
                   <>
                     <LocateIcon className="mr-2 h-5 w-5" />
-                    Use My Location
+                    {p("useMyLocation")}
                   </>
                 )}
               </Button>
@@ -204,7 +203,7 @@ export function CRCFinderSection({ crcs }: CRCFinderSectionProps) {
                   >
                     <div className="flex items-center gap-2">
                       <MapPinCheck className="h-4 w-4" />
-                      <span>Location enabled</span>
+                      <span>{p("locationEnabled")}</span>
                     </div>
                     <Button
                       variant="ghost"
@@ -212,7 +211,7 @@ export function CRCFinderSection({ crcs }: CRCFinderSectionProps) {
                       onClick={() => setUserLocation(null)}
                       className="h-auto py-1 px-2 text-xs hover:bg-green-100"
                     >
-                      Clear
+                      {p("clear")}
                     </Button>
                   </motion.div>
                 )}
@@ -225,7 +224,7 @@ export function CRCFinderSection({ crcs }: CRCFinderSectionProps) {
                 </div>
                 <div className="relative flex justify-center text-sm">
                   <span className="bg-white px-2 text-gray-500">
-                    or search manually
+                    {p("orSearchManually")}
                   </span>
                 </div>
               </div>
@@ -233,11 +232,11 @@ export function CRCFinderSection({ crcs }: CRCFinderSectionProps) {
               {/* Search Input */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">
-                  Search
+                  {p("searchLabel")}
                 </label>
                 <Input
                   type="text"
-                  placeholder="Name, city, or address..."
+                  placeholder={p("searchPlaceholder")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="h-11"
@@ -247,14 +246,14 @@ export function CRCFinderSection({ crcs }: CRCFinderSectionProps) {
               {/* City Filter */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">
-                  Filter by City
+                  {p("filterByCity")}
                 </label>
                 <Select value={selectedCity} onValueChange={setSelectedCity}>
                   <SelectTrigger className="h-11">
-                    <SelectValue placeholder="All cities" />
+                    <SelectValue placeholder={p("allCities")} />
                   </SelectTrigger>
                   <SelectContent className="bg-white">
-                    <SelectItem value="all">All Cities</SelectItem>
+                    <SelectItem value="all">{p("allCities")}</SelectItem>
                     {cities.map((city) => (
                       <SelectItem key={city} value={city}>
                         {city}
@@ -274,27 +273,27 @@ export function CRCFinderSection({ crcs }: CRCFinderSectionProps) {
                 >
                   <p className="text-sm text-gray-600">
                     {totalResults === 0 ? (
-                      "No CRCs found"
+                      p("noResults")
                     ) : (
                       <>
-                        Showing{" "}
+                        {p("resultsShowing")}{" "}
                         <span className="font-semibold text-primary">
                           {filteredCRCs.length}
                         </span>{" "}
-                        of{" "}
+                        {p("of")}{" "}
                         <span className="font-semibold text-primary">
                           {totalResults}
                         </span>{" "}
-                        {totalResults === 1 ? "CRC" : "CRCs"}
+                        {totalResults === 1 ? p("crcSingular") : p("crcPlural")}
                         {userLocation &&
                           selectedCity === "all" &&
-                          " (nearest to you)"}
+                          ` ${p("nearestToYou")}`}
                       </>
                     )}
                   </p>
                   {totalResults > 4 && (
                     <p className="text-xs text-gray-500">
-                      Narrow your search to see more specific results
+                      {p("narrowResultsHint")}
                     </p>
                   )}
                 </motion.div>
@@ -316,15 +315,12 @@ export function CRCFinderSection({ crcs }: CRCFinderSectionProps) {
                   <Card className="border-2 border-primary/20 shadow-lg">
                     <CardHeader>
                       <CardTitle className="text-2xl md:text-3xl">
-                        What is a Community Resource Center?
+                        {p("whatIsHeading")}
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6">
                       <p className="text-lg leading-relaxed text-gray-700">
-                        Community Resource Centers (CRCs) are welcoming
-                        neighborhood hubs that provide free classes, programs,
-                        and resources to strengthen individuals and families
-                        throughout Utah.
+                        {p("whatIsDescription")}
                       </p>
 
                       <div className="grid sm:grid-cols-2 gap-4">
@@ -400,8 +396,7 @@ export function CRCFinderSection({ crcs }: CRCFinderSectionProps) {
                       <div className="mt-6 p-5 bg-primary/5 rounded-lg border border-primary/20 hidden md:block">
                         <p className="text-center font-medium text-primary flex items-center justify-center gap-2 ">
                           <ArrowLeft className="h-5 w-5 md:block hidden" />
-                          Use the search panel to find your nearest CRC and
-                          explore available classes
+                          {p("useSearchPanelHint")}
                         </p>
                       </div>
                     </CardContent>
@@ -440,10 +435,10 @@ export function CRCFinderSection({ crcs }: CRCFinderSectionProps) {
                     <Card className="border-2 border-dashed">
                       <CardContent className="text-center pt-12">
                         <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                          No CRCs Found
+                          {p("noCrCsFoundTitle")}
                         </h3>
                         <p className="text-gray-600 mb-4">
-                          Try adjusting your search or filters
+                          {p("noCrCsFoundBody")}
                         </p>
                         {/* Dont see your city here */}
 
@@ -455,7 +450,7 @@ export function CRCFinderSection({ crcs }: CRCFinderSectionProps) {
                             setUserLocation(null);
                           }}
                         >
-                          Clear All Filters
+                          {p("clearAllFilters")}
                         </Button>
 
                         <div className="mt-10 mb-4 text-center">

@@ -10,7 +10,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown, Menu } from "lucide-react";
 import { MyHometownLogo } from "../logo/my-hometown";
+import { useTranslations } from "next-intl";
 import { CitySelectOption } from "@/lib/cities";
+import { LanguageSwitcher } from "@/components/language-switcher";
 
 interface HeaderProps {
   onMobileMenuOpen: () => void;
@@ -18,6 +20,7 @@ interface HeaderProps {
 }
 
 export function Header({ onMobileMenuOpen, cities }: HeaderProps) {
+  const t = useTranslations("header");
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-[#1b75bc] shadow-md">
       <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
@@ -26,14 +29,19 @@ export function Header({ onMobileMenuOpen, cities }: HeaderProps) {
             <MyHometownLogo type="header-full" size={36} />
           </Link>
 
-          {/* Mobile menu button */}
-          <button
-            onClick={onMobileMenuOpen}
-            className="md:hidden p-2 text-white hover:text-white/80 transition-colors"
-            aria-label="Open menu"
-          >
-            <Menu className="h-6 w-6" />
-          </button>
+          {/* Mobile controls: language + menu */}
+          <div className="flex items-center gap-1 md:hidden">
+            <LanguageSwitcher />
+            <Button
+              type="button"
+              variant="ghost"
+              aria-label="Open menu"
+              onClick={onMobileMenuOpen}
+              className="text-white hover:text-white/80 hover:bg-white/10 p-2 h-9 w-9 flex items-center justify-center"
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+          </div>
 
           {/* Desktop navigation */}
           <nav className="hidden md:flex items-center gap-8">
@@ -43,7 +51,7 @@ export function Header({ onMobileMenuOpen, cities }: HeaderProps) {
                   variant="ghost"
                   className="text-white font-semibold text-base hover:text-white/80 hover:bg-white/10 transition-colors"
                 >
-                  Our Cities
+                  {t("cities")}
                   <ChevronDown className="ml-1 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -73,7 +81,7 @@ export function Header({ onMobileMenuOpen, cities }: HeaderProps) {
                   variant="ghost"
                   className="text-white font-semibold text-base hover:text-white/80 hover:bg-white/10 transition-colors"
                 >
-                  Volunteer
+                  {t("volunteer")}
                   <ChevronDown className="ml-1 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -83,7 +91,7 @@ export function Header({ onMobileMenuOpen, cities }: HeaderProps) {
                     href="/volunteer"
                     className="text-gray-900 font-medium hover:bg-gray-100 cursor-pointer"
                   >
-                    Volunteer
+                    {t("volunteer_menu")}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
@@ -91,7 +99,7 @@ export function Header({ onMobileMenuOpen, cities }: HeaderProps) {
                     href="/days-of-service"
                     className="text-gray-900 font-medium hover:bg-gray-100 cursor-pointer"
                   >
-                    Days of Service
+                    {t("days_of_service")}
                   </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -101,22 +109,24 @@ export function Header({ onMobileMenuOpen, cities }: HeaderProps) {
               href="classes"
               className="text-white font-semibold text-base hover:text-white/80 transition-colors"
             >
-              Find Classes
+              {t("classes")}
             </Link>
 
             <Link
               href="/what-we-do"
               className="text-white font-semibold text-base hover:text-white/80 transition-colors"
             >
-              What We Do
+              {t("what_we_do")}
             </Link>
 
             <Link
               href="/login"
               className="text-white font-semibold text-base hover:text-white/80 transition-colors"
             >
-              Login
+              {t("login")}
             </Link>
+
+            <LanguageSwitcher />
           </nav>
         </div>
       </div>

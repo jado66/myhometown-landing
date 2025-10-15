@@ -3,8 +3,13 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
-import { getCachedCitySelectOptions, getCachedAllCitySelectOptions } from "@/lib/cities";
+import {
+  getCachedCitySelectOptions,
+  getCachedAllCitySelectOptions,
+} from "@/lib/cities";
 import { MainLayoutClient } from "@/layout/main-layout-client";
+import { detectLocale, getMessages } from "@/i18n/getMessages";
+import { I18nProvider } from "@/components/i18n-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,13 +34,20 @@ export default async function RootLayout({
 }>) {
   const visibleCities = await getCachedCitySelectOptions();
   const allCities = await getCachedAllCitySelectOptions();
+  const locale = await detectLocale();
+  const messages = await getMessages(locale);
 
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html
+      lang={locale}
+      className={`${geistSans.variable} ${geistMono.variable}`}
+    >
       <body className="font-sans antialiased">
-        <MainLayoutClient visibleCities={visibleCities} allCities={allCities}>
-          {children}
-        </MainLayoutClient>
+        <I18nProvider locale={locale} messages={messages}>
+          <MainLayoutClient visibleCities={visibleCities} allCities={allCities}>
+            {children}
+          </MainLayoutClient>
+        </I18nProvider>
         <Toaster position="top-center" closeButton richColors theme="light" />
       </body>
     </html>

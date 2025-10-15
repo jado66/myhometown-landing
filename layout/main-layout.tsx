@@ -1,6 +1,9 @@
 import type React from "react";
 
-import { getCachedCitySelectOptions, getCachedAllCitySelectOptions } from "@/lib/cities";
+import {
+  getCachedCitySelectOptions,
+  getCachedAllCitySelectOptions,
+} from "@/lib/cities";
 import { MainLayoutClient } from "./main-layout-client";
 
 interface MainLayoutProps {

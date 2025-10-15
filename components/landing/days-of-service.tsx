@@ -14,6 +14,7 @@ import {
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslations } from "next-intl";
 import {
   DayOfServicePublic,
   CityWithCommunities,
@@ -32,30 +33,40 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const serviceHighlights = [
-  {
-    title: "Transform Neighborhoods Together",
-    description:
-      "Every Saturday morning from spring through summer, volunteers unite to revitalize local communities. We tackle home repairs, landscape beautification, and neighborhood clean-ups that make a visible difference. From painting fences to planting gardens, each project strengthens the fabric of our community and creates lasting bonds between neighbors.",
+const highlightImages = {
+  transform: {
     image:
       "https://myhometown-bucket.s3.us-west-1.amazonaws.com/uploads/6ac65a2c-c6d1-42e7-a792-7d33582de7f1-MHT%20DOS.webp",
-    blurDataURL:
-      "data:image/webp;base64,UklGRoICAABXRUJQVlA4WAoAAAAIAAAAEwAADAAAVlA4IIYBAACwCACdASoUAA0APh0Kg0CDAIAAYDiewAnTKEcDek0wFYgZIBvG8wCeq47X85mU2nif6PzwsS31F/5J/ePys4039bhgfHzShdrTV4sNhQAA/vkIJJ2zBu6l38ryHor/o6FSn/f/m1N+w34k/8KWwUHM5Tur1U3v29lqXJJgsRvofhq6KZ064DWQk4+Vt3fs2z5W2H9qXz7uE6epONTLD2ogn22d5/xi+jbdxhVz+v/uev6U+7VV/CugQR/85V7xRJ0Qam8esbrqq0OeUPBYy9YqemBQfkxuw622EKuXm62hNm6IPsfIM6P/zRCj96vxl+/+uAGuyzk+lH+UwQT7KN7feOLR7DRbo7lpXB08mIPjgbuf+9eAVEf+DIZ1ulOTwYB/9MyDIB/f89G/+Gv7sNiRgUqMPdf9tcr0+IquaiWtc/ZsWVxvi4qcIxBZd6AP/JR5D91PA4vj0Pg5Ms39ZpzH5lFvUv8I3mp7OKUPf/P/P/uOcj/EVe7+bM970da9mIqW97EAAABFWElG1gAAAElJKgAIAAAABgASAQMAAQAAAAEAAAAaAQUAAQAAAFYAAAAbAQUAAQAAAF4AAAAoAQMAAQAAAAIAAAAxAQIAEAAAAGYAAABphwQAAQAAAHYAAAAAAAAAYAAAAAEAAABgAAAAAQAAAFBhaW50Lk5FVCA1LjEuNwAFAACQBwAEAAAAMDIzMAGgAwABAAAAAQAAAAKgBAABAAAAFAAAAAOgBAABAAAADQAAAAWgBAABAAAAuAAAAAAAAAACAAEAAgAEAAAAUjk4AAIABwAEAAAAMDEwMAAAAAA=",
-    icon: Users,
+    blur: "data:image/webp;base64,UklGRoICAABXRUJQVlA4WAoAAAAIAAAAEwAADAAAVlA4IIYBAACwCACdASoUAA0APh0Kg0CDAIAAYDiewAnTKEcDek0wFYgZIBvG8wCeq47X85mU2nif6PzwsS31F/5J/ePys4039bhgfHzShdrTV4sNhQAA/vkIJJ2zBu6l38ryHor/o6FSn/f/m1N+w34k/8KWwUHM5Tur1U3v29lqXJJgsRvofhq6KZ064DWQk4+Vt3fs2z5W2H9qXz7uE6epONTLD2ogn22d5/xi+jbdxhVz+v/uev6U+7VV/CugQR/85V7xRJ0Qam8esbrqq0OeUPBYy9YqemBQfkxuw622EKuXm62hNm6IPsfIM6P/zRCj96vxl+/+uAGuyzk+lH+UwQT7KN7feOLR7DRbo7lpXB08mIPjgbuf+9eAVEf+DIZ1ulOTwYB/9MyDIB/f89G/+Gv7sNiRgUqMPdf9tcr0+IquaiWtc/ZsWVxvi4qcIxBZd6AP/JR5D91PA4vj0Pg5Ms39ZpzH5lFvUv8I3mp7OKUPf/P/P/uOcj/EVe7+bM970da9mIqW97EAAABFWElG1gAAAElJKgAIAAAABgASAQMAAQAAAAEAAAAaAQUAAQAAAFYAAAAbAQUAAQAAAF4AAAAoAQMAAQAAAAIAAAAxAQIAEAAAAGYAAABphwQAAQAAAHYAAAAAAAAAYAAAAAEAAABgAAAAAQAAAFBhaW50Lk5FVCA1LjEuNwAFAACQBwAEAAAAMDIzMAGgAwABAAAAAQAAAAKgBAABAAAAFAAAAAOgBAABAAAADQAAAAWgBAABAAAAuAAAAAAAAAACAAEAAgAEAAAAUjk4AAIABwAEAAAAMDEwMAAAAAA=",
   },
-  {
-    title: "Make Your Impact Count",
-    description:
-      "Whether you have a few hours or the whole morning, your contribution matters. Join us for hands-on projects that range from tree planting and park restoration to home upgrades for families in need. No special skills required—just bring your energy and willingness to serve. We provide all tools, training, and refreshments.",
+  impact: {
     image:
       "https://myhometown-bucket.s3.us-west-1.amazonaws.com/uploads/16e95792-4da2-4599-9858-27abaf55261f-IMG_1369crop.png",
-    blurDataURL:
-      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAGCAIAAABM9SnKAAABeWlDQ1BJQ0MgUHJvZmlsZQAAKM+Vkc8rRFEUxz/zQ8SIIllYTBpWQ4Oa2CgzCTVpGqMMNjNvfqn58XpvJk22ynaKEhu/FvwFbJW1UkRK1myJDdNz3owaKQvndu753O+953TvuWANZ5SsbvdANlfQQlM+50Jk0dn4jA07XTJ6o4quTgSDAf6091ssZrweMGvxP2uJJ3QFLE3C44qqFYSnhQOrBdXkLeFOJR2NC58IuzW5oPCNqcdq/GRyqsafJmvhkB+s7cLO1A+O/WAlrWWF5eW4spmi8n0f8yWORG5+TmKveA86Iabw4WSGSfx4GWJMZi8DDDMoK/7I91TzZ8lLriKzSgmNFVKkKeAWtSjVExKToidkZCiZ/f/dVz05Mlyr7vBBw6NhvPZB4yZUyobxcWAYlUOwPcB5rp6f34fRN9HLdc21B23rcHpR12LbcLYB3fdqVItWJZu4NZmEl2NojUDHFTQv1Xr2vc/RHYTX5KsuYWcX+uV82/IXOVBn0WZADa0AAAAJcEhZcwAALiIAAC4iAari3ZIAAAAYdEVYdFNvZnR3YXJlAFBhaW50Lk5FVCA1LjEuN4vW9zkAAACMZVhJZklJKgAIAAAABQAaAQUAAQAAAEoAAAAbAQUAAQAAAFIAAAAoAQMAAQAAAAIAAAAxAQIAEAAAAFoAAABphwQAAQAAAGoAAAAAAAAA35MEAOgDAADfkwQA6AMAAFBhaW50Lk5FVCA1LjEuNwACAACQBwAEAAAAMDIzMAGgAwABAAAA//8AAAAAAABer1M4nw+XqwAAAXBJREFUKFMFwU0vw2AAAOC+b7/Wru06inaLLWQTEeHAUbji4m/4He5uEuIy4ujiIpm4LBExEhEHEmFbq5Z9qLX7aN+264fnASeH+8w4XRt2OZCgOE+RZQl3qAjpukMKGZYCgpS2rWH7o7a4viGyrO+qpuMTGK3VTXBVOljuuZ0ApBgOskkbI2iABgQBEjDSvQlRpOmOFXNjywUkLn/VHZa3Ftcea9+hoUHjU5d81e3/RkMDR5BGftPiZhOFZT9ZjHpaA2++U6ObChGYpu8+f9WtgGRyRSHFM2kFnB0fqc1w5DmxmLc7g924IWUZdQjf7l7WVznkLxVmSF5wYrV62Z8GcyuvqqkoWRfBogzwne29xlhy0SgcQ8P6K4NcDyNu7y8qLe06tyUE9qb5UA6mnqkZM6LY0PnRB09aTOIwzyNwflqqfrih3eZTooc8PyJZGk7yOIQkxiaNTssbjPR2l5MzjPO3UJi3A0ARcR/FSgr7ByW5uf95qW9XAAAAAElFTkSuQmCC",
-    icon: Heart,
+    blur: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAGCAIAAABM9SnKAAABeWlDQ1BJQ0MgUHJvZmlsZQAAKM+Vkc8rRFEUxz/zQ8SIIllYTBpWQ4Oa2CgzCTVpGqMMNjNvfqn58XpvJk22ynaKEhu/FvwFbJW1UkRK1myJDdNz3owaKQvndu753O+953TvuWANZ5SsbvdANlfQQlM+50Jk0dn4jA07XTJ6o4quTgSDAf6091ssZrweMGvxP2uJJ3QFLE3C44qqFYSnhQOrBdXkLeFOJR2NC58IuzW5oPCNqcdq/GRyqsafJmvhkB+s7cLO1A+O/WAlrWWF5eW4spmi8n0f8yWORG5+TmKveA86Iabw4WSGSfx4GWJMZi8DDDMoK/7I91TzZ8lLriKzSgmNFVKkKeAWtSjVExKToidkZCiZ/f/dVz05Mlyr7vBBw6NhvPZB4yZUyobxcWAYlUOwPcB5rp6f34fRN9HLdc21B23rcHpR12LbcLYB3fdqVItWJZu4NZmEl2NojUDHFTQv1Xr2vc/RHYTX5KsuYWcX+uV82/IXOVBn0WZADa0AAAAJcEhZcwAALiIAAC4iAari3ZIAAAAYdEVYdFNvZnR3YXJlAFBhaW50Lk5FVCA1LjEuN4vW9zkAAACMZVhJZklJKgAIAAAABQAaAQUAAQAAAEoAAAAbAQUAAQAAAFIAAAAoAQMAAQAAAAIAAAAxAQIAEAAAAFoAAABphwQAAQAAAGoAAAAAAAAA35MEAOgDAADfkwQA6AMAAFBhaW50Lk5FVCA1LjEuNwACAACQBwAEAAAAMDIzMAGgAwABAAAA//8AAAAAAABer1M4nw+XqwAAAXBJREFUKFMFwU0vw2AAAOC+b7/Wru06inaLLWQTEeHAUbji4m/4He5uEuIy4ujiIpm4LBExEhEHEmFbq5Z9qLX7aN+264fnASeH+8w4XRt2OZCgOE+RZQl3qAjpukMKGZYCgpS2rWH7o7a4viGyrO+qpuMTGK3VTXBVOljuuZ0ApBgOskkbI2iABgQBEjDSvQlRpOmOFXNjywUkLn/VHZa3Ftcea9+hoUHjU5d81e3/RkMDR5BGftPiZhOFZT9ZjHpaA2++U6ObChGYpu8+f9WtgGRyRSHFM2kFnB0fqc1w5DmxmLc7g924IWUZdQjf7l7WVznkLxVmSF5wYrV62Z8GcyuvqqkoWRfBogzwne29xlhy0SgcQ8P6K4NcDyNu7y8qLe06tyUE9qb5UA6mnqkZM6LY0PnRB09aTOIwzyNwflqqfrih3eZTooc8PyJZGk7yOIQkxiaNTssbjPR2l5MzjPO3UJi3A0ARcR/FSgr7ByW5uf95qW9XAAAAAElFTkSuQmCC",
   },
-];
+};
 
 export function DaysOfServiceSection() {
+  const t = useTranslations("home.dos");
+  const heroT = useTranslations("home.hero");
+  const serviceHighlights = [
+    {
+      key: "transform",
+      title: t("highlights.transform_title"),
+      description: t("highlights.transform_desc"),
+      image: highlightImages.transform.image,
+      blurDataURL: highlightImages.transform.blur,
+      icon: Users,
+    },
+    {
+      key: "impact",
+      title: t("highlights.impact_title"),
+      description: t("highlights.impact_desc"),
+      image: highlightImages.impact.image,
+      blurDataURL: highlightImages.impact.blur,
+      icon: Heart,
+    },
+  ];
   const [daysOfService, setDaysOfService] = useState<DayOfServicePublic[]>([]);
   const [cities, setCities] = useState<CityWithCommunities[]>([]);
   const [citiesWithEvents, setCitiesWithEvents] = useState<
@@ -171,12 +182,10 @@ export function DaysOfServiceSection() {
         {/* Header */}
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-5xl font-bold mb-4 text-balance">
-            Days of Service
+            {t("heading")}
           </h2>
           <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto text-pretty">
-            Join hundreds of neighbors in making our community stronger, one
-            Saturday at a time. Together, we create lasting change through
-            hands-on service.
+            {t("intro")}
           </p>
         </div>
 
@@ -215,11 +224,10 @@ export function DaysOfServiceSection() {
           <div className="grid md:grid-cols-2 gap-8 items-start">
             <div>
               <h3 className="text-2xl md:text-3xl font-bold mb-4">
-                Upcoming Service Days
+                {t("upcoming_heading")}
               </h3>
               <p className="text-primary-foreground/90 mb-6 text-pretty">
-                Select a city and choose an upcoming service day to see details
-                and sign up.
+                {t("selectCityHelp")}
               </p>
 
               {/* City Filter & Days in One Row */}
@@ -232,10 +240,10 @@ export function DaysOfServiceSection() {
                       onValueChange={setSelectedCity}
                     >
                       <SelectTrigger className="bg-white/10 border-white/20 h-10">
-                        <SelectValue placeholder="Choose a city" />
+                        <SelectValue placeholder={t("chooseCityPlaceholder")} />
                       </SelectTrigger>
                       <SelectContent className="bg-white">
-                        <SelectItem value="all">All Cities</SelectItem>
+                        <SelectItem value="all">{t("allCities")}</SelectItem>
                         {citiesWithEvents.map((city) => (
                           <SelectItem key={city.id} value={city.id}>
                             {city.name}, {city.state}
@@ -304,7 +312,7 @@ export function DaysOfServiceSection() {
                           className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/20"
                         >
                           <div className="text-sm font-medium">
-                            No upcoming service days in this city
+                            {t("noUpcomingInCity")}
                           </div>
                         </motion.div>
                       )}
@@ -327,7 +335,9 @@ export function DaysOfServiceSection() {
                     <div className="flex items-start justify-between">
                       <h4 className="text-xl font-bold ">
                         {selectedDay.name ||
-                          `Service Day - ${getCityName(selectedDay.city_id)}`}
+                          t("serviceDayFallback", {
+                            city: getCityName(selectedDay.city_id),
+                          })}
                       </h4>
                       <motion.div
                         initial={{ scale: 0, opacity: 0 }}
@@ -336,11 +346,11 @@ export function DaysOfServiceSection() {
                       >
                         {selectedDay.is_locked ? (
                           <div className="inline-flex items-center px-3 py-1 rounded-full bg-yellow-100 text-yellow-800 text-xs font-medium">
-                            Registration Closed
+                            {t("registrationClosed")}
                           </div>
                         ) : (
                           <div className="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-800 text-xs font-medium">
-                            Registration Open
+                            {t("registrationOpen")}
                           </div>
                         )}
                       </motion.div>
@@ -376,10 +386,12 @@ export function DaysOfServiceSection() {
                         <MapPin className="w-5 h-5 flex-shrink-0 mt-0.5" />
                         <div>
                           <p className="font-medium">
-                            Check-in{" "}
+                            {t("checkInPrefix")}{" "}
                             {selectedDay.check_in_location
-                              ? "at " + selectedDay.check_in_location
-                              : "location to be announced"}
+                              ? t("atLocation", {
+                                  location: selectedDay.check_in_location,
+                                })
+                              : t("locationTBA")}
                           </p>
                         </div>
                       </motion.div>
@@ -391,7 +403,7 @@ export function DaysOfServiceSection() {
                         className="flex items-center gap-2 font-medium"
                       >
                         <Clock className="w-5 h-5" />
-                        <span>Starts at 8:00 AM</span>
+                        <span>{t("startsAt", { time: "8:00 AM" })}</span>
                       </motion.div>
 
                       {selectedDay.partner_stake_names &&
@@ -403,16 +415,19 @@ export function DaysOfServiceSection() {
                             className="pt-2 border-t border-white/20"
                           >
                             <p className="text-sm font-medium mb-1">
-                              Participating Communities:
+                              {t("participatingCommunities")}
                             </p>
                             <p className="text-sm opacity-90">
                               {selectedDay.partner_stake_names
                                 .slice(0, 2)
                                 .join(", ")}
                               {selectedDay.partner_stake_names.length > 2 &&
-                                ` +${
-                                  selectedDay.partner_stake_names.length - 2
-                                } more`}
+                                " " +
+                                  t("moreCount", {
+                                    count:
+                                      selectedDay.partner_stake_names.length -
+                                      2,
+                                  })}
                             </p>
                           </motion.div>
                         )}
@@ -438,8 +453,8 @@ export function DaysOfServiceSection() {
                         disabled={selectedDay.is_locked}
                       >
                         {selectedDay.is_locked
-                          ? "Registration Closed"
-                          : "Sign Up To Volunteer"}
+                          ? t("registrationClosed")
+                          : heroT("volunteer_cta")}
                       </Button>
                     </motion.div>
                   </motion.div>
@@ -452,10 +467,10 @@ export function DaysOfServiceSection() {
                   >
                     <Calendar className="w-12 h-12 text-primary-foreground/60 mb-4" />
                     <h4 className="text-lg font-semibold mb-2">
-                      Select a Service Day
+                      {t("emptySelectServiceDay")}
                     </h4>
                     <p className="text-primary-foreground/80 text-sm">
-                      Choose from the available dates to see details and sign up
+                      {t("emptySelectServiceDayHelp")}
                     </p>
                   </motion.div>
                 )}
@@ -467,14 +482,14 @@ export function DaysOfServiceSection() {
         {/* Don't see your city here */}
         <div className="mt-12 text-center">
           <p className="text-sm text-muted-foreground">
-            Don&apos;t see your city?{" "}
+            {t("noCityLine")}{" "}
             <a
               href="/contact"
               className="text-primary hover:underline font-medium"
             >
-              Contact us
+              {t("contactUs")}
             </a>{" "}
-            to learn about upcoming opportunities in your area.
+            {t("noCityTail")}
           </p>
         </div>
       </div>

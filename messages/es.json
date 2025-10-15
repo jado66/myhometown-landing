@@ -1,0 +1,146 @@
+{
+  "header": {
+    "cities": "Ciudades",
+    "volunteer": "Voluntariado",
+    "volunteer_menu": "Ser Voluntario",
+    "days_of_service": "Días de Servicio",
+    "classes": "Clases",
+    "what_we_do": "Acerca de",
+    "login": "Ingresar"
+  },
+  "language": {
+    "switcher_label": "Idioma",
+    "english": "Inglés",
+    "spanish": "Español"
+  },
+  "stats": {
+    "activeVolunteers": "Voluntarios Activos",
+    "hoursServed": "Horas Servidas",
+    "eventsThisYear": "Eventos Este Año",
+    "neighborhoodsHelped": "Barrios Ayudados"
+  },
+  "home": {
+    "hero": {
+      "title_part1": "Siente el amor en",
+      "volunteer_cta": "Inscríbete como Voluntario",
+      "classes_cta": "Inscríbete en Clases",
+      "subtitle": "Únete a miles de voluntarios que fortalecen los vecindarios de Utah mediante servicio, colaboración y acción comunitaria."
+    },
+    "features": {
+      "heading": "Por Qué Funciona My Hometown",
+      "subheading": "Nuestro enfoque combina alianzas comunitarias con servicio práctico para crear un impacto duradero",
+      "cards": {
+        "cooperative_title": "Una Alianza Cooperativa",
+        "cooperative_desc": "My Hometown reúne a gobiernos locales, organizaciones de fe, empresas, ONGs y residentes en un esfuerzo unificado para fortalecer nuestras comunidades. A través de colaboraciones, coordinamos recursos, voluntarios y experiencia para crear cambios positivos duraderos en vecindarios de todo Utah.",
+        "difference_title": "Cómo Marcamos la Diferencia",
+        "difference_desc": "De abril a octubre organizamos proyectos impulsados por voluntarios: limpieza de vecindarios, renovación de jardines, reparaciones del hogar y embellecimiento comunitario. Nuestros Centros de Recursos Comunitarios ofrecen clases y servicios de apoyo, mientras que nuestra plataforma facilita encontrar proyectos, registrarse y conectar con los vecinos. Cada proyecto fortalece la unión y mejora la calidad de vida."
+      }
+    },
+    "dos": {
+      "heading": "Días de Servicio",
+      "intro": "Únete a cientos de vecinos para fortalecer nuestra comunidad, un sábado a la vez. Juntos creamos cambios duraderos mediante servicio práctico.",
+      "highlights": {
+        "transform_title": "Transforma los Vecindarios Juntos",
+        "transform_desc": "Cada sábado por la mañana, de primavera a verano, los voluntarios se unen para revitalizar comunidades locales. Abordamos reparaciones del hogar, embellecimiento de jardines y limpiezas que marcan una diferencia visible. Desde pintar cercas hasta plantar jardines, cada proyecto fortalece el tejido de nuestra comunidad y crea lazos duraderos entre vecinos.",
+        "impact_title": "Haz que tu Impacto Cuente",
+        "impact_desc": "Tengas unas horas o toda la mañana, tu contribución importa. Únete a proyectos prácticos que van desde plantar árboles y restaurar parques hasta mejoras del hogar para familias necesitadas. No se requieren habilidades especiales, solo energía y disposición a servir. Proporcionamos herramientas, capacitación y refrigerios."
+      },
+      "upcoming_heading": "Próximos Días de Servicio",
+      "selectCityHelp": "Selecciona una ciudad y elige un próximo día de servicio para ver detalles e inscribirte.",
+      "chooseCityPlaceholder": "Elige una ciudad",
+      "allCities": "Todas las Ciudades",
+      "noUpcomingInCity": "No hay próximos días de servicio en esta ciudad",
+      "serviceDayFallback": "Día de Servicio - {city}",
+      "registrationClosed": "Inscripción Cerrada",
+      "registrationOpen": "Inscripción Abierta",
+      "checkInPrefix": "Registro",
+      "atLocation": "en {location}",
+      "locationTBA": "ubicación por anunciar",
+      "startsAt": "Comienza a las {time}",
+      "participatingCommunities": "Comunidades Participantes:",
+      "moreCount": "+{count} más",
+      "emptySelectServiceDay": "Selecciona un Día de Servicio",
+      "emptySelectServiceDayHelp": "Elige entre las fechas disponibles para ver detalles e inscribirte",
+      "noCityLine": "¿No ves tu ciudad?",
+      "contactUs": "Contáctanos",
+      "noCityTail": "para conocer oportunidades próximas en tu área."
+    },
+    "cta": {
+      "heading": "¿Listo para Marcar la Diferencia?",
+      "body": "Únete a nosotros para fortalecer los vecindarios de Utah. Encuentra un proyecto cercano y comienza a generar impacto hoy.",
+      "button": "Sé Voluntario Hoy"
+    },
+    "stats": {
+      "heading": "Nuestro Impacto",
+      "subheading": "Juntos estamos marcando una verdadera diferencia en las comunidades de Utah",
+      "labels": {
+        "volunteersEngaged": "Voluntarios Comprometidos",
+        "homesImproved": "Hogares Mejorados",
+        "citiesServed": "Ciudades Atendidas",
+        "serviceHours": "Horas de Servicio"
+      }
+    },
+    "crcFinder": {
+      "heading": "Encuentra tu Centro de Recursos Comunitarios",
+      "subheading": "Descubre clases, programas y recursos gratuitos en tu CRC local",
+      "searchPanel": {
+        "searchCardTitle": "Buscar un CRC",
+        "searchCardDesc": "Usa tu ubicación o busca manualmente",
+        "useMyLocation": "Usar Mi Ubicación",
+        "findingLocation": "Buscando ubicación...",
+        "locationEnabled": "Ubicación activada",
+        "clear": "Borrar",
+        "orSearchManually": "o buscar manualmente",
+        "searchLabel": "Buscar",
+        "searchPlaceholder": "Nombre, ciudad o dirección...",
+        "filterByCity": "Filtrar por Ciudad",
+        "allCities": "Todas las Ciudades",
+        "noResults": "No se encontraron CRCs",
+        "narrowResultsHint": "Reduce tu búsqueda para ver resultados más específicos",
+        "resultsShowing": "Mostrando",
+        "of": "de",
+        "crcSingular": "CRC",
+        "crcPlural": "CRCs",
+        "nearestToYou": "(más cercanos a ti)",
+        "whatIsHeading": "¿Qué es un Centro de Recursos Comunitarios?",
+        "whatIsDescription": "Los Centros de Recursos Comunitarios (CRCs) son espacios acogedores que ofrecen clases, programas y recursos gratuitos para fortalecer a individuos y familias en todo Utah.",
+        "useSearchPanelHint": "Usa el panel de búsqueda para encontrar tu CRC más cercano y explorar clases disponibles",
+        "noCrCsFoundTitle": "No se Encontraron CRCs",
+        "noCrCsFoundBody": "Intenta ajustar tu búsqueda o filtros",
+        "clearAllFilters": "Borrar Todos los Filtros"
+      }
+    }
+  },
+  "footer": {
+    "stayConnected": "Mantente Conectado",
+    "intro": "Recibe actualizaciones sobre próximos proyectos de servicio y eventos comunitarios en tu área.",
+    "selectYourCity": "Selecciona tu Ciudad",
+    "cityPlaceholder": "Elige una ciudad",
+    "emailPlaceholder": "Ingresa tu correo",
+    "subscribe": "Suscribirse",
+    "subscribing": "Suscribiendo...",
+    "errors": {
+      "invalidEmail": "Por favor ingresa un correo válido.",
+      "noCity": "Por favor selecciona una ciudad."
+    },
+    "about": "Fortaleciendo vecindarios mediante servicio y alianzas comunitarias.",
+    "ourCities": "Nuestras Ciudades",
+    "comingSoon": "Próximamente",
+    "quickLinks": "Enlaces Rápidos",
+    "links": {
+      "whatWeDo": "Qué Hacemos",
+      "findClasses": "Buscar Clases",
+      "volunteer": "Voluntariado",
+      "daysOfService": "Días de Servicio",
+      "privacy": "Política de Privacidad",
+      "terms": "Términos de Servicio",
+      "poweredBy": "Desarrollado por Platinum Programming"
+    },
+    "contact": "Contacto",
+    "copyright": "Derechos Reservados © 2023 - {year} myHometown Utah. Todos los derechos reservados."
+  },
+  "nav": {
+    "menuTitle": "Menú de Navegación",
+    "closeMenu": "Cerrar menú"
+  }
+}
