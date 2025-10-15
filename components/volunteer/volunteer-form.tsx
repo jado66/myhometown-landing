@@ -2,6 +2,7 @@
 
 import type React from "react";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -60,14 +61,16 @@ interface FormData {
   specialAccommodations: string;
 }
 
+// Titles will be translated at render time
 const STEPS = [
-  { title: "Personal Info" },
-  { title: "Availability" },
-  { title: "Background" },
-  { title: "Review" },
+  { title: "steps.personalInfo" },
+  { title: "steps.availability" },
+  { title: "steps.background" },
+  { title: "steps.review" },
 ];
 
 export function VolunteerForm() {
+  const t = useTranslations("volunteerForm");
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -128,47 +131,50 @@ export function VolunteerForm() {
 
     if (step === 1) {
       if (!formData.firstName.trim())
-        newErrors.firstName = "First name is required";
+        newErrors.firstName = t("errors.firstNameRequired");
       if (!formData.lastName.trim())
-        newErrors.lastName = "Last name is required";
-      if (!formData.email.trim()) newErrors.email = "Email is required";
+        newErrors.lastName = t("errors.lastNameRequired");
+      if (!formData.email.trim()) newErrors.email = t("errors.emailRequired");
       else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
-        newErrors.email = "Invalid email format";
-      if (!formData.phone.trim()) newErrors.phone = "Phone number is required";
+        newErrors.email = t("errors.emailInvalid");
+      if (!formData.phone.trim()) newErrors.phone = t("errors.phoneRequired");
       if (!formData.dateOfBirth)
-        newErrors.dateOfBirth = "Date of birth is required";
+        newErrors.dateOfBirth = t("errors.dateOfBirthRequired");
       if (!formData.streetAddress.trim())
-        newErrors.streetAddress = "Street address is required";
-      if (!formData.city.trim()) newErrors.city = "City is required";
-      if (!formData.state) newErrors.state = "State is required";
-      if (!formData.zipCode.trim()) newErrors.zipCode = "Zip code is required";
+        newErrors.streetAddress = t("errors.streetRequired");
+      if (!formData.city.trim()) newErrors.city = t("errors.cityRequired");
+      if (!formData.state) newErrors.state = t("errors.stateRequired");
+      if (!formData.zipCode.trim()) newErrors.zipCode = t("errors.zipRequired");
       else if (!/^\d{5}$/.test(formData.zipCode))
-        newErrors.zipCode = "Zip code must be 5 digits";
+        newErrors.zipCode = t("errors.zipInvalid");
     }
 
     if (step === 2) {
       if (formData.daysAvailable.length === 0)
-        newErrors.daysAvailable = "Select at least one day";
+        newErrors.daysAvailable = t("errors.daysRequired");
       if (!formData.timePreference)
-        newErrors.timePreference = "Time preference is required";
+        newErrors.timePreference = t("errors.timePreferenceRequired");
       if (!formData.hoursPerWeek)
-        newErrors.hoursPerWeek = "Hours per week is required";
+        newErrors.hoursPerWeek = t("errors.hoursPerWeekRequired");
       if (formData.interests.length === 0)
-        newErrors.interests = "Select at least one area of interest";
+        newErrors.interests = t("errors.interestsRequired");
     }
 
     if (step === 3) {
       if (!formData.emergencyContactName.trim())
-        newErrors.emergencyContactName = "Emergency contact name is required";
+        newErrors.emergencyContactName = t("errors.emergencyNameRequired");
       if (!formData.emergencyContactPhone.trim())
-        newErrors.emergencyContactPhone = "Emergency contact phone is required";
+        newErrors.emergencyContactPhone = t("errors.emergencyPhoneRequired");
       if (!formData.emergencyContactRelationship.trim())
-        newErrors.emergencyContactRelationship = "Relationship is required";
+        newErrors.emergencyContactRelationship = t(
+          "errors.emergencyRelationshipRequired"
+        );
       if (!formData.hearAboutUs)
-        newErrors.hearAboutUs = "Please tell us how you heard about us";
+        newErrors.hearAboutUs = t("errors.hearAboutUsRequired");
       if (!formData.backgroundCheckConsent)
-        newErrors.backgroundCheckConsent =
-          "Background check consent is required";
+        newErrors.backgroundCheckConsent = t(
+          "errors.backgroundConsentRequired"
+        );
     }
 
     setErrors(newErrors);
@@ -240,16 +246,15 @@ export function VolunteerForm() {
         </div>
         <div className="space-y-3">
           <h3 className="text-3xl font-bold text-foreground text-balance">
-            Thank You for Signing Up!
+            {t("success.title")}
           </h3>
           <p className="text-muted-foreground text-pretty leading-relaxed max-w-md mx-auto text-lg">
-            We&apos;ve received your application and will be in touch within 24
-            hours with next steps and upcoming volunteer opportunities.
+            {t("success.body")}
           </p>
         </div>
         <div className="pt-4">
           <Button onClick={resetForm} variant="outline" className="gap-2">
-            Submit Another Application
+            {t("actions.submitAnother")}
           </Button>
         </div>
       </div>
@@ -300,12 +305,12 @@ export function VolunteerForm() {
             <div className="space-y-6 p-6 bg-muted/30 rounded-lg border border-border/50">
               <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
                 <User className="w-5 h-5 text-primary" />
-                Basic Information
+                {t("sections.basicInformation")}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="firstName" className="text-sm font-medium">
-                    First Name *
+                    {t("fields.firstName.label")} *
                   </Label>
                   <Input
                     id="firstName"
@@ -328,7 +333,7 @@ export function VolunteerForm() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="lastName" className="text-sm font-medium">
-                    Last Name *
+                    {t("fields.lastName.label")} *
                   </Label>
                   <Input
                     id="lastName"
@@ -352,12 +357,12 @@ export function VolunteerForm() {
 
             <div className="space-y-6 p-6 bg-muted/30 rounded-lg border border-border/50">
               <h3 className="text-lg font-semibold text-foreground">
-                Contact Details
+                {t("sections.contactDetails")}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-sm font-medium">
-                    Email Address *
+                    {t("fields.email.label")} *
                   </Label>
                   <Input
                     id="email"
@@ -379,7 +384,7 @@ export function VolunteerForm() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="phone" className="text-sm font-medium">
-                    Phone Number *
+                    {t("fields.phone.label")} *
                   </Label>
                   <Input
                     id="phone"
@@ -403,7 +408,7 @@ export function VolunteerForm() {
 
               <div className="space-y-2">
                 <Label htmlFor="dateOfBirth" className="text-sm font-medium">
-                  Date of Birth *
+                  {t("fields.dateOfBirth.label")} *
                 </Label>
                 <Input
                   id="dateOfBirth"
@@ -427,10 +432,12 @@ export function VolunteerForm() {
             </div>
 
             <div className="space-y-6 p-6 bg-muted/30 rounded-lg border border-border/50">
-              <h3 className="text-lg font-semibold text-foreground">Address</h3>
+              <h3 className="text-lg font-semibold text-foreground">
+                {t("sections.address")}
+              </h3>
               <div className="space-y-2">
                 <Label htmlFor="streetAddress" className="text-sm font-medium">
-                  Street Address *
+                  {t("fields.streetAddress.label")} *
                 </Label>
                 <Input
                   id="streetAddress"
@@ -455,7 +462,7 @@ export function VolunteerForm() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="city" className="text-sm font-medium">
-                    City *
+                    {t("fields.city.label")} *
                   </Label>
                   <Input
                     id="city"
@@ -476,7 +483,7 @@ export function VolunteerForm() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="state" className="text-sm font-medium">
-                    State *
+                    {t("fields.state.label")} *
                   </Label>
                   <Select
                     value={formData.state}
@@ -508,7 +515,7 @@ export function VolunteerForm() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="zipCode" className="text-sm font-medium">
-                    Zip Code *
+                    {t("fields.zipCode.label")} *
                   </Label>
                   <Input
                     id="zipCode"
@@ -539,10 +546,12 @@ export function VolunteerForm() {
             <div className="space-y-6 p-6 bg-muted/30 rounded-lg border border-border/50">
               <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-primary" />
-                Your Schedule
+                {t("sections.schedule")}
               </h3>
               <div className="space-y-4">
-                <Label className="text-sm font-medium">Days Available *</Label>
+                <Label className="text-sm font-medium">
+                  {t("fields.daysAvailable.label")} *
+                </Label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                   {[
                     "Monday",
@@ -569,7 +578,7 @@ export function VolunteerForm() {
                         }
                       />
                       <span className="text-sm font-medium">
-                        {day.slice(0, 3)}
+                        {t(`weekdays.${day.toLowerCase()}.short`)}
                       </span>
                     </label>
                   ))}
@@ -587,7 +596,7 @@ export function VolunteerForm() {
                     htmlFor="timePreference"
                     className="text-sm font-medium"
                   >
-                    Time Preference *
+                    {t("fields.timePreference.label")} *
                   </Label>
                   <Select
                     value={formData.timePreference}
@@ -602,19 +611,23 @@ export function VolunteerForm() {
                           : "focus:ring-2 focus:ring-primary/20"
                       }`}
                     >
-                      <SelectValue placeholder="Select time preference" />
+                      <SelectValue
+                        placeholder={t("fields.timePreference.placeholder")}
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="morning">
-                        Morning (6am - 12pm)
+                        {t("fields.timePreference.options.morning")}
                       </SelectItem>
                       <SelectItem value="afternoon">
-                        Afternoon (12pm - 5pm)
+                        {t("fields.timePreference.options.afternoon")}
                       </SelectItem>
                       <SelectItem value="evening">
-                        Evening (5pm - 9pm)
+                        {t("fields.timePreference.options.evening")}
                       </SelectItem>
-                      <SelectItem value="flexible">Flexible</SelectItem>
+                      <SelectItem value="flexible">
+                        {t("fields.timePreference.options.flexible")}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                   {errors.timePreference && (
@@ -627,7 +640,7 @@ export function VolunteerForm() {
 
                 <div className="space-y-2">
                   <Label htmlFor="hoursPerWeek" className="text-sm font-medium">
-                    Hours Per Week *
+                    {t("fields.hoursPerWeek.label")} *
                   </Label>
                   <Select
                     value={formData.hoursPerWeek}
@@ -642,13 +655,23 @@ export function VolunteerForm() {
                           : "focus:ring-2 focus:ring-primary/20"
                       }`}
                     >
-                      <SelectValue placeholder="Select hours" />
+                      <SelectValue
+                        placeholder={t("fields.hoursPerWeek.placeholder")}
+                      />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="1-3">1-3 hours</SelectItem>
-                      <SelectItem value="4-6">4-6 hours</SelectItem>
-                      <SelectItem value="7-10">7-10 hours</SelectItem>
-                      <SelectItem value="10+">10+ hours</SelectItem>
+                      <SelectItem value="1-3">
+                        {t("fields.hoursPerWeek.options.1_3")}
+                      </SelectItem>
+                      <SelectItem value="4-6">
+                        {t("fields.hoursPerWeek.options.4_6")}
+                      </SelectItem>
+                      <SelectItem value="7-10">
+                        {t("fields.hoursPerWeek.options.7_10")}
+                      </SelectItem>
+                      <SelectItem value="10+">
+                        {t("fields.hoursPerWeek.options.10_plus")}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                   {errors.hoursPerWeek && (
@@ -662,42 +685,47 @@ export function VolunteerForm() {
 
             <div className="space-y-6 p-6 bg-muted/30 rounded-lg border border-border/50">
               <h3 className="text-lg font-semibold text-foreground">
-                Your Interests
+                {t("sections.interests")}
               </h3>
               <div className="space-y-4">
                 <Label className="text-sm font-medium">
-                  Areas of Interest * (Select all that apply)
+                  {t("fields.interests.label")}
                 </Label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {[
-                    "Community Events",
-                    "Neighborhood Projects",
-                    "Support Services",
-                    "Youth Programs",
-                    "Senior Services",
-                    "Environmental Projects",
-                    "Education & Tutoring",
-                    "Food Distribution",
-                    "Virtual Opportunities",
-                    "Administrative Support",
+                    "communityEvents",
+                    "neighborhoodProjects",
+                    "supportServices",
+                    "youthPrograms",
+                    "seniorServices",
+                    "environmentalProjects",
+                    "educationTutoring",
+                    "foodDistribution",
+                    "virtualOpportunities",
+                    "administrativeSupport",
                   ].map((interest) => (
                     <label
                       key={interest}
                       className={`flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all hover:bg-muted/50 ${
-                        formData.interests.includes(interest)
+                        formData.interests.includes(t(`interests.${interest}`))
                           ? "border-primary bg-primary/5"
                           : "border-border"
                       }`}
                     >
                       <Checkbox
                         id={interest}
-                        checked={formData.interests.includes(interest)}
+                        checked={formData.interests.includes(
+                          t(`interests.${interest}`)
+                        )}
                         onCheckedChange={() =>
-                          toggleArrayValue("interests", interest)
+                          toggleArrayValue(
+                            "interests",
+                            t(`interests.${interest}`)
+                          )
                         }
                       />
                       <span className="text-sm font-medium leading-tight">
-                        {interest}
+                        {t(`interests.${interest}`)}
                       </span>
                     </label>
                   ))}
@@ -711,13 +739,13 @@ export function VolunteerForm() {
 
               <div className="space-y-2">
                 <Label htmlFor="skills" className="text-sm font-medium">
-                  Skills & Experience (Optional)
+                  {t("fields.skills.label")}
                 </Label>
                 <Textarea
                   id="skills"
                   value={formData.skills}
                   onChange={(e) => updateFormData("skills", e.target.value)}
-                  placeholder="e.g., Event planning, carpentry, graphic design, teaching..."
+                  placeholder={t("fields.skills.placeholder")}
                   rows={3}
                   className="resize-none focus:ring-2 focus:ring-primary/20 transition-all"
                 />
@@ -725,13 +753,13 @@ export function VolunteerForm() {
 
               <div className="space-y-2">
                 <Label htmlFor="languages" className="text-sm font-medium">
-                  Languages Spoken (Optional)
+                  {t("fields.languages.label")}
                 </Label>
                 <Input
                   id="languages"
                   value={formData.languages}
                   onChange={(e) => updateFormData("languages", e.target.value)}
-                  placeholder="e.g., English, Spanish, Mandarin"
+                  placeholder={t("fields.languages.placeholder")}
                   className="focus:ring-2 focus:ring-primary/20 transition-all"
                 />
               </div>
@@ -745,7 +773,7 @@ export function VolunteerForm() {
             <div className="space-y-6 p-6 bg-muted/30 rounded-lg border border-border/50">
               <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
                 <Shield className="w-5 h-5 text-primary" />
-                Emergency Contact
+                {t("sections.emergencyContact")}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
@@ -753,7 +781,7 @@ export function VolunteerForm() {
                     htmlFor="emergencyContactName"
                     className="text-sm font-medium"
                   >
-                    Contact Name *
+                    {t("fields.emergencyContactName.label")} *
                   </Label>
                   <Input
                     id="emergencyContactName"
@@ -780,7 +808,7 @@ export function VolunteerForm() {
                     htmlFor="emergencyContactPhone"
                     className="text-sm font-medium"
                   >
-                    Contact Phone *
+                    {t("fields.emergencyContactPhone.label")} *
                   </Label>
                   <Input
                     id="emergencyContactPhone"
@@ -809,7 +837,7 @@ export function VolunteerForm() {
                   htmlFor="emergencyContactRelationship"
                   className="text-sm font-medium"
                 >
-                  Relationship *
+                  {t("fields.emergencyContactRelationship.label")} *
                 </Label>
                 <Input
                   id="emergencyContactRelationship"
@@ -838,14 +866,14 @@ export function VolunteerForm() {
 
             <div className="space-y-6 p-6 bg-muted/30 rounded-lg border border-border/50">
               <h3 className="text-lg font-semibold text-foreground">
-                Additional Information
+                {t("sections.additionalInformation")}
               </h3>
               <div className="space-y-2">
                 <Label
                   htmlFor="previousVolunteerExperience"
                   className="text-sm font-medium"
                 >
-                  Previous Volunteer Experience (Optional)
+                  {t("fields.previousVolunteerExperience.label")}
                 </Label>
                 <Textarea
                   id="previousVolunteerExperience"
@@ -856,7 +884,9 @@ export function VolunteerForm() {
                       e.target.value
                     )
                   }
-                  placeholder="Tell us about any previous volunteer work..."
+                  placeholder={t(
+                    "fields.previousVolunteerExperience.placeholder"
+                  )}
                   rows={3}
                   className="resize-none focus:ring-2 focus:ring-primary/20 transition-all"
                 />
@@ -864,13 +894,13 @@ export function VolunteerForm() {
 
               <div className="space-y-2">
                 <Label htmlFor="references" className="text-sm font-medium">
-                  Professional or Personal References (Optional)
+                  {t("fields.references.label")}
                 </Label>
                 <Textarea
                   id="references"
                   value={formData.references}
                   onChange={(e) => updateFormData("references", e.target.value)}
-                  placeholder="Name, relationship, and contact information for 1-2 references..."
+                  placeholder={t("fields.references.placeholder")}
                   rows={3}
                   className="resize-none focus:ring-2 focus:ring-primary/20 transition-all"
                 />
@@ -878,7 +908,7 @@ export function VolunteerForm() {
 
               <div className="space-y-2">
                 <Label htmlFor="hearAboutUs" className="text-sm font-medium">
-                  How did you hear about us? *
+                  {t("fields.hearAboutUs.label")} *
                 </Label>
                 <Select
                   value={formData.hearAboutUs}
@@ -893,17 +923,29 @@ export function VolunteerForm() {
                         : "focus:ring-2 focus:ring-primary/20"
                     }`}
                   >
-                    <SelectValue placeholder="Select an option" />
+                    <SelectValue
+                      placeholder={t("fields.hearAboutUs.placeholder")}
+                    />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="social-media">Social Media</SelectItem>
-                    <SelectItem value="friend">Friend or Family</SelectItem>
-                    <SelectItem value="community-event">
-                      Community Event
+                    <SelectItem value="social-media">
+                      {t("fields.hearAboutUs.options.socialMedia")}
                     </SelectItem>
-                    <SelectItem value="website">Website</SelectItem>
-                    <SelectItem value="news">News Article</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
+                    <SelectItem value="friend">
+                      {t("fields.hearAboutUs.options.friend")}
+                    </SelectItem>
+                    <SelectItem value="community-event">
+                      {t("fields.hearAboutUs.options.communityEvent")}
+                    </SelectItem>
+                    <SelectItem value="website">
+                      {t("fields.hearAboutUs.options.website")}
+                    </SelectItem>
+                    <SelectItem value="news">
+                      {t("fields.hearAboutUs.options.news")}
+                    </SelectItem>
+                    <SelectItem value="other">
+                      {t("fields.hearAboutUs.options.other")}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 {errors.hearAboutUs && (
@@ -933,12 +975,10 @@ export function VolunteerForm() {
                   />
                   <div className="space-y-2">
                     <div className="text-sm font-semibold leading-none">
-                      Background Check Consent *
+                      {t("fields.backgroundCheckConsent.label")} *
                     </div>
                     <p className="text-sm text-muted-foreground leading-relaxed">
-                      I consent to a background check as required for volunteer
-                      positions. I understand this is for the safety of all
-                      participants.
+                      {t("fields.backgroundCheckConsent.body")}
                     </p>
                   </div>
                 </label>
@@ -952,13 +992,13 @@ export function VolunteerForm() {
 
               <div className="space-y-2">
                 <Label htmlFor="motivation" className="text-sm font-medium">
-                  Why do you want to volunteer? (Optional)
+                  {t("fields.motivation.label")}
                 </Label>
                 <Textarea
                   id="motivation"
                   value={formData.motivation}
                   onChange={(e) => updateFormData("motivation", e.target.value)}
-                  placeholder="Share what motivates you to give back to your community..."
+                  placeholder={t("fields.motivation.placeholder")}
                   rows={3}
                   className="resize-none focus:ring-2 focus:ring-primary/20 transition-all"
                 />
@@ -969,7 +1009,7 @@ export function VolunteerForm() {
                   htmlFor="specialAccommodations"
                   className="text-sm font-medium"
                 >
-                  Special Accommodations (Optional)
+                  {t("fields.specialAccommodations.label")}
                 </Label>
                 <Textarea
                   id="specialAccommodations"
@@ -977,7 +1017,7 @@ export function VolunteerForm() {
                   onChange={(e) =>
                     updateFormData("specialAccommodations", e.target.value)
                   }
-                  placeholder="Let us know if you need any accommodations to participate fully..."
+                  placeholder={t("fields.specialAccommodations.placeholder")}
                   rows={2}
                   className="resize-none focus:ring-2 focus:ring-primary/20 transition-all"
                 />
@@ -993,12 +1033,11 @@ export function VolunteerForm() {
               <div className="flex items-center gap-3 mb-4">
                 <FileCheck className="w-6 h-6 text-primary" />
                 <h3 className="text-xl font-bold text-foreground">
-                  Review Your Application
+                  {t("review.title")}
                 </h3>
               </div>
               <p className="text-muted-foreground leading-relaxed">
-                Please review your information before submitting. You can go
-                back to make changes if needed.
+                {t("review.intro")}
               </p>
             </div>
 
@@ -1007,13 +1046,13 @@ export function VolunteerForm() {
                 <div className="flex items-center gap-2 mb-4">
                   <User className="w-5 h-5 text-primary" />
                   <h3 className="text-lg font-semibold text-foreground">
-                    Personal Information
+                    {t("review.sections.personalInformation")}
                   </h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="text-muted-foreground font-medium">
-                      Name:
+                      {t("review.labels.name")}
                     </span>
                     <p className="font-semibold text-foreground mt-1">
                       {formData.firstName} {formData.lastName}
@@ -1021,7 +1060,7 @@ export function VolunteerForm() {
                   </div>
                   <div>
                     <span className="text-muted-foreground font-medium">
-                      Email:
+                      {t("review.labels.email")}
                     </span>
                     <p className="font-semibold text-foreground mt-1">
                       {formData.email}
@@ -1029,7 +1068,7 @@ export function VolunteerForm() {
                   </div>
                   <div>
                     <span className="text-muted-foreground font-medium">
-                      Phone:
+                      {t("review.labels.phone")}
                     </span>
                     <p className="font-semibold text-foreground mt-1">
                       {formData.phone}
@@ -1037,7 +1076,7 @@ export function VolunteerForm() {
                   </div>
                   <div>
                     <span className="text-muted-foreground font-medium">
-                      Date of Birth:
+                      {t("review.labels.dateOfBirth")}
                     </span>
                     <p className="font-semibold text-foreground mt-1">
                       {formData.dateOfBirth}
@@ -1045,7 +1084,7 @@ export function VolunteerForm() {
                   </div>
                   <div className="md:col-span-2">
                     <span className="text-muted-foreground font-medium">
-                      Address:
+                      {t("review.labels.address")}
                     </span>
                     <p className="font-semibold text-foreground mt-1">
                       {formData.streetAddress}, {formData.city},{" "}
@@ -1059,13 +1098,13 @@ export function VolunteerForm() {
                 <div className="flex items-center gap-2 mb-4">
                   <Calendar className="w-5 h-5 text-primary" />
                   <h3 className="text-lg font-semibold text-foreground">
-                    Availability
+                    {t("review.sections.availability")}
                   </h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="text-muted-foreground font-medium">
-                      Days Available:
+                      {t("review.labels.daysAvailable")}
                     </span>
                     <p className="font-semibold text-foreground mt-1">
                       {formData.daysAvailable.join(", ")}
@@ -1073,7 +1112,7 @@ export function VolunteerForm() {
                   </div>
                   <div>
                     <span className="text-muted-foreground font-medium">
-                      Time Preference:
+                      {t("review.labels.timePreference")}
                     </span>
                     <p className="font-semibold text-foreground mt-1 capitalize">
                       {formData.timePreference}
@@ -1081,7 +1120,7 @@ export function VolunteerForm() {
                   </div>
                   <div>
                     <span className="text-muted-foreground font-medium">
-                      Hours Per Week:
+                      {t("review.labels.hoursPerWeek")}
                     </span>
                     <p className="font-semibold text-foreground mt-1">
                       {formData.hoursPerWeek}
@@ -1089,7 +1128,7 @@ export function VolunteerForm() {
                   </div>
                   <div className="md:col-span-2">
                     <span className="text-muted-foreground font-medium">
-                      Areas of Interest:
+                      {t("review.labels.interests")}
                     </span>
                     <p className="font-semibold text-foreground mt-1">
                       {formData.interests.join(", ")}
@@ -1102,13 +1141,13 @@ export function VolunteerForm() {
                 <div className="flex items-center gap-2 mb-4">
                   <Shield className="w-5 h-5 text-primary" />
                   <h3 className="text-lg font-semibold text-foreground">
-                    Emergency Contact
+                    {t("review.sections.emergencyContact")}
                   </h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="text-muted-foreground font-medium">
-                      Name:
+                      {t("review.labels.emergencyName")}
                     </span>
                     <p className="font-semibold text-foreground mt-1">
                       {formData.emergencyContactName}
@@ -1116,7 +1155,7 @@ export function VolunteerForm() {
                   </div>
                   <div>
                     <span className="text-muted-foreground font-medium">
-                      Phone:
+                      {t("review.labels.emergencyPhone")}
                     </span>
                     <p className="font-semibold text-foreground mt-1">
                       {formData.emergencyContactPhone}
@@ -1124,7 +1163,7 @@ export function VolunteerForm() {
                   </div>
                   <div>
                     <span className="text-muted-foreground font-medium">
-                      Relationship:
+                      {t("review.labels.emergencyRelationship")}
                     </span>
                     <p className="font-semibold text-foreground mt-1">
                       {formData.emergencyContactRelationship}
@@ -1136,9 +1175,7 @@ export function VolunteerForm() {
 
             <div className="bg-muted/50 rounded-lg p-5 border border-border">
               <p className="text-sm text-muted-foreground text-center text-pretty leading-relaxed">
-                By submitting this form, you agree to be contacted about
-                volunteer opportunities with myHometown and consent to the
-                background check process.
+                {t("review.disclaimer")}
               </p>
             </div>
           </div>
@@ -1154,11 +1191,14 @@ export function VolunteerForm() {
             className="flex items-center gap-2 px-6 h-11 disabled:opacity-50 transition-all hover:bg-muted bg-transparent"
           >
             <ChevronLeft className="w-4 h-4" />
-            Back
+            {t("actions.back")}
           </Button>
 
           <div className="text-sm text-muted-foreground font-medium">
-            Step {currentStep} of {STEPS.length}
+            {t("progress.stepIndicator", {
+              current: currentStep,
+              total: STEPS.length,
+            })}
           </div>
 
           {currentStep < STEPS.length ? (
@@ -1167,7 +1207,7 @@ export function VolunteerForm() {
               onClick={handleNext}
               className="flex items-center gap-2 px-6 h-11 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all"
             >
-              Next
+              {t("actions.next")}
               <ChevronRight className="w-4 h-4" />
             </Button>
           ) : (
@@ -1180,12 +1220,12 @@ export function VolunteerForm() {
               {isSubmitting ? (
                 <>
                   <span className="animate-spin">⏳</span>
-                  Submitting...
+                  {t("actions.submitting")}
                 </>
               ) : (
                 <>
                   <CheckCircle2 className="w-4 h-4" />
-                  Submit Application
+                  {t("actions.submit")}
                 </>
               )}
             </Button>

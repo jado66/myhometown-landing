@@ -40,6 +40,7 @@ interface CRCFinderSectionProps {
 export function CRCFinderSection({ crcs }: CRCFinderSectionProps) {
   const t = useTranslations("home.crcFinder");
   const p = useTranslations("home.crcFinder.searchPanel");
+  const f = useTranslations("home.crcFinder.features");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCity, setSelectedCity] = useState<string>("all");
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
@@ -332,11 +333,10 @@ export function CRCFinderSection({ crcs }: CRCFinderSectionProps) {
                           </div>
                           <div>
                             <h4 className="font-semibold mb-1 text-gray-900">
-                              Free Education
+                              {f("education.title")}
                             </h4>
                             <p className="text-sm text-gray-600">
-                              ESL classes, computer skills, citizenship prep,
-                              and more—all at no cost.
+                              {f("education.body")}
                             </p>
                           </div>
                         </div>
@@ -349,11 +349,10 @@ export function CRCFinderSection({ crcs }: CRCFinderSectionProps) {
                           </div>
                           <div>
                             <h4 className="font-semibold mb-1 text-gray-900">
-                              Arts & Music
+                              {f("arts.title")}
                             </h4>
                             <p className="text-sm text-gray-600">
-                              Piano lessons, art classes, and creative programs
-                              for all ages.
+                              {f("arts.body")}
                             </p>
                           </div>
                         </div>
@@ -366,11 +365,10 @@ export function CRCFinderSection({ crcs }: CRCFinderSectionProps) {
                           </div>
                           <div>
                             <h4 className="font-semibold mb-1 text-gray-900">
-                              Family Programs
+                              {f("family.title")}
                             </h4>
                             <p className="text-sm text-gray-600">
-                              Youth activities, family events, and community
-                              gatherings.
+                              {f("family.body")}
                             </p>
                           </div>
                         </div>
@@ -383,11 +381,10 @@ export function CRCFinderSection({ crcs }: CRCFinderSectionProps) {
                           </div>
                           <div>
                             <h4 className="font-semibold mb-1 text-gray-900">
-                              Job Readiness
+                              {f("jobs.title")}
                             </h4>
                             <p className="text-sm text-gray-600">
-                              Vocational training, resume help, and career
-                              development resources.
+                              {f("jobs.body")}
                             </p>
                           </div>
                         </div>
@@ -455,14 +452,16 @@ export function CRCFinderSection({ crcs }: CRCFinderSectionProps) {
 
                         <div className="mt-10 mb-4 text-center">
                           <p className="text-sm text-muted-foreground">
-                            Don&apos;t see your city?{" "}
-                            <a
-                              href="/contact"
-                              className="text-primary hover:underline font-medium"
-                            >
-                              Contact us
-                            </a>{" "}
-                            to learn about upcoming opportunities in your area.
+                            {p.rich("noCityCta", {
+                              contact: (chunks) => (
+                                <a
+                                  href="/contact"
+                                  className="text-primary hover:underline font-medium"
+                                >
+                                  {chunks}
+                                </a>
+                              ),
+                            })}
                           </p>
                         </div>
                       </CardContent>

@@ -102,7 +102,26 @@
         "useSearchPanelHint": "Use the search panel to find your nearest CRC and explore available classes",
         "noCrCsFoundTitle": "No CRCs Found",
         "noCrCsFoundBody": "Try adjusting your search or filters",
-        "clearAllFilters": "Clear All Filters"
+        "clearAllFilters": "Clear All Filters",
+        "noCityCta": "Don't see your city? <contact>Contact us</contact> to learn about upcoming opportunities in your area."
+      },
+      "features": {
+        "education": {
+          "title": "Free Education",
+          "body": "ESL classes, computer skills, citizenship prep, and more—all at no cost."
+        },
+        "arts": {
+          "title": "Arts & Music",
+          "body": "Piano lessons, art classes, and creative programs for all ages."
+        },
+        "family": {
+          "title": "Family Programs",
+          "body": "Youth activities, family events, and community gatherings."
+        },
+        "jobs": {
+          "title": "Job Readiness",
+          "body": "Vocational training, resume help, and career development resources."
+        }
       }
     }
   },
@@ -137,5 +156,268 @@
   "nav": {
     "menuTitle": "Navigation Menu",
     "closeMenu": "Close menu"
+  },
+  "volunteerPage": {
+    "hero": {
+      "title": "Join the myHometown Initiative",
+      "subtitle": "Become part of a community dedicated to strengthening Utah neighborhoods through service, partnership, and action.",
+      "benefits": {
+        "impact": "Make an Impact",
+        "community": "Build Community",
+        "neighborhoods": "Strengthen Neighborhoods"
+      }
+    },
+    "whatYouDo": {
+      "heading": "What You'll Do as a Volunteer",
+      "intro": "Choose from a variety of meaningful opportunities that fit your schedule and interests",
+      "cards": {
+        "communityEventsTitle": "Community Events",
+        "communityEventsDesc": "Help organize and run neighborhood gatherings, festivals, and community celebrations",
+        "neighborhoodProjectsTitle": "Neighborhood Projects",
+        "neighborhoodProjectsDesc": "Participate in beautification projects, park cleanups, and community improvement initiatives",
+        "supportServicesTitle": "Support Services",
+        "supportServicesDesc": "Assist neighbors in need with tasks like yard work, meal delivery, or companionship",
+        "localOutreachTitle": "Local Outreach",
+        "localOutreachDesc": "Connect with residents, share resources, and help build stronger neighborhood networks",
+        "youthProgramsTitle": "Youth Programs",
+        "youthProgramsDesc": "Mentor young people, lead activities, and help create positive experiences for kids",
+        "flexibleOpportunitiesTitle": "Flexible Opportunities",
+        "flexibleOpportunitiesDesc": "One-time events, ongoing commitments, or virtual volunteering - choose what works for you"
+      }
+    },
+    "form": {
+      "heading": "Ready to Make a Difference?",
+      "intro": "Complete the form below to join our volunteer network. We'll match you with opportunities that fit your interests and availability.",
+      "afterSignup": "After signing up, you'll receive a welcome email with next steps and information about upcoming volunteer opportunities."
+    },
+    "testimonials": {
+      "heading": "Hear from Our Volunteers",
+      "intro": "Real stories from people making a difference in their communities",
+      "since": "Volunteer since {year}",
+      "sarahQuote": "\"Volunteering with myHometown has been incredibly rewarding. I've met amazing neighbors and helped make our community stronger.\"",
+      "jamesQuote": "\"The flexibility is perfect for my schedule. I can volunteer when it works for me, and every opportunity feels meaningful.\"",
+      "emilyQuote": "\"I love seeing the direct impact of my work. From park cleanups to helping elderly neighbors, every moment counts.\""
+    }
+  },
+  "dosPage": {
+    "hero": {
+      "title": "Days of Service",
+      "subtitle": "Join hundreds of neighbors in making our community stronger, one day at a time. Find upcoming service opportunities near you.",
+      "how": {
+        "heading": "How to Volunteer",
+        "step1": "Select a day from the calendar",
+        "step2": "Review the event details",
+        "step3": "Complete the registration form"
+      },
+      "benefits": {
+        "community": "Build Community",
+        "impact": "Make an Impact",
+        "flexible": "Flexible Schedule"
+      }
+    },
+    "finder": {
+      "heading": "Find Days of Service",
+      "subheading": "Search and filter upcoming service opportunities",
+      "searchPlaceholder": "Search by name, city, or community...",
+      "allCitiesPlaceholder": "All Cities",
+      "allCities": "All Cities",
+      "clearFilters": "Clear Filters",
+      "clearAllFilters": "Clear All Filters",
+      "showing": "Showing {count} of {total} Days of Service",
+      "loading": "(Loading...)"
+    },
+    "loading": "Loading days of service...",
+    "cards": {
+      "registrationClosed": "Registration Closed",
+      "selected": "Selected - Fill Form Below",
+      "selectThisDay": "Select This Day",
+      "fallbackTitle": "Service Day - {city}"
+    },
+    "empty": {
+      "title": "No Days of Service Found",
+      "body": "Try adjusting your search or filters"
+    },
+    "registration": {
+      "heading": "Volunteer Registration",
+      "change": "Change",
+      "noSelectionTitle": "No Day of Service Selected",
+      "noSelectionBody": "Browse the available Days of Service above and click on one to begin your volunteer registration.",
+      "browse": "Browse Days of Service"
+    }
+  },
+  "volunteerForm": {
+    "steps": {
+      "personalInfo": "Personal Info",
+      "availability": "Availability",
+      "background": "Background",
+      "review": "Review"
+    },
+    "sections": {
+      "basicInformation": "Basic Information",
+      "contactDetails": "Contact Details",
+      "address": "Address",
+      "schedule": "Your Schedule",
+      "interests": "Your Interests",
+      "emergencyContact": "Emergency Contact",
+      "additionalInformation": "Additional Information"
+    },
+    "fields": {
+      "firstName": { "label": "First Name" },
+      "lastName": { "label": "Last Name" },
+      "email": { "label": "Email Address" },
+      "phone": { "label": "Phone Number" },
+      "dateOfBirth": { "label": "Date of Birth" },
+      "streetAddress": { "label": "Street Address" },
+      "city": { "label": "City" },
+      "state": { "label": "State" },
+      "zipCode": { "label": "Zip Code" },
+      "daysAvailable": { "label": "Days Available" },
+      "timePreference": {
+        "label": "Time Preference",
+        "placeholder": "Select time preference",
+        "options": {
+          "morning": "Morning (6am - 12pm)",
+          "afternoon": "Afternoon (12pm - 5pm)",
+          "evening": "Evening (5pm - 9pm)",
+          "flexible": "Flexible"
+        }
+      },
+      "hoursPerWeek": {
+        "label": "Hours Per Week",
+        "placeholder": "Select hours",
+        "options": {
+          "1_3": "1-3 hours",
+          "4_6": "4-6 hours",
+          "7_10": "7-10 hours",
+          "10_plus": "10+ hours"
+        }
+      },
+      "interests": { "label": "Areas of Interest * (Select all that apply)" },
+      "skills": {
+        "label": "Skills & Experience (Optional)",
+        "placeholder": "e.g., Event planning, carpentry, graphic design, teaching..."
+      },
+      "languages": {
+        "label": "Languages Spoken (Optional)",
+        "placeholder": "e.g., English, Spanish, Mandarin"
+      },
+      "emergencyContactName": { "label": "Contact Name" },
+      "emergencyContactPhone": { "label": "Contact Phone" },
+      "emergencyContactRelationship": { "label": "Relationship" },
+      "previousVolunteerExperience": {
+        "label": "Previous Volunteer Experience (Optional)",
+        "placeholder": "Tell us about any previous volunteer work..."
+      },
+      "references": {
+        "label": "Professional or Personal References (Optional)",
+        "placeholder": "Name, relationship, and contact information for 1-2 references..."
+      },
+      "hearAboutUs": {
+        "label": "How did you hear about us?",
+        "placeholder": "Select an option",
+        "options": {
+          "socialMedia": "Social Media",
+          "friend": "Friend or Family",
+          "communityEvent": "Community Event",
+          "website": "Website",
+          "news": "News Article",
+          "other": "Other"
+        }
+      },
+      "backgroundCheckConsent": {
+        "label": "Background Check Consent",
+        "body": "I consent to a background check as required for volunteer positions. I understand this is for the safety of all participants."
+      },
+      "motivation": {
+        "label": "Why do you want to volunteer? (Optional)",
+        "placeholder": "Share what motivates you to give back to your community..."
+      },
+      "specialAccommodations": {
+        "label": "Special Accommodations (Optional)",
+        "placeholder": "Let us know if you need any accommodations to participate fully..."
+      },
+      "timePreferenceRequired": "Time preference is required"
+    },
+    "interests": {
+      "communityEvents": "Community Events",
+      "neighborhoodProjects": "Neighborhood Projects",
+      "supportServices": "Support Services",
+      "youthPrograms": "Youth Programs",
+      "seniorServices": "Senior Services",
+      "environmentalProjects": "Environmental Projects",
+      "educationTutoring": "Education & Tutoring",
+      "foodDistribution": "Food Distribution",
+      "virtualOpportunities": "Virtual Opportunities",
+      "administrativeSupport": "Administrative Support"
+    },
+    "weekdays": {
+      "monday": { "short": "Mon" },
+      "tuesday": { "short": "Tue" },
+      "wednesday": { "short": "Wed" },
+      "thursday": { "short": "Thu" },
+      "friday": { "short": "Fri" },
+      "saturday": { "short": "Sat" },
+      "sunday": { "short": "Sun" }
+    },
+    "errors": {
+      "firstNameRequired": "First name is required",
+      "lastNameRequired": "Last name is required",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Invalid email format",
+      "phoneRequired": "Phone number is required",
+      "dateOfBirthRequired": "Date of birth is required",
+      "streetRequired": "Street address is required",
+      "cityRequired": "City is required",
+      "stateRequired": "State is required",
+      "zipRequired": "Zip code is required",
+      "zipInvalid": "Zip code must be 5 digits",
+      "daysRequired": "Select at least one day",
+      "timePreferenceRequired": "Time preference is required",
+      "hoursPerWeekRequired": "Hours per week is required",
+      "interestsRequired": "Select at least one area of interest",
+      "emergencyNameRequired": "Emergency contact name is required",
+      "emergencyPhoneRequired": "Emergency contact phone is required",
+      "emergencyRelationshipRequired": "Relationship is required",
+      "hearAboutUsRequired": "Please tell us how you heard about us",
+      "backgroundConsentRequired": "Background check consent is required"
+    },
+    "review": {
+      "title": "Review Your Application",
+      "intro": "Please review your information before submitting. You can go back to make changes if needed.",
+      "sections": {
+        "personalInformation": "Personal Information",
+        "availability": "Availability",
+        "emergencyContact": "Emergency Contact"
+      },
+      "labels": {
+        "name": "Name:",
+        "email": "Email:",
+        "phone": "Phone:",
+        "dateOfBirth": "Date of Birth:",
+        "address": "Address:",
+        "daysAvailable": "Days Available:",
+        "timePreference": "Time Preference:",
+        "hoursPerWeek": "Hours Per Week:",
+        "interests": "Areas of Interest:",
+        "emergencyName": "Name:",
+        "emergencyPhone": "Phone:",
+        "emergencyRelationship": "Relationship:"
+      },
+      "disclaimer": "By submitting this form, you agree to be contacted about volunteer opportunities with myHometown and consent to the background check process."
+    },
+    "success": {
+      "title": "Thank You for Signing Up!",
+      "body": "We've received your application and will be in touch within 24 hours with next steps and upcoming volunteer opportunities."
+    },
+    "actions": {
+      "back": "Back",
+      "next": "Next",
+      "submit": "Submit Application",
+      "submitting": "Submitting...",
+      "submitAnother": "Submit Another Application"
+    },
+    "progress": {
+      "stepIndicator": "Step {current} of {total}"
+    }
   }
 }

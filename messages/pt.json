@@ -108,8 +108,203 @@
         "useSearchPanelHint": "Use o painel de busca para encontrar o CRC mais próximo e explorar aulas disponíveis",
         "noCrCsFoundTitle": "Nenhum CRC Encontrado",
         "noCrCsFoundBody": "Tente ajustar sua busca ou filtros",
-        "clearAllFilters": "Limpar Todos os Filtros"
+        "clearAllFilters": "Limpar Todos os Filtros",
+        "noCityCta": "Não vê sua cidade? <contact>Fale conosco</contact> para saber sobre oportunidades futuras em sua área."
+      },
+      "features": {
+        "education": {
+          "title": "Educação Gratuita",
+          "body": "Aulas de ESL, informática, preparação para cidadania e mais sem custo."
+        },
+        "arts": {
+          "title": "Artes e Música",
+          "body": "Aulas de piano, arte e programas criativos para todas as idades."
+        },
+        "family": {
+          "title": "Programas Familiares",
+          "body": "Atividades para jovens, eventos familiares e encontros comunitários."
+        },
+        "jobs": {
+          "title": "Preparação Profissional",
+          "body": "Treinamento, ajuda com currículo e recursos de desenvolvimento de carreira."
+        }
       }
+    }
+  },
+  "volunteerForm": {
+    "steps": {
+      "personalInfo": "Informações Pessoais",
+      "availability": "Disponibilidade",
+      "background": "Histórico",
+      "review": "Revisar"
+    },
+    "sections": {
+      "basicInformation": "Informações Básicas",
+      "contactDetails": "Detalhes de Contato",
+      "address": "Endereço",
+      "schedule": "Sua Agenda",
+      "interests": "Seus Interesses",
+      "emergencyContact": "Contato de Emergência",
+      "additionalInformation": "Informações Adicionais"
+    },
+    "fields": {
+      "firstName": { "label": "Nome" },
+      "lastName": { "label": "Sobrenome" },
+      "email": { "label": "E-mail" },
+      "phone": { "label": "Telefone" },
+      "dateOfBirth": { "label": "Data de Nascimento" },
+      "streetAddress": { "label": "Endereço" },
+      "city": { "label": "Cidade" },
+      "state": { "label": "Estado" },
+      "zipCode": { "label": "CEP" },
+      "daysAvailable": { "label": "Dias Disponíveis" },
+      "timePreference": {
+        "label": "Preferência de Horário",
+        "placeholder": "Selecione um horário",
+        "options": {
+          "morning": "Manhã (6-12)",
+          "afternoon": "Tarde (12-17)",
+          "evening": "Noite (17-21)",
+          "flexible": "Flexível"
+        }
+      },
+      "hoursPerWeek": {
+        "label": "Horas por Semana",
+        "placeholder": "Selecione horas",
+        "options": {
+          "1_3": "1-3 horas",
+          "4_6": "4-6 horas",
+          "7_10": "7-10 horas",
+          "10_plus": "10+ horas"
+        }
+      },
+      "interests": {
+        "label": "Áreas de Interesse * (Selecione todas que se aplicam)"
+      },
+      "skills": {
+        "label": "Habilidades e Experiência (Opcional)",
+        "placeholder": "ex.: Organização de eventos, marcenaria, design gráfico, ensino..."
+      },
+      "languages": {
+        "label": "Idiomas (Opcional)",
+        "placeholder": "ex.: Português, Inglês, Espanhol"
+      },
+      "emergencyContactName": { "label": "Nome do Contato" },
+      "emergencyContactPhone": { "label": "Telefone do Contato" },
+      "emergencyContactRelationship": { "label": "Relação" },
+      "previousVolunteerExperience": {
+        "label": "Experiência Anterior (Opcional)",
+        "placeholder": "Conte-nos sobre voluntariado anterior..."
+      },
+      "references": {
+        "label": "Referências (Opcional)",
+        "placeholder": "Nome, relação e contato de 1-2 referências..."
+      },
+      "hearAboutUs": {
+        "label": "Como nos conheceu?",
+        "placeholder": "Selecione uma opção",
+        "options": {
+          "socialMedia": "Mídias Sociais",
+          "friend": "Amigo ou Familiar",
+          "communityEvent": "Evento Comunitário",
+          "website": "Site",
+          "news": "Notícia",
+          "other": "Outro"
+        }
+      },
+      "backgroundCheckConsent": {
+        "label": "Consentimento de Verificação",
+        "body": "Autorizo uma verificação de antecedentes necessária para voluntários; entendo que é pela segurança de todos."
+      },
+      "motivation": {
+        "label": "Por que quer ser voluntário? (Opcional)",
+        "placeholder": "Compartilhe o que o motiva a servir..."
+      },
+      "specialAccommodations": {
+        "label": "Acomodações Especiais (Opcional)",
+        "placeholder": "Informe se necessita alguma acomodação..."
+      }
+    },
+    "interests": {
+      "communityEvents": "Eventos Comunitários",
+      "neighborhoodProjects": "Projetos de Bairro",
+      "supportServices": "Serviços de Apoio",
+      "youthPrograms": "Programas para Jovens",
+      "seniorServices": "Serviços para Idosos",
+      "environmentalProjects": "Projetos Ambientais",
+      "educationTutoring": "Educação e Reforço",
+      "foodDistribution": "Distribuição de Alimentos",
+      "virtualOpportunities": "Oportunidades Virtuais",
+      "administrativeSupport": "Suporte Administrativo"
+    },
+    "weekdays": {
+      "monday": { "short": "Seg" },
+      "tuesday": { "short": "Ter" },
+      "wednesday": { "short": "Qua" },
+      "thursday": { "short": "Qui" },
+      "friday": { "short": "Sex" },
+      "saturday": { "short": "Sáb" },
+      "sunday": { "short": "Dom" }
+    },
+    "errors": {
+      "firstNameRequired": "O nome é obrigatório",
+      "lastNameRequired": "O sobrenome é obrigatório",
+      "emailRequired": "O e-mail é obrigatório",
+      "emailInvalid": "Formato de e-mail inválido",
+      "phoneRequired": "O telefone é obrigatório",
+      "dateOfBirthRequired": "A data de nascimento é obrigatória",
+      "streetRequired": "O endereço é obrigatório",
+      "cityRequired": "A cidade é obrigatória",
+      "stateRequired": "O estado é obrigatório",
+      "zipRequired": "O CEP é obrigatório",
+      "zipInvalid": "O CEP deve ter 5 dígitos",
+      "daysRequired": "Selecione pelo menos um dia",
+      "timePreferenceRequired": "A preferência de horário é obrigatória",
+      "hoursPerWeekRequired": "As horas por semana são obrigatórias",
+      "interestsRequired": "Selecione pelo menos uma área de interesse",
+      "emergencyNameRequired": "O nome do contato é obrigatório",
+      "emergencyPhoneRequired": "O telefone do contato é obrigatório",
+      "emergencyRelationshipRequired": "A relação é obrigatória",
+      "hearAboutUsRequired": "Informe como nos conheceu",
+      "backgroundConsentRequired": "O consentimento é obrigatório"
+    },
+    "review": {
+      "title": "Revise Sua Inscrição",
+      "intro": "Verifique suas informações antes de enviar. Você pode voltar para fazer alterações.",
+      "sections": {
+        "personalInformation": "Informações Pessoais",
+        "availability": "Disponibilidade",
+        "emergencyContact": "Contato de Emergência"
+      },
+      "labels": {
+        "name": "Nome:",
+        "email": "E-mail:",
+        "phone": "Telefone:",
+        "dateOfBirth": "Data de Nascimento:",
+        "address": "Endereço:",
+        "daysAvailable": "Dias Disponíveis:",
+        "timePreference": "Preferência de Horário:",
+        "hoursPerWeek": "Horas por Semana:",
+        "interests": "Áreas de Interesse:",
+        "emergencyName": "Nome:",
+        "emergencyPhone": "Telefone:",
+        "emergencyRelationship": "Relação:"
+      },
+      "disclaimer": "Ao enviar você concorda em ser contatado sobre oportunidades de voluntariado e autoriza a verificação de antecedentes."
+    },
+    "success": {
+      "title": "Obrigado por Inscrever-se!",
+      "body": "Recebemos sua inscrição e entraremos em contato em 24 horas com próximos passos e oportunidades."
+    },
+    "actions": {
+      "back": "Voltar",
+      "next": "Próximo",
+      "submit": "Enviar Inscrição",
+      "submitting": "Enviando...",
+      "submitAnother": "Enviar Outra Inscrição"
+    },
+    "progress": {
+      "stepIndicator": "Etapa {current} de {total}"
     }
   },
   "footer": {
@@ -143,5 +338,93 @@
   "nav": {
     "menuTitle": "Menu de Navegação",
     "closeMenu": "Fechar menu"
+  },
+  "volunteerPage": {
+    "hero": {
+      "title": "Junte-se à Iniciativa myHometown",
+      "subtitle": "Faça parte de uma comunidade dedicada a fortalecer bairros de Utah através de serviço, parceria e ação.",
+      "benefits": {
+        "impact": "Cause Impacto",
+        "community": "Construa Comunidade",
+        "neighborhoods": "Fortaleça Bairros"
+      }
+    },
+    "whatYouDo": {
+      "heading": "O Que Você Fará como Voluntário",
+      "intro": "Escolha entre diversas oportunidades significativas que se encaixam no seu horário e interesses",
+      "cards": {
+        "communityEventsTitle": "Eventos Comunitários",
+        "communityEventsDesc": "Ajude a organizar e conduzir encontros, festivais e celebrações comunitárias",
+        "neighborhoodProjectsTitle": "Projetos de Bairro",
+        "neighborhoodProjectsDesc": "Participe de projetos de embelezamento, limpeza de parques e iniciativas de melhoria",
+        "supportServicesTitle": "Serviços de Apoio",
+        "supportServicesDesc": "Auxilie vizinhos em tarefas como jardinagem, entrega de refeições ou companhia",
+        "localOutreachTitle": "Alcance Local",
+        "localOutreachDesc": "Conecte-se com moradores, compartilhe recursos e ajude a construir redes de bairro mais fortes",
+        "youthProgramsTitle": "Programas para Jovens",
+        "youthProgramsDesc": "Mentore jovens, lidere atividades e crie experiências positivas para crianças",
+        "flexibleOpportunitiesTitle": "Oportunidades Flexíveis",
+        "flexibleOpportunitiesDesc": "Eventos pontuais, compromissos contínuos ou voluntariado virtual – escolha o que funciona para você"
+      }
+    },
+    "form": {
+      "heading": "Pronto para Fazer a Diferença?",
+      "intro": "Preencha o formulário para juntar-se à nossa rede de voluntários. Vamos conectá-lo com oportunidades alinhadas aos seus interesses e disponibilidade.",
+      "afterSignup": "Após a inscrição você receberá um e-mail de boas-vindas com próximos passos e informações sobre oportunidades futuras."
+    },
+    "testimonials": {
+      "heading": "Depoimentos de Nossos Voluntários",
+      "intro": "Histórias reais de pessoas fazendo a diferença em suas comunidades",
+      "since": "Voluntário desde {year}",
+      "sarahQuote": "\"Ser voluntário com a myHometown tem sido extremamente gratificante. Conheci vizinhos incríveis e ajudei a fortalecer nossa comunidade.\"",
+      "jamesQuote": "\"A flexibilidade é perfeita para minha rotina. Posso ajudar quando funciona para mim e cada oportunidade é significativa.\"",
+      "emilyQuote": "\"Adoro ver o impacto direto do meu trabalho. De limpezas em parques a ajudar vizinhos idosos, cada momento conta.\""
+    }
+  },
+  "dosPage": {
+    "hero": {
+      "title": "Dias de Serviço",
+      "subtitle": "Junte-se a centenas de vizinhos fortalecendo nossa comunidade, um dia de cada vez. Encontre oportunidades de serviço perto de você.",
+      "how": {
+        "heading": "Como Ser Voluntário",
+        "step1": "Selecione um dia no calendário",
+        "step2": "Revise os detalhes do evento",
+        "step3": "Preencha o formulário de inscrição"
+      },
+      "benefits": {
+        "community": "Construa Comunidade",
+        "impact": "Cause Impacto",
+        "flexible": "Horário Flexível"
+      }
+    },
+    "finder": {
+      "heading": "Encontrar Dias de Serviço",
+      "subheading": "Busque e filtre próximas oportunidades de serviço",
+      "searchPlaceholder": "Buscar por nome, cidade ou comunidade...",
+      "allCitiesPlaceholder": "Todas as Cidades",
+      "allCities": "Todas as Cidades",
+      "clearFilters": "Limpar Filtros",
+      "clearAllFilters": "Limpar Todos os Filtros",
+      "showing": "Mostrando {count} de {total} Dias de Serviço",
+      "loading": "(Carregando...)"
+    },
+    "loading": "Carregando dias de serviço...",
+    "cards": {
+      "registrationClosed": "Inscrições Encerradas",
+      "selected": "Selecionado - Preencha o Formulário",
+      "selectThisDay": "Selecionar Este Dia",
+      "fallbackTitle": "Dia de Serviço - {city}"
+    },
+    "empty": {
+      "title": "Nenhum Dia de Serviço Encontrado",
+      "body": "Tente ajustar sua busca ou filtros"
+    },
+    "registration": {
+      "heading": "Inscrição de Voluntários",
+      "change": "Alterar",
+      "noSelectionTitle": "Nenhum Dia de Serviço Selecionado",
+      "noSelectionBody": "Navegue pelos Dias de Serviço e selecione um para iniciar sua inscrição.",
+      "browse": "Ver Dias de Serviço"
+    }
   }
 }

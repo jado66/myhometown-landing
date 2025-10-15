@@ -11,9 +11,10 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
   --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
+  /* Ensure high contrast (white) on primary & secondary backgrounds */
+  --primary-foreground: #ffffff;
   --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
+  --secondary-foreground: #ffffff;
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
   --accent: oklch(0.97 0 0);
@@ -45,8 +46,10 @@
 
   --color-primary: #318d43;
   --color-primary-hover: #246340;
+  --color-primary-foreground: #ffffff; /* new token for text on primary */
   --color-secondary: #e67e50;
   --color-secondary-hover: #d66a42;
+  --color-secondary-foreground: #ffffff; /* new token for text on secondary */
   --color-accent: #4a90e2;
   --color-accent-hover: #3a7bc8;
 
@@ -86,6 +89,48 @@ body {
   color: var(--color-foreground);
   background: var(--color-background);
   font-feature-settings: "rlig" 1, "calt" 1;
+}
+
+/*
+  Automatic contrast helpers:
+  Any element with a primary or secondary background will default to white text/icon unless explicitly overridden.
+  This keeps markup simple (you can still add text-* utilities to override when needed).
+*/
+@layer components {
+  .bg-primary,
+  .hover\:bg-primary:hover,
+  .bg-primary-hover:hover {
+    color: var(--primary-foreground) !important;
+  }
+  .bg-secondary,
+  .hover\:bg-secondary:hover,
+  .bg-secondary-hover:hover {
+    color: var(--secondary-foreground) !important;
+  }
+
+  /* Ensure SVG/icon strokes follow currentColor for contrast but keep fill transparent */
+  .bg-primary svg,
+  .bg-primary-hover:hover svg,
+  .bg-secondary svg,
+  .bg-secondary-hover:hover svg,
+  .hover\:bg-primary:hover svg,
+  .hover\:bg-secondary:hover svg {
+    fill: none;
+    stroke: currentColor;
+  }
+
+  /* Opt-in class if you need filled icons to inherit text color */
+  .icon-fill svg {
+    fill: currentColor;
+  }
+
+  /* Utility classes if you prefer explicit usage */
+  .text-primary-contrast {
+    color: var(--primary-foreground) !important;
+  }
+  .text-secondary-contrast {
+    color: var(--secondary-foreground) !important;
+  }
 }
 
 html {

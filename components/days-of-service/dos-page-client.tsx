@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useRef, useEffect, Suspense } from "react";
+import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -56,6 +57,7 @@ interface DaysOfServicePageInnerProps {
 }
 
 function DaysOfServicePageInner({ stats }: DaysOfServicePageInnerProps) {
+  const t = useTranslations();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCity, setSelectedCity] = useState<string>("all");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
@@ -248,38 +250,36 @@ function DaysOfServicePageInner({ stats }: DaysOfServicePageInnerProps) {
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
               <div className="max-w-4xl mx-auto text-center relative z-10">
                 <h1 className="text-5xl md:text-6xl font-bold mb-6 text-balance">
-                  Days of Service
+                  {t("dosPage.hero.title")}
                 </h1>
                 <p className="text-xl md:text-2xl text-primary-foreground/90 mb-8 text-pretty leading-relaxed max-w-3xl mx-auto">
-                  Join hundreds of neighbors in making our community stronger,
-                  one day at a time. Find upcoming service opportunities near
-                  you.
+                  {t("dosPage.hero.subtitle")}
                 </p>
 
                 <div className="bg-primary-foreground/10 bg-white text-foreground rounded-lg p-6 mb-8 border border-primary-foreground/20">
                   <h3 className="text-xl font-semibold mb-3">
-                    How to Volunteer
+                    {t("dosPage.hero.how.heading")}
                   </h3>
                   <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-sm">
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold">
                         1
                       </div>
-                      <span>Select a day from the calendar</span>
+                      <span>{t("dosPage.hero.how.step1")}</span>
                     </div>
                     <ArrowRight className="w-5 h-5 hidden md:block" />
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold">
                         2
                       </div>
-                      <span>Review the event details</span>
+                      <span>{t("dosPage.hero.how.step2")}</span>
                     </div>
                     <ArrowRight className="w-5 h-5 hidden md:block" />
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold">
                         3
                       </div>
-                      <span>Complete the registration form</span>
+                      <span>{t("dosPage.hero.how.step3")}</span>
                     </div>
                   </div>
                 </div>
@@ -290,7 +290,7 @@ function DaysOfServicePageInner({ stats }: DaysOfServicePageInnerProps) {
                       <Users className="w-8 h-8" />
                     </div>
                     <span className="text-base font-medium">
-                      Build Community
+                      {t("dosPage.hero.benefits.community")}
                     </span>
                   </div>
                   <div className="flex flex-col items-center gap-3 text-center">
@@ -298,7 +298,7 @@ function DaysOfServicePageInner({ stats }: DaysOfServicePageInnerProps) {
                       <Heart className="w-8 h-8" />
                     </div>
                     <span className="text-base font-medium">
-                      Make an Impact
+                      {t("dosPage.hero.benefits.impact")}
                     </span>
                   </div>
                   <div className="flex flex-col items-center gap-3 text-center">
@@ -306,7 +306,7 @@ function DaysOfServicePageInner({ stats }: DaysOfServicePageInnerProps) {
                       <Calendar className="w-8 h-8" />
                     </div>
                     <span className="text-base font-medium">
-                      Flexible Schedule
+                      {t("dosPage.hero.benefits.flexible")}
                     </span>
                   </div>
                 </div>
@@ -365,10 +365,10 @@ function DaysOfServicePageInner({ stats }: DaysOfServicePageInnerProps) {
               <Card className="shadow-lg border-2">
                 <CardHeader>
                   <CardTitle className="text-xl">
-                    Find Days of Service
+                    {t("dosPage.finder.heading")}
                   </CardTitle>
                   <CardDescription>
-                    Search and filter upcoming service opportunities
+                    {t("dosPage.finder.subheading")}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -377,7 +377,7 @@ function DaysOfServicePageInner({ stats }: DaysOfServicePageInnerProps) {
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                       <Input
                         type="text"
-                        placeholder="Search by name, city, or community..."
+                        placeholder={t("dosPage.finder.searchPlaceholder")}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="h-12 pl-10"
@@ -388,10 +388,14 @@ function DaysOfServicePageInner({ stats }: DaysOfServicePageInnerProps) {
                       onValueChange={setSelectedCity}
                     >
                       <SelectTrigger className="!h-12 sm:w-[240px]">
-                        <SelectValue placeholder="All cities" />
+                        <SelectValue
+                          placeholder={t("dosPage.finder.allCitiesPlaceholder")}
+                        />
                       </SelectTrigger>
                       <SelectContent className="bg-white">
-                        <SelectItem value="all">All Cities</SelectItem>
+                        <SelectItem value="all">
+                          {t("dosPage.finder.allCities")}
+                        </SelectItem>
                         {citiesWithEvents.map((city) => (
                           <SelectItem key={city.id} value={city.id}>
                             {city.name}, {city.state}
@@ -408,14 +412,16 @@ function DaysOfServicePageInner({ stats }: DaysOfServicePageInnerProps) {
                         }}
                         className="h-12 mt-8"
                       >
-                        Clear Filters
+                        {t("dosPage.finder.clearFilters")}
                       </Button>
                     )}
                   </div>
                   <div className="mt-4 text-sm text-muted-foreground">
-                    Showing {filteredDaysOfService.length} of{" "}
-                    {daysOfService.length} Days of Service
-                    {loading && " (Loading...)"}
+                    {t("dosPage.finder.showing", {
+                      count: filteredDaysOfService.length,
+                      total: daysOfService.length,
+                    })}
+                    {loading && ` ${t("dosPage.finder.loading")}`}
                   </div>
                 </CardContent>
               </Card>
@@ -428,7 +434,7 @@ function DaysOfServicePageInner({ stats }: DaysOfServicePageInnerProps) {
                       <div className="flex items-center justify-center space-x-2">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                         <span className="text-lg font-medium">
-                          Loading days of service...
+                          {t("dosPage.loading")}
                         </span>
                       </div>
                     </CardContent>
@@ -563,17 +569,17 @@ function DaysOfServicePageInner({ stats }: DaysOfServicePageInnerProps) {
                                 {dos.is_locked ? (
                                   <>
                                     <Lock className="w-4 h-4 mr-2" />
-                                    Registration Closed
+                                    {t("dosPage.cards.registrationClosed")}
                                   </>
                                 ) : selectedDayOfService?.id === dos.id ? (
                                   <>
                                     <CheckCircle2 className="w-4 h-4 mr-2" />
-                                    Selected - Fill Form Below
+                                    {t("dosPage.cards.selected")}
                                   </>
                                 ) : (
                                   <>
                                     <CheckCircle2 className="w-4 h-4 mr-2" />
-                                    Select This Day
+                                    {t("dosPage.cards.selectThisDay")}
                                   </>
                                 )}
                               </Button>
@@ -587,10 +593,10 @@ function DaysOfServicePageInner({ stats }: DaysOfServicePageInnerProps) {
                   <Card className="border-2 border-dashed">
                     <CardContent className="text-center py-12">
                       <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                        No Days of Service Found
+                        {t("dosPage.empty.title")}
                       </h3>
                       <p className="text-gray-600 mb-4">
-                        Try adjusting your search or filters
+                        {t("dosPage.empty.body")}
                       </p>
                       <Button
                         variant="outline"
@@ -600,7 +606,7 @@ function DaysOfServicePageInner({ stats }: DaysOfServicePageInnerProps) {
                           setSelectedDate(undefined);
                         }}
                       >
-                        Clear All Filters
+                        {t("dosPage.finder.clearAllFilters")}
                       </Button>
                     </CardContent>
                   </Card>
@@ -618,7 +624,7 @@ function DaysOfServicePageInner({ stats }: DaysOfServicePageInnerProps) {
               <Card className="shadow-xl border-2">
                 <CardHeader className="text-primary-foreground">
                   <CardTitle className="text-2xl md:text-3xl">
-                    Volunteer Registration
+                    {t("dosPage.registration.heading")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-6 md:p-8">
@@ -630,9 +636,11 @@ function DaysOfServicePageInner({ stats }: DaysOfServicePageInnerProps) {
                           <div className="space-y-2 flex-1">
                             <h4 className="font-semibold text-lg">
                               {selectedDayOfService.name ||
-                                `Service Day - ${getCityName(
-                                  selectedDayOfService.city_id
-                                )}`}
+                                t("dosPage.cards.fallbackTitle", {
+                                  city: getCityName(
+                                    selectedDayOfService.city_id
+                                  ),
+                                })}
                             </h4>
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                               <MapPin className="w-4 h-4" />
@@ -659,7 +667,7 @@ function DaysOfServicePageInner({ stats }: DaysOfServicePageInnerProps) {
                             onClick={handleSelectChangeButton}
                             className="flex-shrink-0"
                           >
-                            Change
+                            {t("dosPage.registration.change")}
                           </Button>
                         </div>
                       </div>
@@ -671,11 +679,10 @@ function DaysOfServicePageInner({ stats }: DaysOfServicePageInnerProps) {
                         <Calendar className="w-8 h-8 text-muted-foreground" />
                       </div>
                       <h3 className="text-xl font-semibold text-foreground">
-                        No Day of Service Selected
+                        {t("dosPage.registration.noSelectionTitle")}
                       </h3>
                       <p className="text-muted-foreground text-pretty leading-relaxed max-w-md mx-auto">
-                        Browse the available Days of Service above and click on
-                        one to begin your volunteer registration.
+                        {t("dosPage.registration.noSelectionBody")}
                       </p>
                       <Button
                         variant="outline"
@@ -689,7 +696,7 @@ function DaysOfServicePageInner({ stats }: DaysOfServicePageInnerProps) {
                           });
                         }}
                       >
-                        Browse Days of Service
+                        {t("dosPage.registration.browse")}
                       </Button>
                     </div>
                   )}

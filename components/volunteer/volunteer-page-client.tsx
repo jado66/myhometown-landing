@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   Heart,
   Users,
@@ -83,6 +84,7 @@ function AnimatedNumber({
 }
 
 export function VolunteerPageClient({ stats }: VolunteerPageClientProps) {
+  const t = useTranslations();
   return (
     <Container>
       <div className="min-h-screen bg-background">
@@ -98,11 +100,10 @@ export function VolunteerPageClient({ stats }: VolunteerPageClientProps) {
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
               <div className="max-w-4xl mx-auto text-center relative z-10">
                 <h1 className="text-5xl md:text-6xl font-bold mb-6 text-balance">
-                  Join the myHometown Initiative
+                  {t("volunteerPage.hero.title")}
                 </h1>
                 <p className="text-xl md:text-2xl text-primary-foreground/90 mb-8 text-pretty leading-relaxed max-w-3xl mx-auto">
-                  Become part of a community dedicated to strengthening Utah
-                  neighborhoods through service, partnership, and action.
+                  {t("volunteerPage.hero.subtitle")}
                 </p>
 
                 <div className="grid grid-cols-3  gap-8 mt-16 max-w-2xl mx-auto">
@@ -111,7 +112,7 @@ export function VolunteerPageClient({ stats }: VolunteerPageClientProps) {
                       <Heart className="w-8 h-8" />
                     </div>
                     <span className="text-base font-medium">
-                      Make an Impact
+                      {t("volunteerPage.hero.benefits.impact")}
                     </span>
                   </div>
                   <div className="flex flex-col items-center gap-3 text-center">
@@ -119,7 +120,7 @@ export function VolunteerPageClient({ stats }: VolunteerPageClientProps) {
                       <Users className="w-8 h-8" />
                     </div>
                     <span className="text-base font-medium">
-                      Build Community
+                      {t("volunteerPage.hero.benefits.community")}
                     </span>
                   </div>
                   <div className="flex flex-col items-center gap-3 text-center">
@@ -127,7 +128,7 @@ export function VolunteerPageClient({ stats }: VolunteerPageClientProps) {
                       <Home className="w-8 h-8" />
                     </div>
                     <span className="text-base font-medium">
-                      Strengthen Neighborhoods
+                      {t("volunteerPage.hero.benefits.neighborhoods")}
                     </span>
                   </div>
                 </div>
@@ -145,11 +146,10 @@ export function VolunteerPageClient({ stats }: VolunteerPageClientProps) {
             <div className="max-w-5xl mx-auto">
               <div className="text-center mb-12">
                 <h2 className="text-4xl font-bold mb-4 text-foreground text-balance">
-                  What You&apos;ll Do as a Volunteer
+                  {t("volunteerPage.whatYouDo.heading")}
                 </h2>
                 <p className="text-lg text-muted-foreground text-pretty leading-relaxed max-w-3xl mx-auto">
-                  Choose from a variety of meaningful opportunities that fit
-                  your schedule and interests
+                  {t("volunteerPage.whatYouDo.intro")}
                 </p>
               </div>
 
@@ -160,11 +160,10 @@ export function VolunteerPageClient({ stats }: VolunteerPageClientProps) {
                       <Users className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
                     </div>
                     <h3 className="text-xl font-semibold group-hover:text-primary transition-colors">
-                      Community Events
+                      {t("volunteerPage.whatYouDo.cards.communityEventsTitle")}
                     </h3>
                     <p className="text-muted-foreground leading-relaxed">
-                      Help organize and run neighborhood gatherings, festivals,
-                      and community celebrations
+                      {t("volunteerPage.whatYouDo.cards.communityEventsDesc")}
                     </p>
                   </CardContent>
                 </Card>
@@ -175,11 +174,14 @@ export function VolunteerPageClient({ stats }: VolunteerPageClientProps) {
                       <Home className="w-6 h-6 text-accent group-hover:scale-110 transition-transform" />
                     </div>
                     <h3 className="text-xl font-semibold group-hover:text-primary transition-colors">
-                      Neighborhood Projects
+                      {t(
+                        "volunteerPage.whatYouDo.cards.neighborhoodProjectsTitle"
+                      )}
                     </h3>
                     <p className="text-muted-foreground leading-relaxed">
-                      Participate in beautification projects, park cleanups, and
-                      community improvement initiatives
+                      {t(
+                        "volunteerPage.whatYouDo.cards.neighborhoodProjectsDesc"
+                      )}
                     </p>
                   </CardContent>
                 </Card>
@@ -190,11 +192,10 @@ export function VolunteerPageClient({ stats }: VolunteerPageClientProps) {
                       <Heart className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
                     </div>
                     <h3 className="text-xl font-semibold group-hover:text-primary transition-colors">
-                      Support Services
+                      {t("volunteerPage.whatYouDo.cards.supportServicesTitle")}
                     </h3>
                     <p className="text-muted-foreground leading-relaxed">
-                      Assist neighbors in need with tasks like yard work, meal
-                      delivery, or companionship
+                      {t("volunteerPage.whatYouDo.cards.supportServicesDesc")}
                     </p>
                   </CardContent>
                 </Card>
@@ -205,11 +206,10 @@ export function VolunteerPageClient({ stats }: VolunteerPageClientProps) {
                       <MapPin className="w-6 h-6 text-accent group-hover:scale-110 transition-transform" />
                     </div>
                     <h3 className="text-xl font-semibold group-hover:text-primary transition-colors">
-                      Local Outreach
+                      {t("volunteerPage.whatYouDo.cards.localOutreachTitle")}
                     </h3>
                     <p className="text-muted-foreground leading-relaxed">
-                      Connect with residents, share resources, and help build
-                      stronger neighborhood networks
+                      {t("volunteerPage.whatYouDo.cards.localOutreachDesc")}
                     </p>
                   </CardContent>
                 </Card>
@@ -220,11 +220,10 @@ export function VolunteerPageClient({ stats }: VolunteerPageClientProps) {
                       <Award className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
                     </div>
                     <h3 className="text-xl font-semibold group-hover:text-primary transition-colors">
-                      Youth Programs
+                      {t("volunteerPage.whatYouDo.cards.youthProgramsTitle")}
                     </h3>
                     <p className="text-muted-foreground leading-relaxed">
-                      Mentor young people, lead activities, and help create
-                      positive experiences for kids
+                      {t("volunteerPage.whatYouDo.cards.youthProgramsDesc")}
                     </p>
                   </CardContent>
                 </Card>
@@ -235,11 +234,14 @@ export function VolunteerPageClient({ stats }: VolunteerPageClientProps) {
                       <Clock className="w-6 h-6 text-accent group-hover:scale-110 transition-transform" />
                     </div>
                     <h3 className="text-xl font-semibold group-hover:text-primary transition-colors">
-                      Flexible Opportunities
+                      {t(
+                        "volunteerPage.whatYouDo.cards.flexibleOpportunitiesTitle"
+                      )}
                     </h3>
                     <p className="text-muted-foreground leading-relaxed">
-                      One-time events, ongoing commitments, or virtual
-                      volunteering - choose what works for you
+                      {t(
+                        "volunteerPage.whatYouDo.cards.flexibleOpportunitiesDesc"
+                      )}
                     </p>
                   </CardContent>
                 </Card>
@@ -272,12 +274,10 @@ export function VolunteerPageClient({ stats }: VolunteerPageClientProps) {
             <div className="max-w-4xl mx-auto">
               <div className="mb-12 text-center">
                 <h2 className="text-4xl font-bold mb-4 text-foreground text-balance">
-                  Ready to Make a Difference?
+                  {t("volunteerPage.form.heading")}
                 </h2>
                 <p className="text-lg text-muted-foreground text-pretty leading-relaxed">
-                  Complete the form below to join our volunteer network.
-                  We&apos;ll match you with opportunities that fit your
-                  interests and availability.
+                  {t("volunteerPage.form.intro")}
                 </p>
               </div>
               <Card className="border-2">
@@ -288,9 +288,7 @@ export function VolunteerPageClient({ stats }: VolunteerPageClientProps) {
 
               <div className="mt-8 text-center text-sm text-muted-foreground">
                 <p className="text-pretty leading-relaxed">
-                  After signing up, you&apos;ll receive a welcome email with
-                  next steps and information about upcoming volunteer
-                  opportunities.
+                  {t("volunteerPage.form.afterSignup")}
                 </p>
               </div>
             </div>
@@ -303,11 +301,10 @@ export function VolunteerPageClient({ stats }: VolunteerPageClientProps) {
             <div className="max-w-5xl mx-auto">
               <div className="text-center mb-12">
                 <h2 className="text-4xl font-bold mb-4 text-balance">
-                  Hear from Our Volunteers
+                  {t("volunteerPage.testimonials.heading")}
                 </h2>
                 <p className="text-lg font-bold text-pretty leading-relaxed">
-                  Real stories from people making a difference in their
-                  communities
+                  {t("volunteerPage.testimonials.intro")}
                 </p>
               </div>
 
@@ -325,14 +322,14 @@ export function VolunteerPageClient({ stats }: VolunteerPageClientProps) {
                           Sarah Martinez
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          Volunteer since 2023
+                          {t("volunteerPage.testimonials.since", {
+                            year: 2023,
+                          })}
                         </div>
                       </div>
                     </div>
                     <p className="text-foreground leading-relaxed italic text-center transition-colors">
-                      &quot;Volunteering with myHometown has been incredibly
-                      rewarding. I&apos;ve met amazing neighbors and helped make
-                      our community stronger.&quot;
+                      {t("volunteerPage.testimonials.sarahQuote")}
                     </p>
                   </CardContent>
                 </Card>
@@ -351,14 +348,14 @@ export function VolunteerPageClient({ stats }: VolunteerPageClientProps) {
                           James Chen
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          Volunteer since 2022
+                          {t("volunteerPage.testimonials.since", {
+                            year: 2022,
+                          })}
                         </div>
                       </div>
                     </div>
                     <p className="text-foreground leading-relaxed italic text-center transition-colors">
-                      &quot;The flexibility is perfect for my schedule. I can
-                      volunteer when it works for me, and every opportunity
-                      feels meaningful.&quot;
+                      {t("volunteerPage.testimonials.jamesQuote")}
                     </p>
                   </CardContent>
                 </Card>
@@ -376,14 +373,14 @@ export function VolunteerPageClient({ stats }: VolunteerPageClientProps) {
                           Emily Rodriguez
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          Volunteer since 2021
+                          {t("volunteerPage.testimonials.since", {
+                            year: 2021,
+                          })}
                         </div>
                       </div>
                     </div>
                     <p className="text-foreground leading-relaxed italic text-center transition-colors">
-                      &quot;I love seeing the direct impact of my work. From
-                      park cleanups to helping elderly neighbors, every moment
-                      counts.&quot;
+                      {t("volunteerPage.testimonials.emilyQuote")}
                     </p>
                   </CardContent>
                 </Card>
