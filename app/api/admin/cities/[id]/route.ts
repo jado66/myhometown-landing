@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { revalidateTag } from "next/cache";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -31,6 +32,9 @@ export async function PUT(
 
     if (error) throw error;
 
+    // Revalidate the cities cache
+    revalidateTag("cities");
+
     return NextResponse.json(data);
   } catch (error) {
     console.error("Error updating city:", error);
@@ -48,12 +52,12 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    const { error } = await supabase
-      .from("cities")
-      .delete()
-      .eq("id", id);
+    const { error } = await supabase.from("cities").delete().eq("id", id);
 
     if (error) throw error;
+
+    // Revalidate the cities cache
+    revalidateTag("cities");
 
     return NextResponse.json({ success: true });
   } catch (error) {

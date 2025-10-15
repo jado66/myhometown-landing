@@ -1,8 +1,8 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
-import { Plus, Pencil, Trash2, Search } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus, Pencil, Trash2, Search, Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -18,12 +18,14 @@ interface CommunitiesTabProps {
   communities: Community[];
   cities: City[];
   onRefresh: () => void;
+  onShowToast: (message: string, type: "success" | "error") => void;
 }
 
 export function CommunitiesTab({
   communities,
   cities,
   onRefresh,
+  onShowToast,
 }: CommunitiesTabProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
@@ -31,6 +33,16 @@ export function CommunitiesTab({
     null
   );
   const [showNewCityModal, setShowNewCityModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletingCommunity, setDeletingCommunity] = useState<Community | null>(
+    null
+  );
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [localCommunities, setLocalCommunities] =
+    useState<Community[]>(communities);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [newItemIds, setNewItemIds] = useState<Set<string>>(new Set());
   const [formData, setFormData] = useState({
     name: "",
     city_id: "",
@@ -40,20 +52,36 @@ export function CommunitiesTab({
   });
   const [newCityData, setNewCityData] = useState({
     name: "",
-    state: "",
+    state: "Utah",
     country: "USA",
     visibility: true,
     image_url: "",
   });
 
+  useEffect(() => {
+    setLocalCommunities(communities);
+  }, [communities]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
     try {
       const method = editingCommunity ? "PUT" : "POST";
       const url = editingCommunity
         ? `/api/admin/communities/${editingCommunity.id}`
         : "/api/admin/communities";
+
+      if (editingCommunity) {
+        const selectedCity = cities.find((c) => c.id === formData.city_id);
+        setLocalCommunities((prev) =>
+          prev.map((community) =>
+            community.id === editingCommunity.id
+              ? { ...community, ...formData, city: selectedCity }
+              : community
+          )
+        );
+      }
 
       const response = await fetch(url, {
         method,
@@ -63,24 +91,46 @@ export function CommunitiesTab({
 
       if (!response.ok) throw new Error("Failed to save community");
 
-      await onRefresh();
-      handleCloseModal();
-      toast.success(
+      const savedCommunity = await response.json();
+
+      if (!editingCommunity) {
+        const selectedCity = cities.find((c) => c.id === formData.city_id);
+        setLocalCommunities((prev) => [
+          ...prev,
+          { ...savedCommunity, city: selectedCity },
+        ]);
+        setNewItemIds((prev) => new Set(prev).add(savedCommunity.id));
+      } else {
+        setLocalCommunities((prev) =>
+          prev.map((community) =>
+            community.id === savedCommunity.id ? savedCommunity : community
+          )
+        );
+      }
+
+      onShowToast(
         editingCommunity
           ? "Community updated successfully!"
-          : "Community created successfully!"
+          : "Community created successfully!",
+        "success"
       );
+      handleCloseModal();
+
+      onRefresh();
     } catch (error) {
       console.error("Error saving community:", error);
-      toast.error("Failed to save community");
+      onShowToast("Failed to save community", "error");
+      setLocalCommunities(communities);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleSubmitWithNewCity = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
     try {
-      // First create the city
       const cityResponse = await fetch("/api/admin/cities", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -91,7 +141,6 @@ export function CommunitiesTab({
 
       const newCity = await cityResponse.json();
 
-      // Then create the community with the new city
       const communityResponse = await fetch("/api/admin/communities", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -106,30 +155,71 @@ export function CommunitiesTab({
 
       if (!communityResponse.ok) throw new Error("Failed to create community");
 
-      await onRefresh();
+      const newCommunity = await communityResponse.json();
+
+      setLocalCommunities((prev) => [
+        ...prev,
+        { ...newCommunity, city: newCity },
+      ]);
+
+      setNewItemIds((prev) => new Set(prev).add(newCommunity.id));
+
+      onShowToast("City and community created successfully!", "success");
       handleCloseNewCityModal();
-      toast.success("City and community created successfully!");
+
+      onRefresh();
     } catch (error) {
       console.error("Error creating city and community:", error);
-      toast.error("Failed to create city and community");
+      onShowToast("Failed to create city and community", "error");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this community?")) return;
+  const handleDelete = (community: Community) => {
+    setDeletingCommunity(community);
+    setDeleteConfirmText("");
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingCommunity || deleteConfirmText !== deletingCommunity.name) {
+      onShowToast("Community name does not match", "error");
+      return;
+    }
+
+    setIsDeleting(true);
 
     try {
-      const response = await fetch(`/api/admin/communities/${id}`, {
-        method: "DELETE",
-      });
+      setLocalCommunities((prev) =>
+        prev.filter((community) => community.id !== deletingCommunity.id)
+      );
+
+      const response = await fetch(
+        `/api/admin/communities/${deletingCommunity.id}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (!response.ok) throw new Error("Failed to delete community");
 
-      await onRefresh();
-      toast.success("Community deleted successfully!");
+      onShowToast("Community deleted successfully!", "success");
+
+      // Small delay before closing modal to ensure toast renders
+      setTimeout(() => {
+        setShowDeleteModal(false);
+        setDeletingCommunity(null);
+        setDeleteConfirmText("");
+      }, 100);
+
+      onRefresh();
     } catch (error) {
       console.error("Error deleting community:", error);
-      toast.error("Failed to delete community");
+      onShowToast("Failed to delete community", "error");
+      setLocalCommunities(communities);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -148,6 +238,7 @@ export function CommunitiesTab({
   const handleCloseModal = () => {
     setShowModal(false);
     setEditingCommunity(null);
+    setIsSubmitting(false);
     setFormData({
       name: "",
       city_id: "",
@@ -159,6 +250,7 @@ export function CommunitiesTab({
 
   const handleCloseNewCityModal = () => {
     setShowNewCityModal(false);
+    setIsSubmitting(false);
     setFormData({
       name: "",
       city_id: "",
@@ -168,18 +260,30 @@ export function CommunitiesTab({
     });
     setNewCityData({
       name: "",
-      state: "",
+      state: "Utah",
       country: "USA",
       visibility: true,
       image_url: "",
     });
   };
 
-  const filteredCommunities = communities.filter(
-    (community) =>
-      community.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      community.city?.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredCommunities = [...localCommunities]
+    .filter((community) => {
+      const term = searchTerm.toLowerCase();
+      return (
+        community.name.toLowerCase().includes(term) ||
+        community.city?.name.toLowerCase().includes(term)
+      );
+    })
+    .sort((a, b) => {
+      const cityA = a.city?.name?.toLowerCase() || "";
+      const cityB = b.city?.name?.toLowerCase() || "";
+      if (cityA && cityB && cityA !== cityB) {
+        return cityA.localeCompare(cityB);
+      }
+      // Fallback: sort by community name if same / missing city
+      return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+    });
 
   return (
     <div>
@@ -245,9 +349,23 @@ export function CommunitiesTab({
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredCommunities.map((community) => (
-              <tr key={community.id} className="hover:bg-gray-50">
+              <tr
+                key={community.id}
+                className={`hover:bg-gray-50 transition-colors ${
+                  newItemIds.has(community.id)
+                    ? "bg-green-50 border-l-4 border-green-500"
+                    : ""
+                }`}
+              >
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {community.name}
+                  <div className="flex items-center gap-2">
+                    {community.name}
+                    {newItemIds.has(community.id) && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 animate-pulse">
+                        New
+                      </span>
+                    )}
+                  </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {community.city?.name || "N/A"}
@@ -277,7 +395,7 @@ export function CommunitiesTab({
                     <Pencil size={18} />
                   </button>
                   <button
-                    onClick={() => handleDelete(community.id)}
+                    onClick={() => handleDelete(community)}
                     className="text-red-600 hover:text-red-900"
                   >
                     <Trash2 size={18} />
@@ -295,7 +413,6 @@ export function CommunitiesTab({
         )}
       </div>
 
-      {/* Regular Add Community Modal */}
       <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
@@ -404,15 +521,24 @@ export function CommunitiesTab({
               <button
                 type="button"
                 onClick={handleCloseModal}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                disabled={isSubmitting}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                disabled={isSubmitting}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
-                {editingCommunity ? "Update" : "Create"}
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    {editingCommunity ? "Updating..." : "Creating..."}
+                  </>
+                ) : (
+                  <>{editingCommunity ? "Update" : "Create"}</>
+                )}
               </button>
             </DialogFooter>
           </form>
@@ -430,7 +556,6 @@ export function CommunitiesTab({
 
           <form onSubmit={handleSubmitWithNewCity}>
             <div className="space-y-6">
-              {/* City Information Section */}
               <div>
                 <h3 className="text-lg font-semibold mb-3 text-gray-900">
                   City Information
@@ -458,14 +583,10 @@ export function CommunitiesTab({
                     <input
                       type="text"
                       required
-                      value={newCityData.state}
-                      onChange={(e) =>
-                        setNewCityData({
-                          ...newCityData,
-                          state: e.target.value,
-                        })
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      value="Utah"
+                      disabled
+                      readOnly
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
                     />
                   </div>
 
@@ -476,14 +597,10 @@ export function CommunitiesTab({
                     <input
                       type="text"
                       required
-                      value={newCityData.country}
-                      onChange={(e) =>
-                        setNewCityData({
-                          ...newCityData,
-                          country: e.target.value,
-                        })
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      value="USA"
+                      disabled
+                      readOnly
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
                     />
                   </div>
 
@@ -527,7 +644,6 @@ export function CommunitiesTab({
                 </div>
               </div>
 
-              {/* Community Information Section */}
               <div>
                 <h3 className="text-lg font-semibold mb-3 text-gray-900">
                   Community Information
@@ -576,18 +692,96 @@ export function CommunitiesTab({
               <button
                 type="button"
                 onClick={handleCloseNewCityModal}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                disabled={isSubmitting}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                disabled={isSubmitting}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
-                Create City & Community
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  "Create City & Community"
+                )}
               </button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Delete Community</DialogTitle>
+            <DialogDescription>
+              This action cannot be undone. This will permanently delete the
+              community and all associated data.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-sm text-red-800 font-semibold mb-2">
+                Warning: The following will also be deleted:
+              </p>
+              <ul className="text-sm text-red-700 list-disc list-inside space-y-1">
+                <li>All Community Resource Centers in this community</li>
+                <li>All associated data and records</li>
+              </ul>
+            </div>
+            <p className="text-sm text-gray-700">
+              Please type{" "}
+              <span className="font-semibold">{deletingCommunity?.name}</span>{" "}
+              to confirm deletion.
+            </p>
+            <input
+              type="text"
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              placeholder="Type community name here"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+            />
+          </div>
+
+          <DialogFooter>
+            <button
+              type="button"
+              onClick={() => {
+                setShowDeleteModal(false);
+                setDeletingCommunity(null);
+                setDeleteConfirmText("");
+                setIsDeleting(false);
+              }}
+              disabled={isDeleting}
+              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleConfirmDelete}
+              disabled={
+                deleteConfirmText !== deletingCommunity?.name || isDeleting
+              }
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete Community"
+              )}
+            </button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

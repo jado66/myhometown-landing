@@ -48,10 +48,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    const { error } = await supabase
-      .from("communities")
-      .delete()
-      .eq("id", id);
+    const { error } = await supabase.from("communities").delete().eq("id", id);
 
     if (error) throw error;
 

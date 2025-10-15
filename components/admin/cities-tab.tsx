@@ -1,8 +1,9 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
-import { Plus, Pencil, Trash2, Search } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Plus, Pencil, Trash2, Search, Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -17,28 +18,50 @@ import { toast } from "sonner";
 interface CitiesTabProps {
   cities: City[];
   onRefresh: () => void;
+  onShowToast: (message: string, type: "success" | "error") => void;
 }
 
-export function CitiesTab({ cities, onRefresh }: CitiesTabProps) {
+export function CitiesTab({ cities, onRefresh, onShowToast }: CitiesTabProps) {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editingCity, setEditingCity] = useState<City | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletingCity, setDeletingCity] = useState<City | null>(null);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [localCities, setLocalCities] = useState<City[]>(cities);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [newItemIds, setNewItemIds] = useState<Set<string>>(new Set());
   const [formData, setFormData] = useState({
     name: "",
-    state: "",
+    state: "Utah",
     country: "USA",
     visibility: true,
     image_url: "",
   });
 
+  useEffect(() => {
+    setLocalCities(cities);
+  }, [cities]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
     try {
       const method = editingCity ? "PUT" : "POST";
       const url = editingCity
         ? `/api/admin/cities/${editingCity.id}`
         : "/api/admin/cities";
+
+      if (editingCity) {
+        setLocalCities((prev) =>
+          prev.map((city) =>
+            city.id === editingCity.id ? { ...city, ...formData } : city
+          )
+        );
+      }
 
       const response = await fetch(url, {
         method,
@@ -48,34 +71,86 @@ export function CitiesTab({ cities, onRefresh }: CitiesTabProps) {
 
       if (!response.ok) throw new Error("Failed to save city");
 
-      await onRefresh();
-      handleCloseModal();
-      toast.success(
+      const savedCity = await response.json();
+
+      if (!editingCity) {
+        setLocalCities((prev) => [...prev, savedCity]);
+        setNewItemIds((prev) => new Set(prev).add(savedCity.id));
+      } else {
+        setLocalCities((prev) =>
+          prev.map((city) => (city.id === savedCity.id ? savedCity : city))
+        );
+      }
+
+      onShowToast(
         editingCity
           ? "City updated successfully!"
-          : "City created successfully!"
+          : "City created successfully!",
+        "success"
       );
+
+      // Refresh the router to update cached city data across the app
+      router.refresh();
+
+      // Small delay before closing modal to ensure toast renders
+      setTimeout(() => {
+        handleCloseModal();
+      }, 100);
+
+      onRefresh();
     } catch (error) {
       console.error("Error saving city:", error);
-      toast.error("Failed to save city");
+      onShowToast("Failed to save city", "error");
+      setLocalCities(cities);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this city?")) return;
+  const handleDelete = (city: City) => {
+    setDeletingCity(city);
+    setDeleteConfirmText("");
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingCity || deleteConfirmText !== deletingCity.name) {
+      onShowToast("City name does not match", "error");
+      return;
+    }
+
+    setIsDeleting(true);
 
     try {
-      const response = await fetch(`/api/admin/cities/${id}`, {
+      setLocalCities((prev) =>
+        prev.filter((city) => city.id !== deletingCity.id)
+      );
+
+      const response = await fetch(`/api/admin/cities/${deletingCity.id}`, {
         method: "DELETE",
       });
 
       if (!response.ok) throw new Error("Failed to delete city");
 
-      await onRefresh();
-      toast.success("City deleted successfully!");
+      onShowToast("City deleted successfully!", "success");
+
+      // Refresh the router to update cached city data across the app
+      router.refresh();
+
+      // Small delay before closing modal to ensure toast renders
+      setTimeout(() => {
+        setShowDeleteModal(false);
+        setDeletingCity(null);
+        setDeleteConfirmText("");
+      }, 100);
+
+      onRefresh();
     } catch (error) {
       console.error("Error deleting city:", error);
-      toast.error("Failed to delete city");
+      onShowToast("Failed to delete city", "error");
+      setLocalCities(cities);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -94,6 +169,7 @@ export function CitiesTab({ cities, onRefresh }: CitiesTabProps) {
   const handleCloseModal = () => {
     setShowModal(false);
     setEditingCity(null);
+    setIsSubmitting(false);
     setFormData({
       name: "",
       state: "",
@@ -103,7 +179,7 @@ export function CitiesTab({ cities, onRefresh }: CitiesTabProps) {
     });
   };
 
-  const filteredCities = cities.filter(
+  const filteredCities = localCities.filter(
     (city) =>
       city.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       city.state.toLowerCase().includes(searchTerm.toLowerCase())
@@ -161,9 +237,23 @@ export function CitiesTab({ cities, onRefresh }: CitiesTabProps) {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredCities.map((city) => (
-              <tr key={city.id} className="hover:bg-gray-50">
+              <tr
+                key={city.id}
+                className={`hover:bg-gray-50 transition-colors ${
+                  newItemIds.has(city.id)
+                    ? "bg-green-50 border-l-4 border-green-500"
+                    : ""
+                }`}
+              >
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {city.name}
+                  <div className="flex items-center gap-2">
+                    {city.name}
+                    {newItemIds.has(city.id) && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 animate-pulse">
+                        New
+                      </span>
+                    )}
+                  </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {city.state}
@@ -190,7 +280,7 @@ export function CitiesTab({ cities, onRefresh }: CitiesTabProps) {
                     <Pencil size={18} />
                   </button>
                   <button
-                    onClick={() => handleDelete(city.id)}
+                    onClick={() => handleDelete(city)}
                     className="text-red-600 hover:text-red-900"
                   >
                     <Trash2 size={18} />
@@ -243,11 +333,10 @@ export function CitiesTab({ cities, onRefresh }: CitiesTabProps) {
                 <input
                   type="text"
                   required
-                  value={formData.state}
-                  onChange={(e) =>
-                    setFormData({ ...formData, state: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  value="Utah"
+                  disabled
+                  readOnly
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
                 />
               </div>
 
@@ -258,11 +347,10 @@ export function CitiesTab({ cities, onRefresh }: CitiesTabProps) {
                 <input
                   type="text"
                   required
-                  value={formData.country}
-                  onChange={(e) =>
-                    setFormData({ ...formData, country: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  value="USA"
+                  disabled
+                  readOnly
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
                 />
               </div>
 
@@ -303,18 +391,95 @@ export function CitiesTab({ cities, onRefresh }: CitiesTabProps) {
               <button
                 type="button"
                 onClick={handleCloseModal}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                disabled={isSubmitting}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                disabled={isSubmitting}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
-                {editingCity ? "Update" : "Create"}
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    {editingCity ? "Updating..." : "Creating..."}
+                  </>
+                ) : (
+                  <>{editingCity ? "Update" : "Create"}</>
+                )}
               </button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Delete City</DialogTitle>
+            <DialogDescription>
+              This action cannot be undone. This will permanently delete the
+              city and all associated data.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-sm text-red-800 font-semibold mb-2">
+                Warning: The following will also be deleted:
+              </p>
+              <ul className="text-sm text-red-700 list-disc list-inside space-y-1">
+                <li>All communities in this city</li>
+                <li>All Community Resource Centers in those communities</li>
+                <li>All associated data and records</li>
+              </ul>
+            </div>
+            <p className="text-sm text-gray-700">
+              Please type{" "}
+              <span className="font-semibold">{deletingCity?.name}</span> to
+              confirm deletion.
+            </p>
+            <input
+              type="text"
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              placeholder="Type city name here"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+            />
+          </div>
+
+          <DialogFooter>
+            <button
+              type="button"
+              onClick={() => {
+                setShowDeleteModal(false);
+                setDeletingCity(null);
+                setDeleteConfirmText("");
+                setIsDeleting(false);
+              }}
+              disabled={isDeleting}
+              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleConfirmDelete}
+              disabled={deleteConfirmText !== deletingCity?.name || isDeleting}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete City"
+              )}
+            </button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

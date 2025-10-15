@@ -1,4 +1,5 @@
 import { supabaseServer } from "@/util/supabase-server";
+import { unstable_cache } from "next/cache";
 
 export interface City {
   id: string;
@@ -57,6 +58,13 @@ export async function getAllCitySelectOptions(): Promise<CitySelectOption[]> {
   }
 }
 
+// Cached version for layout (revalidates every 60 seconds or on-demand)
+export const getCachedAllCitySelectOptions = unstable_cache(
+  getAllCitySelectOptions,
+  ["all-city-select-options"],
+  { revalidate: 60, tags: ["cities"] }
+);
+
 export async function getCities(): Promise<City[]> {
   try {
     const { data, error } = await supabaseServer
@@ -96,6 +104,13 @@ export async function getCitySelectOptions(): Promise<CitySelectOption[]> {
     return [];
   }
 }
+
+// Cached version for layout (revalidates every 60 seconds or on-demand)
+export const getCachedCitySelectOptions = unstable_cache(
+  getCitySelectOptions,
+  ["city-select-options"],
+  { revalidate: 60, tags: ["cities"] }
+);
 
 export async function getCityById(id: string): Promise<City | null> {
   try {

@@ -6,6 +6,7 @@ import { CitiesTab } from "@/components/admin/cities-tab";
 import { CommunitiesTab } from "@/components/admin/communities-tab";
 import { CRCsTab } from "@/components/admin/crcs-tab";
 import type { City, Community, CRC } from "@/types/admin";
+import { toast } from "sonner";
 
 export default function ManageAdminPage() {
   const [activeTab, setActiveTab] = useState("cities");
@@ -20,7 +21,6 @@ export default function ManageAdminPage() {
 
   const fetchAllData = async () => {
     try {
-      setLoading(true);
       const [citiesRes, communitiesRes, crcsRes] = await Promise.all([
         fetch("/api/admin/cities"),
         fetch("/api/admin/communities"),
@@ -38,7 +38,7 @@ export default function ManageAdminPage() {
       setCRCs(crcsData);
     } catch (error) {
       console.error("Error fetching data:", error);
-      alert("Failed to load data");
+      toast.error("Failed to load data");
     } finally {
       setLoading(false);
     }
@@ -64,7 +64,13 @@ export default function ManageAdminPage() {
         </TabsList>
 
         <TabsContent value="cities">
-          <CitiesTab cities={cities} onRefresh={fetchAllData} />
+          <CitiesTab
+            cities={cities}
+            onRefresh={fetchAllData}
+            onShowToast={(message, type) =>
+              type === "success" ? toast.success(message) : toast.error(message)
+            }
+          />
         </TabsContent>
 
         <TabsContent value="communities">
@@ -72,6 +78,9 @@ export default function ManageAdminPage() {
             communities={communities}
             cities={cities}
             onRefresh={fetchAllData}
+            onShowToast={(message, type) =>
+              type === "success" ? toast.success(message) : toast.error(message)
+            }
           />
         </TabsContent>
 
@@ -81,6 +90,7 @@ export default function ManageAdminPage() {
             cities={cities}
             communities={communities}
             onRefresh={fetchAllData}
+            onShowToast={(message, type) => type === 'success' ? toast.success(message) : toast.error(message)}
           />
         </TabsContent>
       </Tabs>
