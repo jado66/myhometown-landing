@@ -42,7 +42,7 @@ export function CRCCard({ crc }: CRCCardProps) {
             )}
           </div>
           <CardDescription className="text-base font-medium">
-            {crc.city}
+            {crc.city?.name || ""}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3 flex-1 flex flex-col pt-0">
@@ -50,25 +50,29 @@ export function CRCCard({ crc }: CRCCardProps) {
             <MapPin className="h-5 w-5 text-gray-400 flex-shrink-0" />
             <p className="text-sm text-gray-600">{crc.address}</p>
           </div>
-          <div className="flex items-center gap-2">
-            <Phone className="h-5 w-5 text-gray-400 flex-shrink-0" />
-            <p className="text-sm text-gray-600">{crc.phone}</p>
-          </div>
-          <div className="pt-2 flex-1">
-            <p className="text-sm font-semibold text-gray-700 mb-2">
-              Featured Classes:
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {crc.classes?.map((cls) => (
-                <span
-                  key={cls}
-                  className="inline-block px-2.5 py-1 text-xs font-medium bg-stone-100 text-gray-700 rounded-full"
-                >
-                  {cls}
-                </span>
-              ))}
+          {crc.phone && (
+            <div className="flex items-center gap-2">
+              <Phone className="h-5 w-5 text-gray-400 flex-shrink-0" />
+              <p className="text-sm text-gray-600">{crc.phone}</p>
             </div>
-          </div>
+          )}
+          {crc.classes && crc.classes.length > 0 && (
+            <div className="pt-2 flex-1">
+              <p className="text-sm font-semibold text-gray-700 mb-2">
+                Featured Classes:
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {crc.classes.map((cls) => (
+                  <span
+                    key={cls}
+                    className="inline-block px-2.5 py-1 text-xs font-medium bg-stone-100 text-gray-700 rounded-full"
+                  >
+                    {cls}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
           <Button className="w-full mt-4 bg-primary text-white hover:bg-primary/90">
             View Schedule & Sign Up
           </Button>

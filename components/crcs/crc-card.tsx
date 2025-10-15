@@ -38,20 +38,23 @@ export function CRCCard({
             <div>
               <div>{crc.address}</div>
               <div className="text-muted-foreground">
-                {crc.city}, {crc.state} {crc.zip}
+                {crc.city?.name || ""}, {crc.state || crc.city?.state || ""}{" "}
+                {crc.zip}
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 text-sm">
-            <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-            <a
-              href={`tel:${crc.phone}`}
-              className="hover:text-primary transition-colors"
-            >
-              {crc.phone}
-            </a>
-          </div>
+          {crc.phone && (
+            <div className="flex items-center gap-2 text-sm">
+              <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+              <a
+                href={`tel:${crc.phone}`}
+                className="hover:text-primary transition-colors"
+              >
+                {crc.phone}
+              </a>
+            </div>
+          )}
         </div>
 
         {showSelectButton && onSelect && (

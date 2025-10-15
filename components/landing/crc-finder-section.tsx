@@ -29,11 +29,14 @@ import {
   Music4,
 } from "lucide-react";
 import { CRC, CRCWithDistance, UserLocation } from "@/types/crc";
-import { crcs } from "@/data/crcs";
 import { calculateDistance } from "@/lib/geo-utils";
 import { CRCCard } from "./crc-card";
 
-export function CRCFinderSection() {
+interface CRCFinderSectionProps {
+  crcs: CRC[];
+}
+
+export function CRCFinderSection({ crcs }: CRCFinderSectionProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCity, setSelectedCity] = useState<string>("all");
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
@@ -42,10 +45,14 @@ export function CRCFinderSection() {
 
   const cities = useMemo(() => {
     const uniqueCities = Array.from(
-      new Set(crcs.map((crc) => crc.city))
+      new Set(
+        crcs
+          .map((crc) => crc.city?.name)
+          .filter((city): city is string => !!city)
+      )
     ).sort();
     return uniqueCities;
-  }, []);
+  }, [crcs]);
 
   const handleUseMyLocation = () => {
     setIsLoadingLocation(true);
@@ -87,10 +94,11 @@ export function CRCFinderSection() {
       const matchesSearch =
         searchQuery === "" ||
         crc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        crc.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        crc.city?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         crc.address.toLowerCase().includes(searchQuery.toLowerCase());
 
-      const matchesCity = selectedCity === "all" || crc.city === selectedCity;
+      const matchesCity =
+        selectedCity === "all" || crc.city?.name === selectedCity;
 
       return matchesSearch && matchesCity;
     });
@@ -98,16 +106,19 @@ export function CRCFinderSection() {
     const totalResults = filtered.length;
 
     // Only use location-based sorting if user has location AND hasn't selected a specific city
+    // AND all CRCs have lat/lng data
     if (userLocation && selectedCity === "all") {
-      const crcsWithDistance: CRCWithDistance[] = filtered.map((crc: CRC) => ({
-        ...crc,
-        distance: calculateDistance(
-          userLocation.lat,
-          userLocation.lng,
-          crc.lat,
-          crc.lng
-        ),
-      }));
+      const crcsWithDistance: CRCWithDistance[] = filtered
+        .filter((crc) => crc.lat !== undefined && crc.lng !== undefined)
+        .map((crc: CRC) => ({
+          ...crc,
+          distance: calculateDistance(
+            userLocation.lat,
+            userLocation.lng,
+            crc.lat!,
+            crc.lng!
+          ),
+        }));
       return {
         filteredCRCs: crcsWithDistance
           .sort((a, b) => a.distance - b.distance)
@@ -120,7 +131,7 @@ export function CRCFinderSection() {
       filteredCRCs: filtered.slice(0, 4),
       totalResults,
     };
-  }, [searchQuery, selectedCity, userLocation]);
+  }, [searchQuery, selectedCity, userLocation, crcs]);
 
   return (
     <section

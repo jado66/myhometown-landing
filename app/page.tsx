@@ -5,13 +5,16 @@ import { FeaturesSection } from "@/components/landing/features-section";
 import { CTASection } from "@/components/landing/cta-section";
 import { Container } from "@/layout/container";
 import { DaysOfServiceSection } from "@/components/landing/days-of-service";
+import { fetchCRCsServer } from "@/lib/crcs";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const crcs = await fetchCRCsServer();
+
   return (
     <Container>
       <HeroSection />
 
-      <CRCFinderSection />
+      <CRCFinderSection crcs={crcs} />
       <StatsSection />
       {/* <PopularClassesSection /> */}
       <FeaturesSection />

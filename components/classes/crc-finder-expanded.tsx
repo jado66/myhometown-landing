@@ -20,15 +20,16 @@ import {
 } from "@/components/ui/select";
 import { Search } from "lucide-react";
 import type { CRC } from "@/types/crc";
-import { crcs } from "@/data/crcs";
 import { CRCCard } from "../crcs/crc-card";
 
 interface CRCFinderExpandedProps {
+  crcs: CRC[];
   onCRCSelect: (crc: CRC) => void;
   selectedCRC: CRC | null;
 }
 
 export function CRCFinderExpanded({
+  crcs,
   onCRCSelect,
   selectedCRC,
 }: CRCFinderExpandedProps) {
@@ -37,10 +38,14 @@ export function CRCFinderExpanded({
 
   const cities = useMemo(() => {
     const uniqueCities = Array.from(
-      new Set(crcs.map((crc) => crc.city))
+      new Set(
+        crcs
+          .map((crc) => crc.city?.name)
+          .filter((city): city is string => !!city)
+      )
     ).sort();
     return uniqueCities;
-  }, []);
+  }, [crcs]);
 
   const filteredCRCs = useMemo(() => {
     let filtered = crcs;
@@ -49,16 +54,17 @@ export function CRCFinderExpanded({
       const matchesSearch =
         searchQuery === "" ||
         crc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        crc.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        crc.city?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         crc.address.toLowerCase().includes(searchQuery.toLowerCase());
 
-      const matchesCity = selectedCity === "all" || crc.city === selectedCity;
+      const matchesCity =
+        selectedCity === "all" || crc.city?.name === selectedCity;
 
       return matchesSearch && matchesCity;
     });
 
     return filtered;
-  }, [searchQuery, selectedCity]);
+  }, [searchQuery, selectedCity, crcs]);
 
   return (
     <section id="crc-finder" className="py-8 md:py-12">
