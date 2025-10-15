@@ -103,7 +103,8 @@ export default function ManagementPage() {
               <Alert>
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  No users found. Click "Add User" to create your first user.
+                  No users found. Click &quot;Add User&quot; to create your
+                  first user.
                 </AlertDescription>
               </Alert>
             </div>

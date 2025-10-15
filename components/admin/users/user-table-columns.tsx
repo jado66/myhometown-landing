@@ -260,15 +260,17 @@ export const columns: ColumnDef<User>[] = [
     accessorKey: "cities",
     header: ({ column, table }) => {
       const filterValue = (column.getFilterValue() as string[]) || [];
-      
+
       // Get all unique cities from ALL data (not just filtered/visible rows)
       const allCities = Array.from(
         new Set(
-          table.getCoreRowModel().rows.flatMap((row) => 
-            (row.original.cities_details || []).map((city) => 
-              `${city.name}, ${city.state}`
+          table
+            .getCoreRowModel()
+            .rows.flatMap((row) =>
+              (row.original.cities_details || []).map(
+                (city) => `${city.name}, ${city.state}`
+              )
             )
-          )
         )
       ).sort();
 
@@ -290,7 +292,10 @@ export const columns: ColumnDef<User>[] = [
                   />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="bg-white w-64 max-h-80 overflow-y-auto">
+              <DropdownMenuContent
+                align="start"
+                className="bg-white w-64 max-h-80 overflow-y-auto"
+              >
                 <div className="p-2 space-y-1">
                   {allCities.map((city) => {
                     const isSelected = filterValue.includes(city);
@@ -358,7 +363,7 @@ export const columns: ColumnDef<User>[] = [
     filterFn: (row, id, value) => {
       const cities = row.original.cities_details || [];
       if (!value || value.length === 0) return true;
-      return cities.some((city) => 
+      return cities.some((city) =>
         value.includes(`${city.name}, ${city.state}`)
       );
     },
@@ -367,15 +372,17 @@ export const columns: ColumnDef<User>[] = [
     accessorKey: "communities",
     header: ({ column, table }) => {
       const filterValue = (column.getFilterValue() as string[]) || [];
-      
+
       // Get all unique communities from ALL data (not just filtered/visible rows)
       const allCommunities = Array.from(
         new Set(
-          table.getCoreRowModel().rows.flatMap((row) => 
-            (row.original.communities_details || []).map((community) => 
-              community.name
+          table
+            .getCoreRowModel()
+            .rows.flatMap((row) =>
+              (row.original.communities_details || []).map(
+                (community) => community.name
+              )
             )
-          )
         )
       ).sort();
 
@@ -397,7 +404,10 @@ export const columns: ColumnDef<User>[] = [
                   />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="bg-white w-64 max-h-80 overflow-y-auto">
+              <DropdownMenuContent
+                align="start"
+                className="bg-white w-64 max-h-80 overflow-y-auto"
+              >
                 <div className="p-2 space-y-1">
                   {allCommunities.map((community) => {
                     const isSelected = filterValue.includes(community);
@@ -465,9 +475,7 @@ export const columns: ColumnDef<User>[] = [
     filterFn: (row, id, value) => {
       const communities = row.original.communities_details || [];
       if (!value || value.length === 0) return true;
-      return communities.some((community) => 
-        value.includes(community.name)
-      );
+      return communities.some((community) => value.includes(community.name));
     },
   },
   {
