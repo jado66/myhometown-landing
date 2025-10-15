@@ -24,7 +24,10 @@ import {
   School,
   MessageSquareText,
   Filter,
+  FilterX,
+  X,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const PERMISSION_LABELS = {
   administrator: "Global Administrator",
@@ -65,6 +68,7 @@ export const columns: ColumnDef<User>[] = [
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="hover:text-white"
         >
           Name
           <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -99,6 +103,7 @@ export const columns: ColumnDef<User>[] = [
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="hover:text-white"
         >
           Email
           <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -129,13 +134,16 @@ export const columns: ColumnDef<User>[] = [
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 p-0 hover:bg-accent"
+                className={cn(
+                  "h-8 w-8 p-0 hover:bg-accent hover:text-white",
+                  filterValue.length > 0 ? "bg-accent/10 " : ""
+                )}
               >
-                <Filter
-                  className={`h-4 w-4 ${
-                    filterValue.length > 0 ? "text-primary" : ""
-                  }`}
-                />
+                {filterValue.length > 0 ? (
+                  <FilterX className="h-4 w-4 " />
+                ) : (
+                  <Filter className="h-4 w-4" />
+                )}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="bg-white w-64">
@@ -154,7 +162,7 @@ export const columns: ColumnDef<User>[] = [
                           newValue.length > 0 ? newValue : undefined
                         );
                       }}
-                      className={`flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer transition-colors ${
+                      className={`flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer transition-colors hover:text-white ${
                         isSelected
                           ? "bg-primary text-primary-foreground"
                           : "hover:bg-accent"
@@ -176,12 +184,13 @@ export const columns: ColumnDef<User>[] = [
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="w-full"
+                      className="w-full hover:text-white"
                       onClick={(e) => {
                         e.stopPropagation();
                         column.setFilterValue(undefined);
                       }}
                     >
+                      <X className="mr-2 h-4 w-4" />
                       Clear Filters
                     </Button>
                   </div>
@@ -220,7 +229,7 @@ export const columns: ColumnDef<User>[] = [
 
       return (
         <TooltipProvider>
-          <div className="flex flex-wrap gap-4">
+          <div className="flex gap-4 whitespace-nowrap">
             {activePermissions.map((permission) => {
               const Icon =
                 PERMISSION_ICONS[permission as keyof typeof PERMISSION_ICONS];
@@ -283,13 +292,16 @@ export const columns: ColumnDef<User>[] = [
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 w-8 p-0 hover:bg-accent"
+                  className={cn(
+                    "h-8 w-8 p-0 hover:bg-accent hover:text-white",
+                    filterValue.length > 0 ? "bg-accent/10 " : ""
+                  )}
                 >
-                  <Filter
-                    className={`h-4 w-4 ${
-                      filterValue.length > 0 ? "text-primary" : ""
-                    }`}
-                  />
+                  {filterValue.length > 0 ? (
+                    <FilterX className="h-4 w-4" />
+                  ) : (
+                    <Filter className="h-4 w-4" />
+                  )}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -310,7 +322,7 @@ export const columns: ColumnDef<User>[] = [
                             newValue.length > 0 ? newValue : undefined
                           );
                         }}
-                        className={`flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer transition-colors ${
+                        className={`flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer transition-colors hover:text-white ${
                           isSelected
                             ? "bg-primary text-primary-foreground"
                             : "hover:bg-accent"
@@ -331,12 +343,13 @@ export const columns: ColumnDef<User>[] = [
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="w-full"
+                        className="w-full hover:text-white"
                         onClick={(e) => {
                           e.stopPropagation();
                           column.setFilterValue(undefined);
                         }}
                       >
+                        <X className="mr-2 h-4 w-4" />
                         Clear Filters
                       </Button>
                     </div>
@@ -395,13 +408,16 @@ export const columns: ColumnDef<User>[] = [
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 w-8 p-0 hover:bg-accent"
+                  className={cn(
+                    "h-8 w-8 p-0 hover:bg-accent hover:text-white",
+                    filterValue.length > 0 ? "bg-accent/10 " : ""
+                  )}
                 >
-                  <Filter
-                    className={`h-4 w-4 ${
-                      filterValue.length > 0 ? "text-primary" : ""
-                    }`}
-                  />
+                  {filterValue.length > 0 ? (
+                    <FilterX className="h-4 w-4" />
+                  ) : (
+                    <Filter className="h-4 w-4" />
+                  )}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -422,7 +438,7 @@ export const columns: ColumnDef<User>[] = [
                             newValue.length > 0 ? newValue : undefined
                           );
                         }}
-                        className={`flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer transition-colors ${
+                        className={`flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer transition-colors hover:text-white ${
                           isSelected
                             ? "bg-primary text-primary-foreground"
                             : "hover:bg-accent"
@@ -443,12 +459,13 @@ export const columns: ColumnDef<User>[] = [
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="w-full"
+                        className="w-full hover:text-white"
                         onClick={(e) => {
                           e.stopPropagation();
                           column.setFilterValue(undefined);
                         }}
                       >
+                        <X className="mr-2 h-4 w-4" />
                         Clear Filters
                       </Button>
                     </div>
@@ -485,6 +502,7 @@ export const columns: ColumnDef<User>[] = [
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="hover:text-white"
         >
           Last Active
           <ArrowUpDown className="ml-2 h-4 w-4" />

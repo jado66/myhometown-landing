@@ -109,7 +109,7 @@ export function SortingCard({
           <Button
             variant="outline"
             size="sm"
-            className="flex-1 bg-transparent"
+            className="flex-1 bg-transparent hover:text-white"
             onClick={handleAddSort}
             disabled={!selectedTable || !sortColumn}
           >
@@ -118,7 +118,7 @@ export function SortingCard({
           <Button
             variant="outline"
             size="sm"
-            className="bg-transparent"
+            className="bg-transparent hover:text-white"
             onClick={() => setSorts([])}
             disabled={sorts.length === 0}
             title="Clear all sorts"

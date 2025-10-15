@@ -1,9 +1,5 @@
+import { supabaseServer } from "@/util/supabase-server";
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 // PUT /api/admin/users/:id -> update user
 export async function PUT(
@@ -26,7 +22,7 @@ export async function PUT(
       communities: Array.isArray(body.communities) ? body.communities : [],
     };
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseServer
       .from("users")
       .update(updatePayload)
       .eq("id", id)
@@ -50,8 +46,27 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    const { error } = await supabase.from("users").delete().eq("id", id);
-    if (error) throw error;
+
+    // First, try to delete from auth.users using admin API
+    // This will cascade to public.users due to the foreign key constraint
+    const { error: authError } = await supabaseServer.auth.admin.deleteUser(id);
+
+    // If the user doesn't exist in auth, that's okay - just delete from public.users
+    if (authError && authError.code !== "user_not_found") {
+      throw authError;
+    }
+
+    // If user wasn't in auth (or auth delete failed with user_not_found),
+    // explicitly delete from public.users as a fallback
+    if (authError?.code === "user_not_found") {
+      const { error: publicError } = await supabaseServer
+        .from("users")
+        .delete()
+        .eq("id", id);
+
+      if (publicError) throw publicError;
+    }
+
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("Error deleting user:", err);

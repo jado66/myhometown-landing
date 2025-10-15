@@ -71,33 +71,39 @@ export function UserDataTable<TData, TValue>({
     onGlobalFilterChange: setGlobalFilter,
     globalFilterFn: (row, columnId, filterValue) => {
       const searchValue = filterValue.toLowerCase();
-      
+
       // Search in name (first_name + last_name)
       const firstName = (row.original as any).first_name?.toLowerCase() || "";
       const lastName = (row.original as any).last_name?.toLowerCase() || "";
       const fullName = `${firstName} ${lastName}`.trim();
       if (fullName.includes(searchValue)) return true;
-      
+
       // Search in email
       const email = (row.original as any).email?.toLowerCase() || "";
       if (email.includes(searchValue)) return true;
-      
+
       // Search in phone
       const phone = (row.original as any).contact_number?.toLowerCase() || "";
       if (phone.includes(searchValue)) return true;
-      
+
       // Search in cities
       const cities = (row.original as any).cities_details || [];
-      if (cities.some((city: any) => 
-        `${city.name}, ${city.state}`.toLowerCase().includes(searchValue)
-      )) return true;
-      
+      if (
+        cities.some((city: any) =>
+          `${city.name}, ${city.state}`.toLowerCase().includes(searchValue)
+        )
+      )
+        return true;
+
       // Search in communities
       const communities = (row.original as any).communities_details || [];
-      if (communities.some((community: any) => 
-        community.name?.toLowerCase().includes(searchValue)
-      )) return true;
-      
+      if (
+        communities.some((community: any) =>
+          community.name?.toLowerCase().includes(searchValue)
+        )
+      )
+        return true;
+
       return false;
     },
     state: {
@@ -292,6 +298,7 @@ export function UserDataTable<TData, TValue>({
             size="sm"
             onClick={() => table.previousPage()}
             disabled={loading || !table.getCanPreviousPage()}
+            className="hover:text-white"
           >
             Previous
           </Button>
@@ -307,6 +314,7 @@ export function UserDataTable<TData, TValue>({
             size="sm"
             onClick={() => table.nextPage()}
             disabled={loading || !table.getCanNextPage()}
+            className="hover:text-white"
           >
             Next
           </Button>

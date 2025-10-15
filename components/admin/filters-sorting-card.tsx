@@ -120,7 +120,7 @@ export function FiltersSortingCard({
               size="sm"
               onClick={() => setMode(mode === "filter" ? null : "filter")}
               disabled={!selectedTable}
-              className="h-9 px-3"
+              className="h-9 px-3 hover:text-white"
             >
               <Plus className="h-3.5 w-3.5 mr-1.5" />
               Filter
@@ -130,7 +130,7 @@ export function FiltersSortingCard({
               size="sm"
               onClick={() => setMode(mode === "sort" ? null : "sort")}
               disabled={!selectedTable || selectableColumns.length === 0}
-              className="h-9 px-3"
+              className="h-9 px-3 hover:text-white"
             >
               <Plus className="h-3.5 w-3.5 mr-1.5" />
               Sort
@@ -243,7 +243,7 @@ export function FiltersSortingCard({
                 variant="outline"
                 size="sm"
                 onClick={() => setMode(null)}
-                className="h-9"
+                className="h-9 hover:text-white"
               >
                 Cancel
               </Button>
@@ -255,7 +255,7 @@ export function FiltersSortingCard({
                   !filterValue ||
                   (filterOperator === "between" && !filterValueTo)
                 }
-                className="h-9 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
+                className="h-9 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 hover:text-white"
               >
                 Add Filter
               </Button>
@@ -327,7 +327,7 @@ export function FiltersSortingCard({
                 variant="outline"
                 size="sm"
                 onClick={() => setMode(null)}
-                className="h-9"
+                className="h-9 hover:text-white"
               >
                 Cancel
               </Button>
@@ -335,7 +335,7 @@ export function FiltersSortingCard({
                 size="sm"
                 onClick={handleAddSort}
                 disabled={!sortColumn}
-                className="h-9 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
+                className="h-9 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 hover:text-white"
               >
                 Add Sort
               </Button>
@@ -357,7 +357,7 @@ export function FiltersSortingCard({
                     variant="ghost"
                     size="sm"
                     onClick={() => setFilters([])}
-                    className="h-8 px-3 text-xs hover:text-destructive"
+                    className="h-8 px-3 text-xs hover:text-white"
                   >
                     Clear all
                   </Button>
@@ -399,7 +399,7 @@ export function FiltersSortingCard({
                     variant="ghost"
                     size="sm"
                     onClick={() => setSorts([])}
-                    className="h-8 px-3 text-xs hover:text-destructive"
+                    className="h-8 px-3 text-xs hover:text-white"
                   >
                     Clear all
                   </Button>

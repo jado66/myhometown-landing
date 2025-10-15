@@ -158,7 +158,7 @@ export function FiltersCard({
           <Button
             variant="outline"
             size="sm"
-            className="flex-1 bg-transparent"
+            className="flex-1 bg-transparent hover:text-white"
             onClick={handleAddFilter}
             disabled={
               !selectedTable ||
@@ -172,7 +172,7 @@ export function FiltersCard({
           <Button
             variant="outline"
             size="sm"
-            className="bg-transparent"
+            className="bg-transparent hover:text-white"
             onClick={() => setFilters([])}
             disabled={filters.length === 0}
             title="Clear all filters"

@@ -1,13 +1,6 @@
 "use client";
 
 import * as React from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { UserDataTable } from "@/components/admin/users/user-data-table";
@@ -15,7 +8,16 @@ import { UserFormDialog } from "@/components/admin/users/user-form-dialog";
 import { columns } from "@/components/admin/users/user-table-columns";
 import type { User, UserFormData } from "@/types/user";
 import { useAdminUsers } from "@/hooks/admin/use-admin-users";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, AlertTriangle } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 export default function ManagementPage() {
   const {
@@ -68,49 +70,45 @@ export default function ManagementPage() {
 
   return (
     <div className="container mx-auto py-10">
-      <Card>
-        <CardHeader className="text-center">
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-primary uppercase tracking-wide">
-              Admin User Management
-            </p>
-            <CardTitle className="text-3xl font-bold">
-              Manage users and their roles
-            </CardTitle>
-            <CardDescription className="text-base">
-              Here you can add, remove, or edit users and their roles.
-            </CardDescription>
+      <div className="text-center mb-8">
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-primary uppercase tracking-wide">
+            Admin User Management
+          </p>
+          <h1 className="text-3xl font-bold">Manage users and their roles</h1>
+          <p className="text-base text-muted-foreground">
+            Here you can add, remove, or edit users and their roles.
+          </p>
+        </div>
+      </div>
+      <div>
+        <UserDataTable
+          columns={columns}
+          data={users}
+          loading={!hasLoaded || loading}
+          onRowClick={(user) => {
+            if (loading) return;
+            setUserToEdit(user);
+            setShowUserForm(true);
+          }}
+          onAddClick={() => {
+            if (loading) return;
+            setUserToEdit(null);
+            setShowUserForm(true);
+          }}
+        />
+        {!loading && hasLoaded && users.length === 0 && (
+          <div className="mt-4">
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                No users found. Click &quot;Add User&quot; to create your first
+                user.
+              </AlertDescription>
+            </Alert>
           </div>
-        </CardHeader>
-        <CardContent>
-          <UserDataTable
-            columns={columns}
-            data={users}
-            loading={!hasLoaded || loading}
-            onRowClick={(user) => {
-              if (loading) return;
-              setUserToEdit(user);
-              setShowUserForm(true);
-            }}
-            onAddClick={() => {
-              if (loading) return;
-              setUserToEdit(null);
-              setShowUserForm(true);
-            }}
-          />
-          {!loading && hasLoaded && users.length === 0 && (
-            <div className="mt-4">
-              <Alert>
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  No users found. Click &quot;Add User&quot; to create your
-                  first user.
-                </AlertDescription>
-              </Alert>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        )}
+      </div>
 
       <UserFormDialog
         open={showUserForm}
@@ -122,6 +120,49 @@ export default function ManagementPage() {
         onResendInvitation={handleResendInvitation}
         loading={loading}
       />
+
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Confirm Delete User
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete{" "}
+              <strong>
+                {userToDelete?.first_name} {userToDelete?.last_name}
+              </strong>{" "}
+              ({userToDelete?.email})?
+              <br />
+              <br />
+              This action cannot be undone. The user will be permanently removed
+              from the system and will lose access to the admin portal.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setShowDeleteConfirm(false);
+                setUserToDelete(null);
+              }}
+              disabled={loading}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={handleConfirmDelete}
+              disabled={loading}
+            >
+              {loading ? "Deleting..." : "Delete User"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

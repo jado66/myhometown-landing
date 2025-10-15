@@ -46,12 +46,33 @@ export function useAdminUsers() {
         body: JSON.stringify(form),
       });
       if (!res.ok) throw new Error("Failed to create user");
-      const created: User = await res.json();
+      const raw = await res.json();
+      // New invite-based POST response shape: { message, data: { user, userRecord, token, invite_link } }
+      const apiData = raw?.data || {};
+      const record: User | null = apiData.userRecord || null;
+      const baseUser = apiData.user || record;
+      if (!baseUser) throw new Error("Malformed response: missing user data");
+
+      // Prefer full record; fallback to constructing minimal user compatible with table
+      const created: User = {
+        id: baseUser.id,
+        email: baseUser.email,
+        first_name: baseUser.first_name,
+        last_name: baseUser.last_name,
+        contact_number: record?.contact_number || form.contact_number || undefined,
+        permissions: record?.permissions || form.permissions || {},
+        cities: record?.cities || form.cities.map((c) => c.id),
+        communities: record?.communities || form.communities || [],
+        created_at: record?.created_at || new Date().toISOString(),
+        updated_at: record?.updated_at || new Date().toISOString(),
+        last_active_at: undefined,
+        cities_details: form.cities || [],
+        communities_details: [],
+        last_sign_in_at: undefined,
+      };
+
       if (created.email !== SYSTEM_USER_EMAIL) {
-        setUsers((prev) => [
-          { ...created, cities_details: form.cities, communities_details: [] },
-          ...prev,
-        ]);
+        setUsers((prev) => [created, ...prev]);
       }
       return { success: true };
     } catch (err: any) {
