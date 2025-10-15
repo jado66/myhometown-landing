@@ -9,9 +9,10 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 // PUT - Update CRC
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const { name, address, city_id, community_id, state, zip } = body;
 
@@ -25,7 +26,7 @@ export async function PUT(
         state,
         zip,
       })
-      .eq("id", params.id)
+      .eq("id", id)
       .select()
       .single();
 
@@ -44,13 +45,14 @@ export async function PUT(
 // DELETE - Delete CRC
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const { error } = await supabase
       .from("community_resource_centers")
       .delete()
-      .eq("id", params.id);
+      .eq("id", id);
 
     if (error) throw error;
 

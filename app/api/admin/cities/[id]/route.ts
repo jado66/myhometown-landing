@@ -9,9 +9,10 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 // PUT - Update city
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const { name, state, country, visibility, image_url } = body;
 
@@ -24,7 +25,7 @@ export async function PUT(
         visibility,
         image_url,
       })
-      .eq("id", params.id)
+      .eq("id", id)
       .select()
       .single();
 
@@ -43,13 +44,14 @@ export async function PUT(
 // DELETE - Delete city
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const { error } = await supabase
       .from("cities")
       .delete()
-      .eq("id", params.id);
+      .eq("id", id);
 
     if (error) throw error;
 

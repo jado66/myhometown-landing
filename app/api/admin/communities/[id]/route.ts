@@ -9,9 +9,10 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 // PUT - Update community
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const { name, city_id, state, country, visibility } = body;
 
@@ -24,7 +25,7 @@ export async function PUT(
         country,
         visibility,
       })
-      .eq("id", params.id)
+      .eq("id", id)
       .select()
       .single();
 
@@ -43,13 +44,14 @@ export async function PUT(
 // DELETE - Delete community
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const { error } = await supabase
       .from("communities")
       .delete()
-      .eq("id", params.id);
+      .eq("id", id);
 
     if (error) throw error;
 
