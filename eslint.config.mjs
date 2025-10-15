@@ -9,15 +9,14 @@ const compat = new FlatCompat({
   baseDirectory: __dirname,
 });
 
-const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
-  // Custom overrides
-  {
-    // Optionally scope to TS files only by adding: files: ["**/*.ts", "**/*.tsx"],
-    rules: {
-      "@typescript-eslint/no-explicit-any": "off",
-    },
+const eslintConfig = [{
+  ignores: ["node_modules/**", ".next/**", "out/**", "build/**", "next-env.d.ts"]
+}, ...compat.extends("next/core-web-vitals", "next/typescript"), // Custom overrides
+{
+  // Optionally scope to TS files only by adding: files: ["**/*.ts", "**/*.tsx"],
+  rules: {
+    "@typescript-eslint/no-explicit-any": "off",
   },
-];
+}];
 
 export default eslintConfig;

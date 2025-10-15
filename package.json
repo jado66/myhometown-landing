@@ -6,7 +6,7 @@
     "dev": "next dev -p 3005",
     "build": "next build",
     "start": "next start -p 3005",
-    "lint": "next lint",
+    "lint": "eslint .",
     "tsc": "tsc"
   },
   "dependencies": {
@@ -68,6 +68,7 @@
     "zod": "3.25.76"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
     "@tailwindcss/postcss": "^4.1.9",
     "@types/node": "^22",
     "@types/papaparse": "^5.3.16",
