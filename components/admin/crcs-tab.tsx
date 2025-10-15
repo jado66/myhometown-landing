@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { City, Community, CRC } from "@/types/admin";
+import { toast } from "sonner";
 
 interface CRCsTabProps {
   crcs: CRC[];
@@ -32,6 +33,8 @@ export function CRCsTab({
   const [filteredCommunities, setFilteredCommunities] = useState<Community[]>(
     []
   );
+  const [showNewCommunityModal, setShowNewCommunityModal] = useState(false);
+  const [showNewCityModal, setShowNewCityModal] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     address: "",
@@ -39,6 +42,20 @@ export function CRCsTab({
     community_id: "",
     state: "",
     zip: "",
+  });
+  const [newCommunityData, setNewCommunityData] = useState({
+    name: "",
+    city_id: "",
+    state: "",
+    country: "USA",
+    visibility: true,
+  });
+  const [newCityData, setNewCityData] = useState({
+    name: "",
+    state: "",
+    country: "USA",
+    visibility: true,
+    image_url: "",
   });
 
   useEffect(() => {
@@ -59,6 +76,15 @@ export function CRCsTab({
     }
   }, [formData.city_id, communities, formData.community_id]);
 
+  useEffect(() => {
+    if (newCommunityData.city_id) {
+      const filtered = communities.filter(
+        (c) => c.city_id === newCommunityData.city_id
+      );
+      setFilteredCommunities(filtered);
+    }
+  }, [newCommunityData.city_id, communities]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -78,12 +104,105 @@ export function CRCsTab({
 
       await onRefresh();
       handleCloseModal();
-      alert(
+      toast.success(
         editingCRC ? "CRC updated successfully!" : "CRC created successfully!"
       );
     } catch (error) {
       console.error("Error saving CRC:", error);
-      alert("Failed to save CRC");
+      toast.error("Failed to save CRC");
+    }
+  };
+
+  const handleSubmitWithNewCommunity = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      // First create the community
+      const communityResponse = await fetch("/api/admin/communities", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newCommunityData),
+      });
+
+      if (!communityResponse.ok) throw new Error("Failed to create community");
+
+      const newCommunity = await communityResponse.json();
+
+      // Then create the CRC with the new community
+      const crcResponse = await fetch("/api/admin/crcs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          community_id: newCommunity.id,
+          city_id: newCommunityData.city_id,
+          state: newCommunityData.state,
+        }),
+      });
+
+      if (!crcResponse.ok) throw new Error("Failed to create CRC");
+
+      await onRefresh();
+      handleCloseNewCommunityModal();
+      toast.success("Community and CRC created successfully!");
+    } catch (error) {
+      console.error("Error creating community and CRC:", error);
+      toast.error("Failed to create community and CRC");
+    }
+  };
+
+  const handleSubmitWithNewCity = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      // First create the city
+      const cityResponse = await fetch("/api/admin/cities", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newCityData),
+      });
+
+      if (!cityResponse.ok) throw new Error("Failed to create city");
+
+      const newCity = await cityResponse.json();
+
+      // Then create the community
+      const communityResponse = await fetch("/api/admin/communities", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newCommunityData.name,
+          city_id: newCity.id,
+          state: newCityData.state,
+          country: newCityData.country,
+          visibility: newCommunityData.visibility,
+        }),
+      });
+
+      if (!communityResponse.ok) throw new Error("Failed to create community");
+
+      const newCommunity = await communityResponse.json();
+
+      // Finally create the CRC
+      const crcResponse = await fetch("/api/admin/crcs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          community_id: newCommunity.id,
+          city_id: newCity.id,
+          state: newCityData.state,
+        }),
+      });
+
+      if (!crcResponse.ok) throw new Error("Failed to create CRC");
+
+      await onRefresh();
+      handleCloseNewCityModal();
+      toast.success("City, community, and CRC created successfully!");
+    } catch (error) {
+      console.error("Error creating city, community, and CRC:", error);
+      toast.error("Failed to create city, community, and CRC");
     }
   };
 
@@ -98,10 +217,10 @@ export function CRCsTab({
       if (!response.ok) throw new Error("Failed to delete CRC");
 
       await onRefresh();
-      alert("CRC deleted successfully!");
+      toast.success("CRC deleted successfully!");
     } catch (error) {
       console.error("Error deleting CRC:", error);
-      alert("Failed to delete CRC");
+      toast.error("Failed to delete CRC");
     }
   };
 
@@ -131,6 +250,51 @@ export function CRCsTab({
     });
   };
 
+  const handleCloseNewCommunityModal = () => {
+    setShowNewCommunityModal(false);
+    setFormData({
+      name: "",
+      address: "",
+      city_id: "",
+      community_id: "",
+      state: "",
+      zip: "",
+    });
+    setNewCommunityData({
+      name: "",
+      city_id: "",
+      state: "",
+      country: "USA",
+      visibility: true,
+    });
+  };
+
+  const handleCloseNewCityModal = () => {
+    setShowNewCityModal(false);
+    setFormData({
+      name: "",
+      address: "",
+      city_id: "",
+      community_id: "",
+      state: "",
+      zip: "",
+    });
+    setNewCommunityData({
+      name: "",
+      city_id: "",
+      state: "",
+      country: "USA",
+      visibility: true,
+    });
+    setNewCityData({
+      name: "",
+      state: "",
+      country: "USA",
+      visibility: true,
+      image_url: "",
+    });
+  };
+
   const filteredCRCs = crcs.filter(
     (crc) =>
       crc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -145,13 +309,29 @@ export function CRCsTab({
         <h2 className="text-2xl font-semibold">
           Manage Community Resource Centers
         </h2>
-        <button
-          onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-        >
-          <Plus size={20} />
-          Add CRC
-        </button>
+        <div className="flex gap-2 flex-wrap">
+          <button
+            onClick={() => setShowModal(true)}
+            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+          >
+            <Plus size={20} />
+            Add CRC
+          </button>
+          <button
+            onClick={() => setShowNewCommunityModal(true)}
+            className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+          >
+            <Plus size={20} />
+            Add CRC to New Community
+          </button>
+          <button
+            onClick={() => setShowNewCityModal(true)}
+            className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700"
+          >
+            <Plus size={20} />
+            Add CRC to New City
+          </button>
+        </div>
       </div>
 
       <div className="mb-6">
@@ -242,6 +422,7 @@ export function CRCsTab({
         )}
       </div>
 
+      {/* Regular Add CRC Modal */}
       <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
@@ -384,6 +565,401 @@ export function CRCsTab({
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
                 {editingCRC ? "Update" : "Create"}
+              </button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={showNewCommunityModal}
+        onOpenChange={setShowNewCommunityModal}
+      >
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add CRC to New Community</DialogTitle>
+            <DialogDescription>
+              Create a new community and then add a CRC to it.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleSubmitWithNewCommunity}>
+            <div className="space-y-6">
+              {/* Community Information Section */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3 text-gray-900">
+                  Community Information
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Community Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={newCommunityData.name}
+                      onChange={(e) =>
+                        setNewCommunityData({
+                          ...newCommunityData,
+                          name: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      City *
+                    </label>
+                    <select
+                      required
+                      value={newCommunityData.city_id}
+                      onChange={(e) => {
+                        const selectedCity = cities.find(
+                          (c) => c.id === e.target.value
+                        );
+                        setNewCommunityData({
+                          ...newCommunityData,
+                          city_id: e.target.value,
+                          state: selectedCity?.state || "",
+                          country: selectedCity?.country || "USA",
+                        });
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Select a city</option>
+                      {cities.map((city) => (
+                        <option key={city.id} value={city.id}>
+                          {city.name}, {city.state}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="new-community-visibility-crc"
+                      checked={newCommunityData.visibility}
+                      onChange={(e) =>
+                        setNewCommunityData({
+                          ...newCommunityData,
+                          visibility: e.target.checked,
+                        })
+                      }
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <label
+                      htmlFor="new-community-visibility-crc"
+                      className="text-sm font-medium text-gray-700"
+                    >
+                      Community Visible
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* CRC Information Section */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3 text-gray-900">
+                  CRC Information
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      CRC Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      ZIP Code *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      pattern="[0-9]{5}"
+                      value={formData.zip}
+                      onChange={(e) =>
+                        setFormData({ ...formData, zip: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      placeholder="12345"
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Address *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.address}
+                      onChange={(e) =>
+                        setFormData({ ...formData, address: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter className="mt-6">
+              <button
+                type="button"
+                onClick={handleCloseNewCommunityModal}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+              >
+                Create Community & CRC
+              </button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showNewCityModal} onOpenChange={setShowNewCityModal}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add CRC to New City</DialogTitle>
+            <DialogDescription>
+              Create a new city, community, and CRC all at once.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleSubmitWithNewCity}>
+            <div className="space-y-6">
+              {/* City Information Section */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3 text-gray-900">
+                  City Information
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      City Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={newCityData.name}
+                      onChange={(e) =>
+                        setNewCityData({ ...newCityData, name: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      State *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={newCityData.state}
+                      onChange={(e) =>
+                        setNewCityData({
+                          ...newCityData,
+                          state: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Country *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={newCityData.country}
+                      onChange={(e) =>
+                        setNewCityData({
+                          ...newCityData,
+                          country: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Image URL
+                    </label>
+                    <input
+                      type="text"
+                      value={newCityData.image_url}
+                      onChange={(e) =>
+                        setNewCityData({
+                          ...newCityData,
+                          image_url: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="new-city-visibility-crc"
+                      checked={newCityData.visibility}
+                      onChange={(e) =>
+                        setNewCityData({
+                          ...newCityData,
+                          visibility: e.target.checked,
+                        })
+                      }
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <label
+                      htmlFor="new-city-visibility-crc"
+                      className="text-sm font-medium text-gray-700"
+                    >
+                      City Visible
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Community Information Section */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3 text-gray-900">
+                  Community Information
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Community Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={newCommunityData.name}
+                      onChange={(e) =>
+                        setNewCommunityData({
+                          ...newCommunityData,
+                          name: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="new-community-visibility-city"
+                      checked={newCommunityData.visibility}
+                      onChange={(e) =>
+                        setNewCommunityData({
+                          ...newCommunityData,
+                          visibility: e.target.checked,
+                        })
+                      }
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <label
+                      htmlFor="new-community-visibility-city"
+                      className="text-sm font-medium text-gray-700"
+                    >
+                      Community Visible
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* CRC Information Section */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3 text-gray-900">
+                  CRC Information
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      CRC Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      ZIP Code *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      pattern="[0-9]{5}"
+                      value={formData.zip}
+                      onChange={(e) =>
+                        setFormData({ ...formData, zip: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      placeholder="12345"
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Address *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.address}
+                      onChange={(e) =>
+                        setFormData({ ...formData, address: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter className="mt-6">
+              <button
+                type="button"
+                onClick={handleCloseNewCityModal}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+              >
+                Create City, Community & CRC
               </button>
             </DialogFooter>
           </form>

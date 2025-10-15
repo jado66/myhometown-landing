@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { City } from "@/types/admin";
+import { toast } from "sonner";
 
 interface CitiesTabProps {
   cities: City[];
@@ -49,14 +50,14 @@ export function CitiesTab({ cities, onRefresh }: CitiesTabProps) {
 
       await onRefresh();
       handleCloseModal();
-      alert(
+      toast.success(
         editingCity
           ? "City updated successfully!"
           : "City created successfully!"
       );
     } catch (error) {
       console.error("Error saving city:", error);
-      alert("Failed to save city");
+      toast.error("Failed to save city");
     }
   };
 
@@ -71,10 +72,10 @@ export function CitiesTab({ cities, onRefresh }: CitiesTabProps) {
       if (!response.ok) throw new Error("Failed to delete city");
 
       await onRefresh();
-      alert("City deleted successfully!");
+      toast.success("City deleted successfully!");
     } catch (error) {
       console.error("Error deleting city:", error);
-      alert("Failed to delete city");
+      toast.error("Failed to delete city");
     }
   };
 

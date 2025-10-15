@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { City, Community } from "@/types/admin";
+import { toast } from "sonner";
 
 interface CommunitiesTabProps {
   communities: Community[];
@@ -29,12 +30,20 @@ export function CommunitiesTab({
   const [editingCommunity, setEditingCommunity] = useState<Community | null>(
     null
   );
+  const [showNewCityModal, setShowNewCityModal] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     city_id: "",
     state: "",
     country: "USA",
     visibility: true,
+  });
+  const [newCityData, setNewCityData] = useState({
+    name: "",
+    state: "",
+    country: "USA",
+    visibility: true,
+    image_url: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -56,14 +65,53 @@ export function CommunitiesTab({
 
       await onRefresh();
       handleCloseModal();
-      alert(
+      toast.success(
         editingCommunity
           ? "Community updated successfully!"
           : "Community created successfully!"
       );
     } catch (error) {
       console.error("Error saving community:", error);
-      alert("Failed to save community");
+      toast.error("Failed to save community");
+    }
+  };
+
+  const handleSubmitWithNewCity = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      // First create the city
+      const cityResponse = await fetch("/api/admin/cities", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newCityData),
+      });
+
+      if (!cityResponse.ok) throw new Error("Failed to create city");
+
+      const newCity = await cityResponse.json();
+
+      // Then create the community with the new city
+      const communityResponse = await fetch("/api/admin/communities", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          city_id: newCity.id,
+          state: newCityData.state,
+          country: newCityData.country,
+          visibility: formData.visibility,
+        }),
+      });
+
+      if (!communityResponse.ok) throw new Error("Failed to create community");
+
+      await onRefresh();
+      handleCloseNewCityModal();
+      toast.success("City and community created successfully!");
+    } catch (error) {
+      console.error("Error creating city and community:", error);
+      toast.error("Failed to create city and community");
     }
   };
 
@@ -78,10 +126,10 @@ export function CommunitiesTab({
       if (!response.ok) throw new Error("Failed to delete community");
 
       await onRefresh();
-      alert("Community deleted successfully!");
+      toast.success("Community deleted successfully!");
     } catch (error) {
       console.error("Error deleting community:", error);
-      alert("Failed to delete community");
+      toast.error("Failed to delete community");
     }
   };
 
@@ -109,6 +157,24 @@ export function CommunitiesTab({
     });
   };
 
+  const handleCloseNewCityModal = () => {
+    setShowNewCityModal(false);
+    setFormData({
+      name: "",
+      city_id: "",
+      state: "",
+      country: "USA",
+      visibility: true,
+    });
+    setNewCityData({
+      name: "",
+      state: "",
+      country: "USA",
+      visibility: true,
+      image_url: "",
+    });
+  };
+
   const filteredCommunities = communities.filter(
     (community) =>
       community.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -119,13 +185,22 @@ export function CommunitiesTab({
     <div>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-semibold">Manage Communities</h2>
-        <button
-          onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-        >
-          <Plus size={20} />
-          Add Community
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowModal(true)}
+            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+          >
+            <Plus size={20} />
+            Add Community
+          </button>
+          <button
+            onClick={() => setShowNewCityModal(true)}
+            className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+          >
+            <Plus size={20} />
+            Add Community to New City
+          </button>
+        </div>
       </div>
 
       <div className="mb-6">
@@ -220,6 +295,7 @@ export function CommunitiesTab({
         )}
       </div>
 
+      {/* Regular Add Community Modal */}
       <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
@@ -337,6 +413,178 @@ export function CommunitiesTab({
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
                 {editingCommunity ? "Update" : "Create"}
+              </button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showNewCityModal} onOpenChange={setShowNewCityModal}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Add Community to New City</DialogTitle>
+            <DialogDescription>
+              Create a new city and then add a community to it.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleSubmitWithNewCity}>
+            <div className="space-y-6">
+              {/* City Information Section */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3 text-gray-900">
+                  City Information
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      City Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={newCityData.name}
+                      onChange={(e) =>
+                        setNewCityData({ ...newCityData, name: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      State *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={newCityData.state}
+                      onChange={(e) =>
+                        setNewCityData({
+                          ...newCityData,
+                          state: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Country *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={newCityData.country}
+                      onChange={(e) =>
+                        setNewCityData({
+                          ...newCityData,
+                          country: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Image URL
+                    </label>
+                    <input
+                      type="text"
+                      value={newCityData.image_url}
+                      onChange={(e) =>
+                        setNewCityData({
+                          ...newCityData,
+                          image_url: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="new-city-visibility"
+                      checked={newCityData.visibility}
+                      onChange={(e) =>
+                        setNewCityData({
+                          ...newCityData,
+                          visibility: e.target.checked,
+                        })
+                      }
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <label
+                      htmlFor="new-city-visibility"
+                      className="text-sm font-medium text-gray-700"
+                    >
+                      City Visible
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Community Information Section */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3 text-gray-900">
+                  Community Information
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Community Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="new-community-visibility"
+                      checked={formData.visibility}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          visibility: e.target.checked,
+                        })
+                      }
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <label
+                      htmlFor="new-community-visibility"
+                      className="text-sm font-medium text-gray-700"
+                    >
+                      Community Visible
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter className="mt-6">
+              <button
+                type="button"
+                onClick={handleCloseNewCityModal}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+              >
+                Create City & Community
               </button>
             </DialogFooter>
           </form>
