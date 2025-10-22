@@ -59,7 +59,8 @@ export function useAdminUsers() {
         email: baseUser.email,
         first_name: baseUser.first_name,
         last_name: baseUser.last_name,
-        contact_number: record?.contact_number || form.contact_number || undefined,
+        contact_number:
+          record?.contact_number || form.contact_number || undefined,
         permissions: record?.permissions || form.permissions || {},
         cities: record?.cities || form.cities.map((c) => c.id),
         communities: record?.communities || form.communities || [],

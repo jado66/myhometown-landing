@@ -126,9 +126,9 @@ export function Header({ onMobileMenuOpen, cities }: HeaderProps) {
               {t("login")}
             </Link>
 
-            {process.env.NEXT_PUBLIC_ENVIRONMENT === "development" && (
-              <LanguageSwitcher />
-            )}
+            {/* {process.env.NEXT_PUBLIC_ENVIRONMENT === "development" && ( */}
+            <LanguageSwitcher />
+            {/* )} */}
           </nav>
         </div>
       </div>

@@ -220,7 +220,7 @@ export function DaysOfServiceSection() {
         </div>
 
         {/* Upcoming Dates & CTA */}
-        <div className="text-primary-foreground rounded-2xl p-8 md:p-12 shadow-xl">
+        <div className="bg-primary text-primary-foreground rounded-2xl p-8 md:p-12 shadow-xl">
           <div className="grid md:grid-cols-2 gap-8 items-start">
             <div>
               <h3 className="text-2xl md:text-3xl font-bold mb-4">
@@ -442,7 +442,7 @@ export function DaysOfServiceSection() {
                       <Button
                         size="lg"
                         variant="outline"
-                        className="w-full font-semibold hover:text-white"
+                        className="w-full font-semibold hover:text-white text-primary"
                         onClick={() => {
                           if (!selectedDay) return;
                           // Deep link to Days of Service page with selected day pre-selected

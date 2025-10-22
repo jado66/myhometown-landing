@@ -176,9 +176,9 @@ export function DaysOfServiceSection() {
               </motion.div>
 
               {/* Call to Action */}
-              <div className="pt-4 border-t border-gray-200">
+              <div className="pt-4 border-t border-gray-200 ">
                 <Button
-                  className="w-full"
+                  className="w-full text-primary bg-primary/10 hover:bg-primary/20"
                   onClick={() => {
                     const formSection =
                       document.getElementById("volunteer-form");

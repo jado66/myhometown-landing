@@ -84,7 +84,8 @@ const formattedInviteHtml = (
   firstName: string,
   lastName: string,
   inviteLink: string
-): string => `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" /><title>Welcome to myHometown</title><style>body{font-family:Arial,sans-serif;line-height:1.6;color:#333;margin:0;padding:0}.container{max-width:600px;margin:0 auto;padding:20px}.header{background:#f8f9fa;padding:20px;text-align:center;border-bottom:2px solid #dee2e6}.content{padding:30px 20px;background:#fff}.button{display:inline-block;padding:12px 24px;background:#318d43;color:#fff;text-decoration:none;border-radius:4px;margin:20px 0}.footer{text-align:center;padding:20px;font-size:12px;color:#6c757d}a.button{color:#fff!important;text-decoration:none!important}</style></head><body><div class="container"><div class="header"><h1>Welcome to myHometown!</h1></div><div class="content"><p>Hello ${firstName} ${lastName},</p><p>You've been invited to join the myHometown Admin Dashboard. Click below to set up your account.</p><p style="text-align:center"><a href="${inviteLink}" class="button">Set Up Your Account</a></p><p>This invitation link will remain active until used.</p><p>If you didn't expect this invitation you can ignore this email.</p></div><div class="footer"><p>&copy; ${new Date().getFullYear()} myHometown. All rights reserved.</p></div></div></body></html>`;
+): string =>
+  `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" /><title>Welcome to myHometown</title><style>body{font-family:Arial,sans-serif;line-height:1.6;color:#333;margin:0;padding:0}.container{max-width:600px;margin:0 auto;padding:20px}.header{background:#f8f9fa;padding:20px;text-align:center;border-bottom:2px solid #dee2e6}.content{padding:30px 20px;background:#fff}.button{display:inline-block;padding:12px 24px;background:#318d43;color:#fff;text-decoration:none;border-radius:4px;margin:20px 0}.footer{text-align:center;padding:20px;font-size:12px;color:#6c757d}a.button{color:#fff!important;text-decoration:none!important}</style></head><body><div class="container"><div class="header"><h1>Welcome to myHometown!</h1></div><div class="content"><p>Hello ${firstName} ${lastName},</p><p>You've been invited to join the myHometown Admin Dashboard. Click below to set up your account.</p><p style="text-align:center"><a href="${inviteLink}" class="button">Set Up Your Account</a></p><p>This invitation link will remain active until used.</p><p>If you didn't expect this invitation you can ignore this email.</p></div><div class="footer"><p>&copy; ${new Date().getFullYear()} myHometown. All rights reserved.</p></div></div></body></html>`;
 
 interface InviteLikeBody {
   email: string;
@@ -112,7 +113,8 @@ export async function POST(request: NextRequest) {
     // 1. Find or create auth user
     let authUser: any = null;
     try {
-      const { data: users, error: listError } = await supabase.auth.admin.listUsers();
+      const { data: users, error: listError } =
+        await supabase.auth.admin.listUsers();
       if (!listError && users) {
         authUser = users.users.find((u: any) => u.email === email) || null;
       }
@@ -121,15 +123,16 @@ export async function POST(request: NextRequest) {
     }
     if (!authUser) {
       console.log("➕ Creating auth user for", email);
-      const { data: newAuth, error: createErr } = await supabase.auth.admin.createUser({
-        email,
-        email_confirm: true,
-        user_metadata: {
-          first_name,
-          last_name,
-          invitation_pending: true,
-        },
-      });
+      const { data: newAuth, error: createErr } =
+        await supabase.auth.admin.createUser({
+          email,
+          email_confirm: true,
+          user_metadata: {
+            first_name,
+            last_name,
+            invitation_pending: true,
+          },
+        });
       if (createErr) {
         throw new Error(`Failed to create auth user: ${createErr.message}`);
       }
@@ -139,12 +142,13 @@ export async function POST(request: NextRequest) {
     // 2. Invitation token (reuse existing unused invitation if present)
     const generatedToken = uuidv4();
     let token = generatedToken;
-    const { data: existingInvitation, error: invitationLookupErr } = await supabase
-      .from("user_invitations")
-      .select("*")
-      .eq("email", email)
-      .eq("used", false)
-      .single();
+    const { data: existingInvitation, error: invitationLookupErr } =
+      await supabase
+        .from("user_invitations")
+        .select("*")
+        .eq("email", email)
+        .eq("used", false)
+        .single();
     if (!invitationLookupErr && existingInvitation) {
       token = (existingInvitation as any).token;
       const { error: updateInvitationErr } = await supabase
@@ -157,20 +161,27 @@ export async function POST(request: NextRequest) {
         })
         .eq("id", (existingInvitation as any).id);
       if (updateInvitationErr) {
-        console.warn("⚠️ Failed to update existing invitation", updateInvitationErr.message);
+        console.warn(
+          "⚠️ Failed to update existing invitation",
+          updateInvitationErr.message
+        );
       }
     } else {
-      const { error: insertInvitationErr } = await supabase.from("user_invitations").insert([
-        {
-          email,
-          token,
-          user_id: authUser.id,
-          first_name,
-          last_name,
-        },
-      ]);
+      const { error: insertInvitationErr } = await supabase
+        .from("user_invitations")
+        .insert([
+          {
+            email,
+            token,
+            user_id: authUser.id,
+            first_name,
+            last_name,
+          },
+        ]);
       if (insertInvitationErr) {
-        throw new Error(`Failed to create invitation: ${insertInvitationErr.message}`);
+        throw new Error(
+          `Failed to create invitation: ${insertInvitationErr.message}`
+        );
       }
     }
 
@@ -179,7 +190,9 @@ export async function POST(request: NextRequest) {
       ? body.cities.map((c: any) => (typeof c === "object" && c.id ? c.id : c))
       : [];
     const communityIds = Array.isArray(body.communities)
-      ? body.communities.map((c: any) => (typeof c === "object" && c.id ? c.id : c))
+      ? body.communities.map((c: any) =>
+          typeof c === "object" && c.id ? c.id : c
+        )
       : [];
 
     let userRecord: any = null;
@@ -218,9 +231,16 @@ export async function POST(request: NextRequest) {
             .select("*")
             .single();
           if (!userUpdateErr) userRecord = updatedUser;
-          else console.warn("⚠️ Failed to update existing user record", userUpdateErr.message);
+          else
+            console.warn(
+              "⚠️ Failed to update existing user record",
+              userUpdateErr.message
+            );
         } else {
-          console.warn("⚠️ Failed to create user record", userInsertErr.message);
+          console.warn(
+            "⚠️ Failed to create user record",
+            userInsertErr.message
+          );
         }
       } else {
         userRecord = insertedUser;
@@ -230,7 +250,10 @@ export async function POST(request: NextRequest) {
     }
 
     // 4. Send invitation email
-    const baseDomain = process.env.NEXT_PUBLIC_PRODUCTION_DOMAIN || process.env.NEXT_PUBLIC_SITE_URL || "";
+    const baseDomain =
+      process.env.NEXT_PUBLIC_PRODUCTION_DOMAIN ||
+      process.env.NEXT_PUBLIC_SITE_URL ||
+      "";
     const inviteLink = `${baseDomain}/auth/setup-password?token=${token}`;
     try {
       const info = await myHometownTransporter.sendMail({
@@ -264,7 +287,10 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     console.error("💥 Error creating invited user:", err);
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Failed to create invited user" },
+      {
+        error:
+          err instanceof Error ? err.message : "Failed to create invited user",
+      },
       { status: 500 }
     );
   }
