@@ -30,6 +30,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Download, Plus, Settings2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -284,13 +291,40 @@ export function UserDataTable<TData, TValue>({
         </Table>
       </div>
 
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-muted-foreground">
-          {loading
-            ? "Loading..."
-            : `${table.getFilteredSelectedRowModel().rows.length} of ${
-                table.getFilteredRowModel().rows.length
-              } row(s) selected.`}
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div className="flex items-center space-x-4">
+          <div className="text-sm text-muted-foreground">
+            {loading
+              ? "Loading..."
+              : `${table.getFilteredSelectedRowModel().rows.length} of ${
+                  table.getFilteredRowModel().rows.length
+                } row(s) selected.`}
+          </div>
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-muted-foreground">
+              Rows per page:
+            </span>
+            <Select
+              value={`${table.getState().pagination.pageSize}`}
+              onValueChange={(value) => {
+                table.setPageSize(Number(value));
+              }}
+              disabled={loading}
+            >
+              <SelectTrigger className="h-8 w-[70px]">
+                <SelectValue
+                  placeholder={table.getState().pagination.pageSize}
+                />
+              </SelectTrigger>
+              <SelectContent side="top" className="bg-white">
+                {[10, 25, 50, 100, 250].map((pageSize) => (
+                  <SelectItem key={pageSize} value={`${pageSize}`}>
+                    {pageSize}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
         <div className="flex items-center space-x-2">
           <Button
