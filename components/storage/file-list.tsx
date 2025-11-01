@@ -77,16 +77,18 @@ function formatDate(date: Date) {
 
 function getFileThumbnail(file: FileItem) {
   const mimeType = file.mimeType || "";
-  
-  // Show image thumbnail
+
+  // Show image thumbnail with lazy loading for faster page loads
   if (mimeType.startsWith("image/") && file.url) {
     return (
-      <div className="w-10 h-10 overflow-hidden rounded-lg">
+      <div className="w-10 h-10 overflow-hidden rounded-lg bg-muted">
         <img
           src={file.url}
           alt={file.name}
           className="w-full h-full object-cover"
-          crossOrigin="anonymous"
+          loading="lazy"
+          decoding="async"
+          style={{ imageRendering: 'auto' }}
           onError={(e) => {
             console.error("Thumbnail failed to load:", file.url);
             e.currentTarget.style.display = "none";
@@ -95,7 +97,7 @@ function getFileThumbnail(file: FileItem) {
       </div>
     );
   }
-  
+
   // Show video thumbnail with play overlay
   if (mimeType.startsWith("video/") && file.url) {
     return (
@@ -103,8 +105,8 @@ function getFileThumbnail(file: FileItem) {
         <video
           src={file.url}
           className="w-full h-full object-cover"
-          crossOrigin="anonymous"
           muted
+          preload="metadata"
           onError={(e) => {
             console.error("Video thumbnail failed to load:", file.url);
           }}
@@ -117,13 +119,9 @@ function getFileThumbnail(file: FileItem) {
       </div>
     );
   }
-  
+
   // Fallback to icon
-  return (
-    <div className="rounded-lg bg-muted p-2">
-      {getFileIcon(file)}
-    </div>
-  );
+  return <div className="rounded-lg bg-muted p-2">{getFileIcon(file)}</div>;
 }
 
 export function FileList({
@@ -201,7 +199,9 @@ export function FileList({
             <TableRow
               key={file.id}
               className={`group ${
-                file.type === "folder" || file.type === "file" ? "cursor-pointer" : ""
+                file.type === "folder" || file.type === "file"
+                  ? "cursor-pointer"
+                  : ""
               }`}
               draggable
               onDragStart={(e) => handleDragStart(e, file.id)}

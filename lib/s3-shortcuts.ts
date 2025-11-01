@@ -87,10 +87,10 @@ export async function createOrganizedShortcuts(
 ): Promise<{ success: boolean; created: number }> {
   const shortcuts: S3Shortcut[] = [];
 
-  // Create Cities shortcuts
+  // Create Cities shortcuts at root level
   for (const city of cities) {
     shortcuts.push({
-      shortcutPath: `Shortcuts/Cities/${city.name}.shortcut`,
+      shortcutPath: `Cities/${city.name}.shortcut`,
       targetPath: city.path,
       displayName: city.name,
       type: "folder",
@@ -98,12 +98,12 @@ export async function createOrganizedShortcuts(
     });
   }
 
-  // Create Communities shortcuts
+  // Create Communities shortcuts at root level
   for (const community of communities) {
     shortcuts.push({
-      shortcutPath: `Shortcuts/Communities/${community.name} (${community.cityName}).shortcut`,
+      shortcutPath: `Communities/${community.cityName} - ${community.name}.shortcut`,
       targetPath: community.path,
-      displayName: `${community.name} (${community.cityName})`,
+      displayName: `${community.cityName} - ${community.name}`,
       type: "folder",
       description: `Shortcut to ${community.name} in ${community.cityName}`,
     });

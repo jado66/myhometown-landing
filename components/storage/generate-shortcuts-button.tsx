@@ -81,23 +81,22 @@ export function GenerateShortcutsButton() {
               <br />
               <br />
               <code className="text-xs bg-muted p-2 rounded block">
-                Shortcuts/
+                Cities/
                 <br />
-                ├── Cities/
+                ├── Salt Lake City.shortcut → Utah/Salt Lake City/
                 <br />
-                │ ├── Salt Lake City.shortcut → Utah/Salt Lake City/
+                ├── Provo.shortcut → Utah/Provo/
                 <br />
-                │ ├── Provo.shortcut → Utah/Provo/
+                └── ...
                 <br />
-                │ └── ...
                 <br />
-                └── Communities/
+                Communities/
                 <br />
-                &nbsp;&nbsp;&nbsp;&nbsp;├── Westside (Salt Lake City).shortcut
+                ├── Salt Lake City - Westside.shortcut
                 <br />
-                &nbsp;&nbsp;&nbsp;&nbsp;├── Central (Salt Lake City).shortcut
+                ├── Salt Lake City - Central.shortcut
                 <br />
-                &nbsp;&nbsp;&nbsp;&nbsp;└── ...
+                └── ...
               </code>
               <br />
               Shortcuts will display the size and modification date of their
@@ -125,9 +124,9 @@ export function GenerateShortcutsButton() {
                   Shortcut folders created:
                 </p>
                 <ul className="text-sm space-y-1 text-muted-foreground">
-                  <li>• Shortcuts/Cities/ ({result.cities} shortcuts)</li>
+                  <li>• Cities/ ({result.cities} shortcuts)</li>
                   <li>
-                    • Shortcuts/Communities/ ({result.communities} shortcuts)
+                    • Communities/ ({result.communities} shortcuts)
                   </li>
                 </ul>
               </div>

@@ -45,17 +45,15 @@ export function FileViewer({ file, onClose }: FileViewerProps) {
 
   return (
     <Dialog open={!!file} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] p-0">
-        <DialogTitle className="sr-only">
-          {file.name}
-        </DialogTitle>
+      <DialogContent className="sm:max-w-4xl max-h-[90vh] p-0">
+        <DialogTitle className="sr-only">{file.name}</DialogTitle>
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b">
             <h2 className="text-lg font-semibold truncate flex-1">
               {file.name}
             </h2>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 pr-8">
               <Button
                 variant="ghost"
                 size="icon"
@@ -71,9 +69,6 @@ export function FileViewer({ file, onClose }: FileViewerProps) {
                 title="Open in new tab"
               >
                 <ExternalLink className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" onClick={onClose}>
-                <X className="h-4 w-4" />
               </Button>
             </div>
           </div>
@@ -95,14 +90,13 @@ export function FileViewer({ file, onClose }: FileViewerProps) {
                   src={file.url}
                   alt={file.name}
                   className="max-w-full max-h-full object-contain rounded-lg"
-                  crossOrigin="anonymous"
                   onError={(e) => {
                     console.error("Image failed to load:", file.url);
                     e.currentTarget.style.display = "none";
-                    e.currentTarget.parentElement?.insertAdjacentHTML(
-                      "beforeend",
-                      '<p class="text-red-500">Failed to load image</p>'
-                    );
+                    const errorMsg = document.createElement("p");
+                    errorMsg.className = "text-red-500";
+                    errorMsg.textContent = "Failed to load image";
+                    e.currentTarget.parentElement?.appendChild(errorMsg);
                   }}
                 />
               </div>
@@ -114,9 +108,13 @@ export function FileViewer({ file, onClose }: FileViewerProps) {
                   src={file.url}
                   controls
                   className="max-w-full max-h-full rounded-lg"
-                  crossOrigin="anonymous"
+                  preload="metadata"
                   onError={(e) => {
-                    console.error("Video failed to load:", file.url);
+                    console.error(
+                      "Video failed to load:",
+                      file.url,
+                      file.mimeType
+                    );
                   }}
                 >
                   Your browser does not support the video tag.

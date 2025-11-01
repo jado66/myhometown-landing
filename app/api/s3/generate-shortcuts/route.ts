@@ -55,10 +55,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create Shortcuts folder structure
-    await createS3Folder("Shortcuts/");
-    await createS3Folder("Shortcuts/Cities/");
-    await createS3Folder("Shortcuts/Communities/");
+    // Create Cities and Communities folders at root level
+    await createS3Folder("Cities/");
+    await createS3Folder("Communities/");
 
     // Prepare city shortcuts
     const cityShortcuts = (cities as City[]).map((city) => ({

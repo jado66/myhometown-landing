@@ -59,16 +59,18 @@ function formatFileSize(bytes?: number) {
 
 function getFileThumbnail(file: FileItem) {
   const mimeType = file.mimeType || "";
-  
-  // Show image thumbnail
+
+  // Show image thumbnail with lazy loading for faster page loads
   if (mimeType.startsWith("image/") && file.url) {
     return (
-      <div className="w-full h-full overflow-hidden rounded-lg">
+      <div className="w-full h-full overflow-hidden rounded-lg bg-muted">
         <img
           src={file.url}
           alt={file.name}
           className="w-full h-full object-cover"
-          crossOrigin="anonymous"
+          loading="lazy"
+          decoding="async"
+          style={{ imageRendering: 'auto' }}
           onError={(e) => {
             console.error("Thumbnail failed to load:", file.url);
             // Fallback to file icon
@@ -78,7 +80,7 @@ function getFileThumbnail(file: FileItem) {
       </div>
     );
   }
-  
+
   // Show video thumbnail with play overlay
   if (mimeType.startsWith("video/") && file.url) {
     return (
@@ -88,6 +90,7 @@ function getFileThumbnail(file: FileItem) {
           className="w-full h-full object-cover"
           crossOrigin="anonymous"
           muted
+          preload="metadata"
           onError={(e) => {
             console.error("Video thumbnail failed to load:", file.url);
           }}
@@ -100,7 +103,7 @@ function getFileThumbnail(file: FileItem) {
       </div>
     );
   }
-  
+
   // Fallback to icon
   return getFileIcon(file);
 }
@@ -172,7 +175,9 @@ export function FileGrid({
         <Card
           key={file.id}
           className={`group relative overflow-hidden transition-all hover:shadow-lg ${
-            file.type === "folder" || file.type === "file" ? "cursor-pointer" : ""
+            file.type === "folder" || file.type === "file"
+              ? "cursor-pointer"
+              : ""
           }`}
           draggable
           onDragStart={(e) => handleDragStart(e, file.id)}
@@ -196,11 +201,14 @@ export function FileGrid({
             </div>
 
             {/* Thumbnail */}
-            <div className={`mb-3 rounded-lg bg-muted overflow-hidden ${
-              file.mimeType?.startsWith("image/") || file.mimeType?.startsWith("video/")
-                ? "w-full h-32"
-                : "p-3 flex items-center justify-center"
-            }`}>
+            <div
+              className={`mb-3 rounded-lg bg-muted overflow-hidden ${
+                file.mimeType?.startsWith("image/") ||
+                file.mimeType?.startsWith("video/")
+                  ? "w-full h-32"
+                  : "p-3 flex items-center justify-center"
+              }`}
+            >
               {getFileThumbnail(file)}
             </div>
 

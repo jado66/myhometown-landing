@@ -32,6 +32,15 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { GenerateFolderStructureButton } from "./generate-folder-structure-button";
 import { GenerateShortcutsButton } from "./generate-shortcuts-button";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 export type FileItem = {
   id: string;
@@ -59,11 +68,19 @@ export function S3FileManager() {
   const [allFiles, setAllFiles] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewingFile, setViewingFile] = useState<FileItem | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(50);
+  const [deleteItem, setDeleteItem] = useState<FileItem | null>(null);
 
   // Load files from S3 on mount and when path changes
   useEffect(() => {
     loadFiles();
   }, [currentPath]);
+
+  // Reset to page 1 when search query or path changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, currentPath]);
 
   const loadFiles = async () => {
     try {
@@ -89,7 +106,26 @@ export function S3FileManager() {
 
   const getCurrentFiles = (): FileItem[] => {
     // Files are already filtered by the API based on the current path
-    return allFiles;
+    // Filter out unwanted file types
+    return allFiles.filter((file) => {
+      // Always show folders and shortcuts
+      if (file.type === "folder" || file.isShortcut) return true;
+
+      // Filter out files with unwanted MIME types
+      const mimeType = file.mimeType || "";
+      const unwantedTypes = [
+        "application/octet-stream",
+        "application/x-msdownload",
+        "application/x-executable",
+        "application/x-binary",
+      ];
+
+      // Allow files without a MIME type (legacy files)
+      if (!mimeType) return true;
+
+      // Filter out unwanted types
+      return !unwantedTypes.includes(mimeType);
+    });
   };
 
   const calculateFolderSize = async (folderKey: string): Promise<number> => {
@@ -124,9 +160,15 @@ export function S3FileManager() {
     file.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredFiles.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedFiles = filteredFiles.slice(startIndex, endIndex);
+
   // For folders, we'll show a loading state for size initially
   // and it will be calculated on the server when listing
-  const filesWithSizes = filteredFiles;
+  const filesWithSizes = paginatedFiles;
 
   const handleUpload = async (uploadedFiles: File[]) => {
     try {
@@ -236,11 +278,20 @@ export function S3FileManager() {
   };
 
   const handleDelete = async (id: string) => {
+    const item = allFiles.find((f) => f.id === id);
+    if (item) {
+      setDeleteItem(item);
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteItem) return;
+
     try {
       const response = await fetch("/api/s3/delete", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ key: id }),
+        body: JSON.stringify({ key: deleteItem.id }),
       });
 
       if (!response.ok) throw new Error("Failed to delete");
@@ -248,6 +299,7 @@ export function S3FileManager() {
       toast.success("Item deleted successfully");
 
       await loadFiles();
+      setDeleteItem(null);
     } catch (error) {
       console.error("Error deleting:", error);
       toast.error("Failed to delete item");
@@ -304,9 +356,8 @@ export function S3FileManager() {
             </div>
             <div>
               <h1 className="text-lg font-semibold text-foreground">
-                S3 Storage Manager
+                myHometown Shared Storage
               </h1>
-              <p className="text-sm text-muted-foreground">my-bucket-name</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -466,6 +517,119 @@ export function S3FileManager() {
                 allFolders={allFiles.filter((f) => f.type === "folder")}
               />
             )}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="mt-6 flex justify-center">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (currentPage > 1) setCurrentPage(currentPage - 1);
+                        }}
+                        className={
+                          currentPage === 1
+                            ? "pointer-events-none opacity-50"
+                            : "cursor-pointer"
+                        }
+                      />
+                    </PaginationItem>
+
+                    {/* First page */}
+                    {currentPage > 3 && (
+                      <>
+                        <PaginationItem>
+                          <PaginationLink
+                            href="#"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setCurrentPage(1);
+                            }}
+                            className="cursor-pointer"
+                          >
+                            1
+                          </PaginationLink>
+                        </PaginationItem>
+                        {currentPage > 4 && (
+                          <PaginationItem>
+                            <PaginationEllipsis />
+                          </PaginationItem>
+                        )}
+                      </>
+                    )}
+
+                    {/* Page numbers around current page */}
+                    {Array.from({ length: totalPages }, (_, i) => i + 1)
+                      .filter(
+                        (page) =>
+                          page === currentPage ||
+                          page === currentPage - 1 ||
+                          page === currentPage + 1 ||
+                          page === currentPage - 2 ||
+                          page === currentPage + 2
+                      )
+                      .filter((page) => page > 0 && page <= totalPages)
+                      .map((page) => (
+                        <PaginationItem key={page}>
+                          <PaginationLink
+                            href="#"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setCurrentPage(page);
+                            }}
+                            isActive={currentPage === page}
+                            className="cursor-pointer"
+                          >
+                            {page}
+                          </PaginationLink>
+                        </PaginationItem>
+                      ))}
+
+                    {/* Last page */}
+                    {currentPage < totalPages - 2 && (
+                      <>
+                        {currentPage < totalPages - 3 && (
+                          <PaginationItem>
+                            <PaginationEllipsis />
+                          </PaginationItem>
+                        )}
+                        <PaginationItem>
+                          <PaginationLink
+                            href="#"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setCurrentPage(totalPages);
+                            }}
+                            className="cursor-pointer"
+                          >
+                            {totalPages}
+                          </PaginationLink>
+                        </PaginationItem>
+                      </>
+                    )}
+
+                    <PaginationItem>
+                      <PaginationNext
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (currentPage < totalPages)
+                            setCurrentPage(currentPage + 1);
+                        }}
+                        className={
+                          currentPage === totalPages
+                            ? "pointer-events-none opacity-50"
+                            : "cursor-pointer"
+                        }
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            )}
           </>
         )}
       </main>
@@ -477,11 +641,16 @@ export function S3FileManager() {
             {filteredFiles.length} items (
             {filteredFiles.filter((f) => f.type === "folder").length} folders,{" "}
             {filteredFiles.filter((f) => f.type === "file").length} files)
+            {totalPages > 1 && (
+              <span className="ml-2">
+                • Page {currentPage} of {totalPages}
+              </span>
+            )}
           </span>
           <span>
-            Selected:{" "}
+            Total size:{" "}
             {formatBytes(
-              filesWithSizes.reduce((acc, f) => acc + (f.size || 0), 0)
+              filteredFiles.reduce((acc, f) => acc + (f.size || 0), 0)
             )}
           </span>
         </div>
@@ -547,6 +716,32 @@ export function S3FileManager() {
               Cancel
             </Button>
             <Button onClick={handleRename}>Rename</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={deleteItem !== null}
+        onOpenChange={(open) => !open && setDeleteItem(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete{" "}
+              <span className="font-semibold">{deleteItem?.name}</span>?
+              {deleteItem?.type === "folder" &&
+                " This will delete the folder and all of its contents."}{" "}
+              This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteItem(null)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={confirmDelete}>
+              Delete
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
