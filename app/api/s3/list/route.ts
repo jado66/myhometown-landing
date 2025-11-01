@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { listS3Objects } from "@/lib/s3-operations";
+import { listS3Objects, getDownloadUrl } from "@/lib/s3-operations";
 import { getShortcutMetadata } from "@/lib/s3-shortcuts";
 import type { FileItem } from "@/components/storage/s3-file-manager";
 import { s3Client, BUCKET_NAME } from "@/lib/s3-client";
@@ -98,6 +98,16 @@ export async function GET(request: NextRequest) {
         }
       }
 
+      // Generate download URL for files (but not for shortcut files)
+      let url: string | undefined;
+      if (!isFolder && !name.endsWith(".shortcut")) {
+        try {
+          url = await getDownloadUrl(key);
+        } catch (error) {
+          console.error(`Error generating URL for ${key}:`, error);
+        }
+      }
+
       return {
         id: key,
         name: name.replace(".shortcut", ""), // Remove .shortcut extension from display
@@ -106,6 +116,7 @@ export async function GET(request: NextRequest) {
         lastModified: obj.lastModified || new Date(),
         path: prefix || "/",
         mimeType: isFolder ? undefined : getMimeType(name),
+        url,
         isShortcut,
         shortcutTarget,
       } as FileItem & { isShortcut?: boolean; shortcutTarget?: string };

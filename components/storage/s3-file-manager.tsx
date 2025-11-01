@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { FileUpload } from "./file-upload";
 import { FileGrid } from "./file-grid";
 import { FileList } from "./file-list";
+import { FileViewer } from "./file-viewer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -57,6 +58,7 @@ export function S3FileManager() {
   const [renameName, setRenameName] = useState("");
   const [allFiles, setAllFiles] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [viewingFile, setViewingFile] = useState<FileItem | null>(null);
 
   // Load files from S3 on mount and when path changes
   useEffect(() => {
@@ -441,6 +443,7 @@ export function S3FileManager() {
                 onDelete={handleDelete}
                 onFolderClick={handleFolderClick}
                 onShortcutClick={handleShortcutClick}
+                onFileClick={setViewingFile}
                 onRename={(item) => {
                   setRenameItem(item);
                   setRenameName(item.name);
@@ -454,6 +457,7 @@ export function S3FileManager() {
                 onDelete={handleDelete}
                 onFolderClick={handleFolderClick}
                 onShortcutClick={handleShortcutClick}
+                onFileClick={setViewingFile}
                 onRename={(item) => {
                   setRenameItem(item);
                   setRenameName(item.name);
@@ -546,6 +550,8 @@ export function S3FileManager() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <FileViewer file={viewingFile} onClose={() => setViewingFile(null)} />
     </div>
   );
 }

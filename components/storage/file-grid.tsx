@@ -23,6 +23,7 @@ interface FileGridProps {
   onRename: (item: FileItem) => void;
   onMove: (itemId: string, targetFolderId: string | null) => void;
   allFolders: FileItem[];
+  onFileClick?: (file: FileItem) => void;
 }
 
 function getFileIcon(file: FileItem) {
@@ -56,6 +57,54 @@ function formatFileSize(bytes?: number) {
   return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
 }
 
+function getFileThumbnail(file: FileItem) {
+  const mimeType = file.mimeType || "";
+  
+  // Show image thumbnail
+  if (mimeType.startsWith("image/") && file.url) {
+    return (
+      <div className="w-full h-full overflow-hidden rounded-lg">
+        <img
+          src={file.url}
+          alt={file.name}
+          className="w-full h-full object-cover"
+          crossOrigin="anonymous"
+          onError={(e) => {
+            console.error("Thumbnail failed to load:", file.url);
+            // Fallback to file icon
+            e.currentTarget.style.display = "none";
+          }}
+        />
+      </div>
+    );
+  }
+  
+  // Show video thumbnail with play overlay
+  if (mimeType.startsWith("video/") && file.url) {
+    return (
+      <div className="relative w-full h-full overflow-hidden rounded-lg bg-black">
+        <video
+          src={file.url}
+          className="w-full h-full object-cover"
+          crossOrigin="anonymous"
+          muted
+          onError={(e) => {
+            console.error("Video thumbnail failed to load:", file.url);
+          }}
+        />
+        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+          <div className="rounded-full bg-white/90 p-2">
+            <Video className="h-4 w-4 text-black" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  // Fallback to icon
+  return getFileIcon(file);
+}
+
 export function FileGrid({
   files,
   onDelete,
@@ -64,6 +113,7 @@ export function FileGrid({
   onRename,
   onMove,
   allFolders,
+  onFileClick,
 }: FileGridProps) {
   const handleDragStart = (e: React.DragEvent, fileId: string) => {
     e.dataTransfer.setData("fileId", fileId);
@@ -110,6 +160,9 @@ export function FileGrid({
 
     if (file.type === "folder") {
       onFolderClick(file.name);
+    } else if (file.type === "file" && onFileClick) {
+      // Open file viewer for regular files
+      onFileClick(file);
     }
   };
 
@@ -119,7 +172,7 @@ export function FileGrid({
         <Card
           key={file.id}
           className={`group relative overflow-hidden transition-all hover:shadow-lg ${
-            file.type === "folder" ? "cursor-pointer" : ""
+            file.type === "folder" || file.type === "file" ? "cursor-pointer" : ""
           }`}
           draggable
           onDragStart={(e) => handleDragStart(e, file.id)}
@@ -130,17 +183,28 @@ export function FileGrid({
           onClick={(e) => handleCardClick(e, file)}
         >
           <div className="p-4">
-            <div className="mb-3 flex items-start justify-between">
-              <div className="rounded-lg bg-muted p-3">{getFileIcon(file)}</div>
+            {/* Actions Menu - Positioned Absolutely */}
+            <div className="absolute top-2 right-2 z-10">
               <FileActionsMenu
                 file={file}
                 onDelete={onDelete}
                 onRename={onRename}
                 onMove={onMove}
                 allFolders={allFolders}
-                className="h-8 w-8 opacity-0 transition-opacity group-hover:opacity-100"
+                className="h-8 w-8 opacity-0 transition-opacity group-hover:opacity-100 bg-background/80 backdrop-blur-sm"
               />
             </div>
+
+            {/* Thumbnail */}
+            <div className={`mb-3 rounded-lg bg-muted overflow-hidden ${
+              file.mimeType?.startsWith("image/") || file.mimeType?.startsWith("video/")
+                ? "w-full h-32"
+                : "p-3 flex items-center justify-center"
+            }`}>
+              {getFileThumbnail(file)}
+            </div>
+
+            {/* File Info */}
             <div className="space-y-1">
               <p className="truncate text-sm font-medium text-foreground">
                 {file.name}

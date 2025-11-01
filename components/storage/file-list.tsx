@@ -30,6 +30,7 @@ interface FileListProps {
   onRename: (item: FileItem) => void;
   onMove: (itemId: string, targetFolderId: string | null) => void;
   allFolders: FileItem[];
+  onFileClick?: (file: FileItem) => void;
 }
 
 function getFileIcon(file: FileItem) {
@@ -74,6 +75,57 @@ function formatDate(date: Date) {
   }).format(dateObj);
 }
 
+function getFileThumbnail(file: FileItem) {
+  const mimeType = file.mimeType || "";
+  
+  // Show image thumbnail
+  if (mimeType.startsWith("image/") && file.url) {
+    return (
+      <div className="w-10 h-10 overflow-hidden rounded-lg">
+        <img
+          src={file.url}
+          alt={file.name}
+          className="w-full h-full object-cover"
+          crossOrigin="anonymous"
+          onError={(e) => {
+            console.error("Thumbnail failed to load:", file.url);
+            e.currentTarget.style.display = "none";
+          }}
+        />
+      </div>
+    );
+  }
+  
+  // Show video thumbnail with play overlay
+  if (mimeType.startsWith("video/") && file.url) {
+    return (
+      <div className="relative w-10 h-10 overflow-hidden rounded-lg bg-black">
+        <video
+          src={file.url}
+          className="w-full h-full object-cover"
+          crossOrigin="anonymous"
+          muted
+          onError={(e) => {
+            console.error("Video thumbnail failed to load:", file.url);
+          }}
+        />
+        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+          <div className="rounded-full bg-white/90 p-1">
+            <Video className="h-2 w-2 text-black" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  // Fallback to icon
+  return (
+    <div className="rounded-lg bg-muted p-2">
+      {getFileIcon(file)}
+    </div>
+  );
+}
+
 export function FileList({
   files,
   onDelete,
@@ -82,6 +134,7 @@ export function FileList({
   onRename,
   onMove,
   allFolders,
+  onFileClick,
 }: FileListProps) {
   const handleDragStart = (e: React.DragEvent, fileId: string) => {
     e.dataTransfer.setData("fileId", fileId);
@@ -126,6 +179,9 @@ export function FileList({
 
     if (file.type === "folder") {
       onFolderClick(file.name);
+    } else if (file.type === "file" && onFileClick) {
+      // Open file viewer for regular files
+      onFileClick(file);
     }
   };
 
@@ -145,7 +201,7 @@ export function FileList({
             <TableRow
               key={file.id}
               className={`group ${
-                file.type === "folder" ? "cursor-pointer" : ""
+                file.type === "folder" || file.type === "file" ? "cursor-pointer" : ""
               }`}
               draggable
               onDragStart={(e) => handleDragStart(e, file.id)}
@@ -159,9 +215,7 @@ export function FileList({
             >
               <TableCell>
                 <div className="flex items-center gap-3">
-                  <div className="rounded-lg bg-muted p-2">
-                    {getFileIcon(file)}
-                  </div>
+                  {getFileThumbnail(file)}
                   <span className="font-medium text-foreground flex items-center gap-1">
                     {file.name}
                     {file.isShortcut && (
