@@ -25,6 +25,7 @@ import {
   Unlock,
   Eye,
   EyeOff,
+  Tag,
 } from "lucide-react";
 
 interface FileActionsMenuProps {
@@ -36,6 +37,7 @@ interface FileActionsMenuProps {
   onUnlock?: (fileId: string, fileName: string) => void;
   onHide?: (fileId: string, fileName: string) => void;
   onUnhide?: (fileId: string, fileName: string) => void;
+  onManageTags?: (file: FileItem) => void;
   allFolders: FileItem[];
   className?: string;
 }
@@ -49,6 +51,7 @@ export function FileActionsMenu({
   onUnlock,
   onHide,
   onUnhide,
+  onManageTags,
   allFolders,
   className,
 }: FileActionsMenuProps) {
@@ -70,6 +73,21 @@ export function FileActionsMenu({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="bg-white dark:bg-gray-900">
+        {/* Manage Tags - available for files only */}
+        {file.type === "file" && !file.isShortcut && onManageTags && (
+          <>
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                onManageTags(file);
+              }}
+            >
+              <Tag className="mr-2 h-4 w-4" />
+              Manage Tags
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
         {/* Only show Rename and Move if not locked or hidden */}
         {!hasStatus && (
           <>

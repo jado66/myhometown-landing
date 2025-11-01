@@ -33,6 +33,7 @@ interface FileListProps {
   onUnlock?: (fileId: string, fileName: string) => void;
   onHide?: (fileId: string, fileName: string) => void;
   onUnhide?: (fileId: string, fileName: string) => void;
+  onManageTags?: (file: FileItem) => void;
   allFolders: FileItem[];
   onFileClick?: (file: FileItem) => void;
 }
@@ -139,6 +140,7 @@ export function FileList({
   onUnlock,
   onHide,
   onUnhide,
+  onManageTags,
   allFolders,
   onFileClick,
 }: FileListProps) {
@@ -248,6 +250,7 @@ export function FileList({
                   onUnlock={onUnlock}
                   onHide={onHide}
                   onUnhide={onUnhide}
+                  onManageTags={onManageTags}
                   allFolders={allFolders}
                   className="h-8 w-8 opacity-0 transition-opacity group-hover:opacity-100"
                 />

@@ -26,6 +26,7 @@ interface FileGridProps {
   onUnlock?: (fileId: string, fileName: string) => void;
   onHide?: (fileId: string, fileName: string) => void;
   onUnhide?: (fileId: string, fileName: string) => void;
+  onManageTags?: (file: FileItem) => void;
   allFolders: FileItem[];
   onFileClick?: (file: FileItem) => void;
 }
@@ -123,6 +124,7 @@ export function FileGrid({
   onUnlock,
   onHide,
   onUnhide,
+  onManageTags,
   allFolders,
   onFileClick,
 }: FileGridProps) {
@@ -207,6 +209,7 @@ export function FileGrid({
                 onUnlock={onUnlock}
                 onHide={onHide}
                 onUnhide={onUnhide}
+                onManageTags={onManageTags}
                 allFolders={allFolders}
                 className="h-8 w-8 opacity-0 transition-opacity group-hover:opacity-100 bg-background/80 backdrop-blur-sm"
               />

@@ -5,6 +5,8 @@ import { FileUpload } from "./file-upload";
 import { FileGrid } from "./file-grid";
 import { FileList } from "./file-list";
 import { FileViewer } from "./file-viewer";
+import { TagManager } from "./tag-manager";
+import { TagFilter } from "./tag-filter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -57,6 +59,7 @@ export type FileItem = {
   isShortcut?: boolean;
   shortcutTarget?: string;
   status?: "locked" | "hidden";
+  tags?: string[];
 };
 
 export function S3FileManager() {
@@ -78,17 +81,19 @@ export function S3FileManager() {
     Map<string, "locked" | "hidden">
   >(new Map());
   const [showHiddenFiles, setShowHiddenFiles] = useState(false);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [tagManagerFile, setTagManagerFile] = useState<FileItem | null>(null);
 
   // Load files from S3 on mount and when path changes
   useEffect(() => {
     loadFiles();
     loadFileStatuses();
-  }, [currentPath]);
+  }, [currentPath, selectedTags]);
 
   // Reset to page 1 when search query or path changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, currentPath]);
+  }, [searchQuery, currentPath, selectedTags]);
 
   const loadFileStatuses = async () => {
     try {
@@ -110,24 +115,49 @@ export function S3FileManager() {
   const loadFiles = async () => {
     try {
       setLoading(true);
-      const prefix =
-        currentPath.length === 0 ? "" : currentPath.join("/") + "/";
 
-      const response = await fetch(
-        `/api/s3/list?prefix=${encodeURIComponent(prefix)}`
-      );
-      if (!response.ok) throw new Error("Failed to load files");
+      // If tags are selected, use tag search instead
+      if (selectedTags.length > 0) {
+        const prefix =
+          currentPath.length === 0 ? "" : currentPath.join("/") + "/";
+        const response = await fetch(
+          `/api/s3/search-by-tags?tags=${encodeURIComponent(
+            selectedTags.join(",")
+          )}&prefix=${encodeURIComponent(prefix)}`
+        );
+        if (!response.ok) throw new Error("Failed to search by tags");
 
-      const data = await response.json();
-      const files = data.files || [];
+        const data = await response.json();
+        const files = data.files || [];
 
-      // Mark files with their status from fileStatuses map
-      const filesWithStatus = files.map((file: FileItem) => ({
-        ...file,
-        status: fileStatuses.get(file.id),
-      }));
+        // Mark files with their status from fileStatuses map
+        const filesWithStatus = files.map((file: FileItem) => ({
+          ...file,
+          status: fileStatuses.get(file.id),
+        }));
 
-      setAllFiles(filesWithStatus);
+        setAllFiles(filesWithStatus);
+      } else {
+        // Normal file listing
+        const prefix =
+          currentPath.length === 0 ? "" : currentPath.join("/") + "/";
+
+        const response = await fetch(
+          `/api/s3/list?prefix=${encodeURIComponent(prefix)}`
+        );
+        if (!response.ok) throw new Error("Failed to load files");
+
+        const data = await response.json();
+        const files = data.files || [];
+
+        // Mark files with their status from fileStatuses map
+        const filesWithStatus = files.map((file: FileItem) => ({
+          ...file,
+          status: fileStatuses.get(file.id),
+        }));
+
+        setAllFiles(filesWithStatus);
+      }
     } catch (error) {
       console.error("Error loading files:", error);
       toast.error("Failed to load files from S3");
@@ -568,6 +598,10 @@ export function S3FileManager() {
             </Button>
             <GenerateFolderStructureButton />
             <GenerateShortcutsButton />
+            <TagFilter
+              selectedTags={selectedTags}
+              onTagsChange={setSelectedTags}
+            />
             <Button
               variant={showHiddenFiles ? "default" : "outline"}
               size="sm"
@@ -648,6 +682,7 @@ export function S3FileManager() {
                 onUnlock={handleUnlockFile}
                 onHide={handleHideFile}
                 onUnhide={handleUnhideFile}
+                onManageTags={setTagManagerFile}
                 allFolders={allFiles.filter((f) => f.type === "folder")}
               />
             ) : (
@@ -666,6 +701,7 @@ export function S3FileManager() {
                 onUnlock={handleUnlockFile}
                 onHide={handleHideFile}
                 onUnhide={handleUnhideFile}
+                onManageTags={setTagManagerFile}
                 allFolders={allFiles.filter((f) => f.type === "folder")}
               />
             )}
@@ -899,6 +935,12 @@ export function S3FileManager() {
       </Dialog>
 
       <FileViewer file={viewingFile} onClose={() => setViewingFile(null)} />
+
+      <TagManager
+        file={tagManagerFile}
+        onClose={() => setTagManagerFile(null)}
+        onTagsUpdated={loadFiles}
+      />
     </div>
   );
 }
