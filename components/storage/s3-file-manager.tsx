@@ -19,6 +19,8 @@ import {
   ChevronRight,
   Home,
   Loader2,
+  Lock,
+  Unlock,
 } from "lucide-react";
 import {
   Dialog,
@@ -54,6 +56,7 @@ export type FileItem = {
   children?: FileItem[];
   isShortcut?: boolean;
   shortcutTarget?: string;
+  status?: "locked" | "hidden";
 };
 
 export function S3FileManager() {
@@ -71,16 +74,38 @@ export function S3FileManager() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(50);
   const [deleteItem, setDeleteItem] = useState<FileItem | null>(null);
+  const [fileStatuses, setFileStatuses] = useState<
+    Map<string, "locked" | "hidden">
+  >(new Map());
+  const [showHiddenFiles, setShowHiddenFiles] = useState(false);
 
   // Load files from S3 on mount and when path changes
   useEffect(() => {
     loadFiles();
+    loadFileStatuses();
   }, [currentPath]);
 
   // Reset to page 1 when search query or path changes
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, currentPath]);
+
+  const loadFileStatuses = async () => {
+    try {
+      const response = await fetch("/api/s3/file-lock");
+      if (!response.ok) throw new Error("Failed to load file statuses");
+
+      const data = await response.json();
+      const statusMap = new Map<string, "locked" | "hidden">();
+      data.files.forEach((f: any) => {
+        statusMap.set(f.file_key, f.status);
+      });
+      setFileStatuses(statusMap);
+    } catch (error) {
+      console.error("Error loading file statuses:", error);
+      // Don't show error toast for this, as it's a background operation
+    }
+  };
 
   const loadFiles = async () => {
     try {
@@ -94,7 +119,15 @@ export function S3FileManager() {
       if (!response.ok) throw new Error("Failed to load files");
 
       const data = await response.json();
-      setAllFiles(data.files || []);
+      const files = data.files || [];
+
+      // Mark files with their status from fileStatuses map
+      const filesWithStatus = files.map((file: FileItem) => ({
+        ...file,
+        status: fileStatuses.get(file.id),
+      }));
+
+      setAllFiles(filesWithStatus);
     } catch (error) {
       console.error("Error loading files:", error);
       toast.error("Failed to load files from S3");
@@ -107,25 +140,36 @@ export function S3FileManager() {
   const getCurrentFiles = (): FileItem[] => {
     // Files are already filtered by the API based on the current path
     // Filter out unwanted file types
-    return allFiles.filter((file) => {
-      // Always show folders and shortcuts
-      if (file.type === "folder" || file.isShortcut) return true;
+    let filtered = allFiles.filter((file) => {
+      // Always show shortcuts
+      if (file.isShortcut) return true;
 
-      // Filter out files with unwanted MIME types
-      const mimeType = file.mimeType || "";
-      const unwantedTypes = [
-        "application/octet-stream",
-        "application/x-msdownload",
-        "application/x-executable",
-        "application/x-binary",
-      ];
+      // Filter out files with unwanted MIME types (but not folders)
+      if (file.type === "file") {
+        const mimeType = file.mimeType || "";
+        const unwantedTypes = [
+          "application/octet-stream",
+          "application/x-msdownload",
+          "application/x-executable",
+          "application/x-binary",
+        ];
 
-      // Allow files without a MIME type (legacy files)
-      if (!mimeType) return true;
+        // Allow files without a MIME type (legacy files)
+        if (!mimeType) return true;
 
-      // Filter out unwanted types
-      return !unwantedTypes.includes(mimeType);
+        // Filter out unwanted types
+        return !unwantedTypes.includes(mimeType);
+      }
+
+      return true;
     });
+
+    // Filter out hidden files and folders if showHiddenFiles is false
+    if (!showHiddenFiles) {
+      filtered = filtered.filter((file) => file.status !== "hidden");
+    }
+
+    return filtered;
   };
 
   const calculateFolderSize = async (folderKey: string): Promise<number> => {
@@ -345,6 +389,91 @@ export function S3FileManager() {
     loadFiles();
   };
 
+  const handleLockFile = async (fileId: string, fileName: string) => {
+    try {
+      const response = await fetch("/api/s3/file-lock", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileKey: fileId }),
+      });
+
+      if (!response.ok) throw new Error("Failed to lock file");
+
+      toast.success(`${fileName} has been locked`);
+
+      // Reload file statuses and refresh the file list
+      await loadFileStatuses();
+      await loadFiles();
+    } catch (error) {
+      console.error("Error locking file:", error);
+      toast.error("Failed to lock file");
+    }
+  };
+
+  const handleUnlockFile = async (fileId: string, fileName: string) => {
+    try {
+      const response = await fetch(
+        `/api/s3/file-lock?fileKey=${encodeURIComponent(fileId)}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to unlock file");
+
+      toast.success(`${fileName} has been unlocked`);
+
+      // Reload file statuses and refresh the file list
+      await loadFileStatuses();
+      await loadFiles();
+    } catch (error) {
+      console.error("Error unlocking file:", error);
+      toast.error("Failed to unlock file");
+    }
+  };
+
+  const handleHideFile = async (fileId: string, fileName: string) => {
+    try {
+      const response = await fetch("/api/s3/file-lock", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileKey: fileId, status: "hidden" }),
+      });
+
+      if (!response.ok) throw new Error("Failed to hide file");
+
+      toast.success(`${fileName} has been hidden`);
+
+      // Reload file statuses and refresh the file list
+      await loadFileStatuses();
+      await loadFiles();
+    } catch (error) {
+      console.error("Error hiding file:", error);
+      toast.error("Failed to hide file");
+    }
+  };
+
+  const handleUnhideFile = async (fileId: string, fileName: string) => {
+    try {
+      const response = await fetch("/api/s3/file-lock", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileKey: fileId, status: "locked" }),
+      });
+
+      if (!response.ok) throw new Error("Failed to unhide file");
+
+      toast.success(`${fileName} is now locked (no longer hidden)`);
+
+      // Reload file statuses and refresh the file list
+      await loadFileStatuses();
+      await loadFiles();
+    } catch (error) {
+      console.error("Error unhiding file:", error);
+      toast.error("Failed to unhide file");
+    }
+  };
+
   return (
     <div className="flex h-screen flex-col">
       {/* Header */}
@@ -439,6 +568,21 @@ export function S3FileManager() {
             </Button>
             <GenerateFolderStructureButton />
             <GenerateShortcutsButton />
+            <Button
+              variant={showHiddenFiles ? "default" : "outline"}
+              size="sm"
+              onClick={() => setShowHiddenFiles(!showHiddenFiles)}
+              title={
+                showHiddenFiles ? "Hide hidden files" : "Show hidden files"
+              }
+            >
+              {showHiddenFiles ? (
+                <Unlock className="mr-2 h-4 w-4" />
+              ) : (
+                <Lock className="mr-2 h-4 w-4" />
+              )}
+              {showHiddenFiles ? "Hide Hidden" : "Show Hidden"}
+            </Button>
             <div className="ml-2 flex items-center gap-1 rounded-md border border-border p-1">
               <Button
                 variant={viewMode === "grid" ? "secondary" : "ghost"}
@@ -500,6 +644,10 @@ export function S3FileManager() {
                   setRenameName(item.name);
                 }}
                 onMove={handleMove}
+                onLock={handleLockFile}
+                onUnlock={handleUnlockFile}
+                onHide={handleHideFile}
+                onUnhide={handleUnhideFile}
                 allFolders={allFiles.filter((f) => f.type === "folder")}
               />
             ) : (
@@ -514,6 +662,10 @@ export function S3FileManager() {
                   setRenameName(item.name);
                 }}
                 onMove={handleMove}
+                onLock={handleLockFile}
+                onUnlock={handleUnlockFile}
+                onHide={handleHideFile}
+                onUnhide={handleUnhideFile}
                 allFolders={allFiles.filter((f) => f.type === "folder")}
               />
             )}

@@ -125,9 +125,7 @@ export function GenerateShortcutsButton() {
                 </p>
                 <ul className="text-sm space-y-1 text-muted-foreground">
                   <li>• Cities/ ({result.cities} shortcuts)</li>
-                  <li>
-                    • Communities/ ({result.communities} shortcuts)
-                  </li>
+                  <li>• Communities/ ({result.communities} shortcuts)</li>
                 </ul>
               </div>
             </div>

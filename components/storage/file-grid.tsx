@@ -22,6 +22,10 @@ interface FileGridProps {
   onShortcutClick?: (targetPath: string) => void;
   onRename: (item: FileItem) => void;
   onMove: (itemId: string, targetFolderId: string | null) => void;
+  onLock?: (fileId: string, fileName: string) => void;
+  onUnlock?: (fileId: string, fileName: string) => void;
+  onHide?: (fileId: string, fileName: string) => void;
+  onUnhide?: (fileId: string, fileName: string) => void;
   allFolders: FileItem[];
   onFileClick?: (file: FileItem) => void;
 }
@@ -70,7 +74,7 @@ function getFileThumbnail(file: FileItem) {
           className="w-full h-full object-cover"
           loading="lazy"
           decoding="async"
-          style={{ imageRendering: 'auto' }}
+          style={{ imageRendering: "auto" }}
           onError={(e) => {
             console.error("Thumbnail failed to load:", file.url);
             // Fallback to file icon
@@ -115,6 +119,10 @@ export function FileGrid({
   onShortcutClick,
   onRename,
   onMove,
+  onLock,
+  onUnlock,
+  onHide,
+  onUnhide,
   allFolders,
   onFileClick,
 }: FileGridProps) {
@@ -195,6 +203,10 @@ export function FileGrid({
                 onDelete={onDelete}
                 onRename={onRename}
                 onMove={onMove}
+                onLock={onLock}
+                onUnlock={onUnlock}
+                onHide={onHide}
+                onUnhide={onUnhide}
                 allFolders={allFolders}
                 className="h-8 w-8 opacity-0 transition-opacity group-hover:opacity-100 bg-background/80 backdrop-blur-sm"
               />
