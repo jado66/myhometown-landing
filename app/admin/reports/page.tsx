@@ -38,6 +38,13 @@ import { DataSourceCard } from "@/components/admin/data-source-card";
 import { FiltersSortingCard } from "@/components/admin/filters-sorting-card";
 import { ReportMetadataCard } from "@/components/admin/report-metadata-card";
 import { formatIdentifier } from "@/lib/reporting";
+import {
+  listSavedQueries,
+  loadQuery,
+  saveQuery,
+  deleteQuery,
+  type SavedQuery,
+} from "@/lib/report-db";
 
 export default function ReportBuilderPage() {
   const [selectedTable, setSelectedTable] = useState<string>("");
@@ -63,21 +70,6 @@ export default function ReportBuilderPage() {
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [sorts, setSorts] = useState<SortSpec[]>([]); // chained sorts
   // Saved Queries state
-  interface SavedQuery {
-    id: string; // uuid
-    name: string;
-    table: string;
-    columns: string[];
-    filters: AdvancedFilter[];
-    sorts: SortSpec[];
-    includeRelations: boolean;
-    createdAt: number;
-    updatedAt: number;
-    // Report metadata
-    reportTitle?: string;
-    reportHeader?: string;
-    reportDescription?: string;
-  }
   const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
   const [savedQueryName, setSavedQueryName] = useState("");
   const [loadingSaved, setLoadingSaved] = useState(false);
@@ -161,116 +153,7 @@ export default function ReportBuilderPage() {
     toast.success(`Loaded template: ${tpl.name || tpl.table}`);
   };
 
-  // IndexedDB helpers (lightweight, no external lib)
-  const DB_NAME = "reportBuilderDB";
-  const DB_VERSION = 1;
-  const STORE = "queries";
 
-  function openDB(): Promise<IDBDatabase> {
-    return new Promise((resolve, reject) => {
-      const req = window.indexedDB.open(DB_NAME, DB_VERSION);
-      req.onerror = () => reject(req.error);
-      req.onupgradeneeded = () => {
-        const db = req.result;
-        if (!db.objectStoreNames.contains(STORE)) {
-          const store = db.createObjectStore(STORE, { keyPath: "id" });
-          store.createIndex("name", "name", { unique: true });
-        }
-      };
-      req.onsuccess = () => resolve(req.result);
-    });
-  }
-
-  // Saved query persistence helpers
-  async function listSavedQueries(): Promise<SavedQuery[]> {
-    try {
-      const db = await openDB();
-      return await new Promise((resolve, reject) => {
-        const tx = db.transaction(STORE, "readonly");
-        const store = tx.objectStore(STORE);
-        const req = store.getAll();
-        req.onerror = () => reject(req.error);
-        req.onsuccess = () => resolve(req.result as SavedQuery[]);
-      });
-    } catch (e) {
-      console.error("[report] listSavedQueries error", e);
-      return [];
-    }
-  }
-
-  async function loadQuery(id: string): Promise<SavedQuery | undefined> {
-    try {
-      const db = await openDB();
-      return await new Promise((resolve, reject) => {
-        const tx = db.transaction(STORE, "readonly");
-        const store = tx.objectStore(STORE);
-        const req = store.get(id);
-        req.onerror = () => reject(req.error);
-        req.onsuccess = () => resolve(req.result as SavedQuery | undefined);
-      });
-    } catch (e) {
-      console.error("[report] loadQuery error", e);
-      return undefined;
-    }
-  }
-
-  async function saveQuery(q: {
-    name: string;
-    table: string;
-    columns: string[];
-    filters: AdvancedFilter[];
-    sorts: SortSpec[];
-    includeRelations: boolean;
-    reportTitle?: string;
-    reportHeader?: string;
-    reportDescription?: string;
-  }): Promise<SavedQuery> {
-    const now = Date.now();
-    const record: SavedQuery = {
-      id: crypto.randomUUID(),
-      name: q.name,
-      table: q.table,
-      columns: q.columns,
-      filters: q.filters,
-      sorts: q.sorts,
-      includeRelations: q.includeRelations,
-      createdAt: now,
-      updatedAt: now,
-      reportTitle: q.reportTitle,
-      reportHeader: q.reportHeader,
-      reportDescription: q.reportDescription,
-    };
-    try {
-      const db = await openDB();
-      await new Promise<void>((resolve, reject) => {
-        const tx = db.transaction(STORE, "readwrite");
-        const store = tx.objectStore(STORE);
-        const req = store.add(record);
-        req.onerror = () => reject(req.error);
-        req.onsuccess = () => resolve();
-      });
-    } catch (e) {
-      console.error("[report] saveQuery error", e);
-      throw e;
-    }
-    return record;
-  }
-
-  async function deleteQuery(id: string): Promise<void> {
-    try {
-      const db = await openDB();
-      await new Promise<void>((resolve, reject) => {
-        const tx = db.transaction(STORE, "readwrite");
-        const store = tx.objectStore(STORE);
-        const req = store.delete(id);
-        req.onerror = () => reject(req.error);
-        req.onsuccess = () => resolve();
-      });
-    } catch (e) {
-      console.error("[report] deleteQuery error", e);
-      throw e;
-    }
-  }
 
   const currentTable = schema.find((t) => t.name === selectedTable);
 
@@ -565,6 +448,7 @@ export default function ReportBuilderPage() {
       toast.error("Select table/columns and provide a name to save.");
       return;
     }
+    setLoadingSaved(true);
     try {
       const record = await saveQuery({
         name: savedQueryName.trim(),
@@ -582,8 +466,14 @@ export default function ReportBuilderPage() {
       setSavedQueries(list.sort((a, b) => b.updatedAt - a.updatedAt));
       toast.success(`Saved query '${record.name}'`);
     } catch (e) {
-      console.error(e);
-      toast.error("Failed to save query");
+      console.error("Error saving query:", e);
+      if (e instanceof Error && e.message.includes("already exists")) {
+        toast.error(e.message);
+      } else {
+        toast.error("Failed to save query");
+      }
+    } finally {
+      setLoadingSaved(false);
     }
   };
 
@@ -596,10 +486,15 @@ export default function ReportBuilderPage() {
   };
 
   const handleDeleteQuery = async (id: string) => {
-    await deleteQuery(id);
-    const list = await listSavedQueries();
-    setSavedQueries(list.sort((a, b) => b.updatedAt - a.updatedAt));
-    toast.success("Deleted saved query");
+    try {
+      await deleteQuery(id);
+      const list = await listSavedQueries();
+      setSavedQueries(list.sort((a, b) => b.updatedAt - a.updatedAt));
+      toast.success("Deleted saved query");
+    } catch (e) {
+      console.error("Error deleting query:", e);
+      toast.error("Failed to delete query");
+    }
   };
   // Build template arrays for child component
   const combinedTemplates: TemplateInfo[] = [
@@ -651,6 +546,29 @@ export default function ReportBuilderPage() {
       if (!cancelled) {
         setSchema(data.tables);
         setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Load saved queries once on mount
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setLoadingSaved(true);
+      try {
+        const list = await listSavedQueries();
+        if (!cancelled) {
+          setSavedQueries(list.sort((a, b) => b.updatedAt - a.updatedAt));
+        }
+      } catch (e) {
+        console.error("Error loading saved queries:", e);
+      } finally {
+        if (!cancelled) {
+          setLoadingSaved(false);
+        }
       }
     })();
     return () => {
