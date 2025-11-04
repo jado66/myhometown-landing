@@ -98,9 +98,9 @@ export async function getTableData(
 ): Promise<any[]> {
   try {
     // Separate main table columns from related table columns
-    const mainColumns = columns.filter(col => !col.includes('.'));
-    const relatedColumns = columns.filter(col => col.includes('.'));
-    
+    const mainColumns = columns.filter((col) => !col.includes("."));
+    const relatedColumns = columns.filter((col) => col.includes("."));
+
     // Build select list starting with main table columns
     let selectList = mainColumns.join(",");
     // Identify filters & sorts that target related tables (table.column syntax)
@@ -122,12 +122,15 @@ export async function getTableData(
     }
     // Build effective related selections: merge explicit relatedSelections with columns from displayedColumns
     const ensuredSelections: RelatedSelections = { ...relatedSelections };
-    
+
     // Add related columns from the columns parameter (table.column format)
     for (const relCol of relatedColumns) {
-      const [rt, rc] = relCol.split('.');
+      const [rt, rc] = relCol.split(".");
       ensuredSelections[rt] = ensuredSelections[rt] || [];
-      if (!ensuredSelections[rt].includes(rc) && !ensuredSelections[rt].includes('*')) {
+      if (
+        !ensuredSelections[rt].includes(rc) &&
+        !ensuredSelections[rt].includes("*")
+      ) {
         ensuredSelections[rt].push(rc);
       }
     }

@@ -334,6 +334,31 @@ export default function ReportBuilderPage() {
     });
   }, [includeRelations, relationTableNames.join("|")]);
 
+  // Format date values to be human readable
+  const formatDateValue = (value: string): string => {
+    try {
+      const date = new Date(value);
+      // Check if it's a valid date and looks like an ISO timestamp
+      if (
+        !isNaN(date.getTime()) &&
+        typeof value === "string" &&
+        (value.includes("T") || value.includes("-"))
+      ) {
+        return new Intl.DateTimeFormat("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+          timeZoneName: "short",
+        }).format(date);
+      }
+    } catch {
+      // If parsing fails, return original value
+    }
+    return value;
+  };
+
   const toggleRelatedColumn = (table: string, col: string) => {
     setRelatedSelections((prev) => {
       const existing = prev[table] || [];
@@ -665,13 +690,24 @@ export default function ReportBuilderPage() {
     }
     const table = schema.find((t) => t.name === selectedTable);
     if (table) {
-      const allCols = table.columns.map((c) => c.name);
+      // Filter out UUID and ID columns by default
+      const filteredCols = table.columns
+        .map((c) => c.name)
+        .filter((colName) => {
+          // Exclude columns that are 'id', end with '_id', or contain 'uuid'
+          return !(
+            colName === "id" ||
+            colName.endsWith("_id") ||
+            colName.toLowerCase().includes("uuid")
+          );
+        });
+      
       // Only update if different to avoid extra renders
-      const sameLength = allCols.length === selectedColumns.length;
+      const sameLength = filteredCols.length === selectedColumns.length;
       const sameContent =
-        sameLength && allCols.every((c) => selectedColumns.includes(c));
+        sameLength && filteredCols.every((c) => selectedColumns.includes(c));
       if (!sameContent) {
-        setSelectedColumns(allCols);
+        setSelectedColumns(filteredCols);
         setFilters([]);
         setSorts([]);
       }
@@ -1006,9 +1042,8 @@ export default function ReportBuilderPage() {
                                       className="px-6 py-4 text-sm text-foreground whitespace-nowrap"
                                     >
                                       {value === null || value === undefined ? (
-                                        <span className="text-muted-foreground italic text-xs">
-                                          null
-                                        </span>
+                                        // Hide null values - show empty cell
+                                        ""
                                       ) : typeof value === "object" ? (
                                         <span
                                           className="text-muted-foreground text-xs"
@@ -1016,7 +1051,7 @@ export default function ReportBuilderPage() {
                                         >
                                           {(() => {
                                             const obj = value;
-                                            if (!obj) return "null";
+                                            if (!obj) return "";
                                             const preferred =
                                               obj.name || obj.title || obj.id;
                                             if (preferred)
@@ -1029,6 +1064,9 @@ export default function ReportBuilderPage() {
                                               : json;
                                           })()}
                                         </span>
+                                      ) : typeof value === "string" ? (
+                                        // Apply date formatting for string values that look like dates
+                                        formatDateValue(value)
                                       ) : (
                                         String(value)
                                       )}
