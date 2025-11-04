@@ -701,7 +701,7 @@ export default function ReportBuilderPage() {
             colName.toLowerCase().includes("uuid")
           );
         });
-      
+
       // Only update if different to avoid extra renders
       const sameLength = filteredCols.length === selectedColumns.length;
       const sameContent =
@@ -817,6 +817,7 @@ export default function ReportBuilderPage() {
             <FiltersSortingCard
               selectedTable={selectedTable}
               selectableColumns={selectableColumns}
+              schema={schema}
               filters={filters}
               setFilters={setFilters}
               sorts={sorts}

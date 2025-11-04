@@ -22,10 +22,12 @@ import {
 import { Filter, ArrowUpDown, X, Plus, Sliders } from "lucide-react";
 import { formatIdentifier } from "@/lib/reporting";
 import type { AdvancedFilter, SortSpec } from "@/app/actions/schema";
+import type { TableSchema } from "@/types/schema";
 
 interface FiltersSortingCardProps {
   selectedTable: string;
   selectableColumns: string[];
+  schema: TableSchema[];
   filters: AdvancedFilter[];
   setFilters: (
     f: AdvancedFilter[] | ((prev: AdvancedFilter[]) => AdvancedFilter[])
@@ -39,6 +41,7 @@ type Mode = "filter" | "sort" | null;
 export function FiltersSortingCard({
   selectedTable,
   selectableColumns,
+  schema,
   filters,
   setFilters,
   sorts,
@@ -57,6 +60,69 @@ export function FiltersSortingCard({
   const [sortDirection, setSortDirection] = React.useState<"asc" | "desc">(
     "asc"
   );
+
+  // Helper function to get column type from schema
+  const getColumnType = (columnName: string): string => {
+    if (!selectedTable || !columnName) return "text";
+    
+    // Handle related columns (table.column format)
+    if (columnName.includes(".")) {
+      const [tableName, colName] = columnName.split(".");
+      const table = schema.find(t => t.name === tableName);
+      const column = table?.columns.find(c => c.name === colName);
+      return column?.type || "text";
+    }
+    
+    // Handle main table columns
+    const table = schema.find(t => t.name === selectedTable);
+    const column = table?.columns.find(c => c.name === columnName);
+    return column?.type || "text";
+  };
+
+  // Helper function to determine if a column type is numeric
+  const isNumericType = (type: string): boolean => {
+    return /^(integer|bigint|smallint|decimal|numeric|real|double|float|money)/.test(type.toLowerCase());
+  };
+
+  // Helper function to determine if a column type is date/time
+  const isDateTimeType = (type: string): boolean => {
+    return /^(timestamp|date|time|datetime|timestamptz)/.test(type.toLowerCase());
+  };
+
+  // Helper function to determine if a column type is boolean
+  const isBooleanType = (type: string): boolean => {
+    return /^(boolean|bool)/.test(type.toLowerCase());
+  };
+
+  // Get appropriate operators for column type
+  const getOperatorsForColumn = (columnName: string) => {
+    const type = getColumnType(columnName);
+    const baseOperators = [
+      { v: "eq", l: "Equals" },
+      { v: "in", l: "In List" },
+    ];
+
+    if (isNumericType(type) || isDateTimeType(type)) {
+      return [
+        ...baseOperators,
+        { v: "gt", l: ">" },
+        { v: "gte", l: ">=" },
+        { v: "lt", l: "<" },
+        { v: "lte", l: "<=" },
+        { v: "between", l: "Between" },
+      ];
+    } else if (isBooleanType(type)) {
+      return baseOperators;
+    } else {
+      // Text type
+      return [
+        ...baseOperators,
+        { v: "contains", l: "Contains" },
+        { v: "startsWith", l: "Starts With" },
+        { v: "endsWith", l: "Ends With" },
+      ];
+    }
+  };
 
   const handleAddFilter = () => {
     if (!filterColumn || !filterValue) return;
@@ -97,6 +163,109 @@ export function FiltersSortingCard({
 
   const removeSort = (column: string) => {
     setSorts((prev: SortSpec[]) => prev.filter((s) => s.column !== column));
+  };
+
+  // Get appropriate placeholder text for column type
+  const getPlaceholderForColumn = (columnName: string, isSecondValue = false): string => {
+    if (!columnName) return "Enter value";
+    
+    const type = getColumnType(columnName);
+    const suffix = isSecondValue ? " (to)" : "";
+    
+    if (isBooleanType(type)) {
+      return `Select true/false${suffix}`;
+    } else if (isDateTimeType(type)) {
+      return `Select date/time${suffix}`;
+    } else if (isNumericType(type)) {
+      return `Enter number${suffix}`;
+    } else {
+      return `Enter text${suffix}`;
+    }
+  };
+
+  // Smart input component based on column type
+  const renderValueInput = (
+    value: string,
+    onChange: (value: string) => void,
+    baseLabel: string,
+    disabled: boolean,
+    id: string,
+    isSecondValue = false
+  ) => {
+    const placeholder = getPlaceholderForColumn(filterColumn, isSecondValue);
+    
+    if (!filterColumn) {
+      return (
+        <Input
+          id={id}
+          placeholder={placeholder}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          disabled={disabled}
+          className="h-10 bg-background border-border/50"
+        />
+      );
+    }
+
+    const type = getColumnType(filterColumn);
+    
+    if (isBooleanType(type)) {
+      return (
+        <Select value={value} onValueChange={onChange} disabled={disabled}>
+          <SelectTrigger id={id} className="h-10 bg-background border-border/50">
+            <SelectValue placeholder={placeholder} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="true">True</SelectItem>
+            <SelectItem value="false">False</SelectItem>
+          </SelectContent>
+        </Select>
+      );
+    } else if (isDateTimeType(type)) {
+      // Determine the appropriate date input type based on column type
+      const inputType = type.toLowerCase().includes('date') && !type.toLowerCase().includes('time') 
+        ? 'date' 
+        : type.toLowerCase().includes('time') && !type.toLowerCase().includes('date')
+        ? 'time'
+        : 'datetime-local';
+        
+      return (
+        <Input
+          id={id}
+          type={inputType}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          disabled={disabled}
+          className="h-10 bg-background border-border/50"
+          placeholder={placeholder}
+        />
+      );
+    } else if (isNumericType(type)) {
+      return (
+        <Input
+          id={id}
+          type="number"
+          step="any"
+          placeholder={placeholder}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          disabled={disabled}
+          className="h-10 bg-background border-border/50"
+        />
+      );
+    } else {
+      // Text input for strings
+      return (
+        <Input
+          id={id}
+          placeholder={placeholder}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          disabled={disabled}
+          className="h-10 bg-background border-border/50"
+        />
+      );
+    }
   };
 
   return (
@@ -156,7 +325,17 @@ export function FiltersSortingCard({
                 </Label>
                 <Select
                   value={filterColumn}
-                  onValueChange={(v) => setFilterColumn(v)}
+                  onValueChange={(v) => {
+                    setFilterColumn(v);
+                    // Reset operator to ensure it's valid for the new column type
+                    const operators = getOperatorsForColumn(v);
+                    if (operators.length > 0 && !operators.find(op => op.v === filterOperator)) {
+                      setFilterOperator(operators[0].v);
+                    }
+                    // Reset values when column changes
+                    setFilterValue("");
+                    setFilterValueTo("");
+                  }}
                 >
                   <SelectTrigger
                     id="filter-column"
@@ -192,18 +371,7 @@ export function FiltersSortingCard({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {[
-                      { v: "eq", l: "Equals" },
-                      { v: "contains", l: "Contains" },
-                      { v: "startsWith", l: "Starts With" },
-                      { v: "endsWith", l: "Ends With" },
-                      { v: "gt", l: ">" },
-                      { v: "gte", l: ">=" },
-                      { v: "lt", l: "<" },
-                      { v: "lte", l: "<=" },
-                      { v: "between", l: "Between" },
-                      { v: "in", l: "In List" },
-                    ].map((o) => (
+                    {getOperatorsForColumn(filterColumn).map((o) => (
                       <SelectItem key={o.v} value={o.v}>
                         {o.l}
                       </SelectItem>
@@ -218,24 +386,24 @@ export function FiltersSortingCard({
                 >
                   Value{filterOperator === "between" ? " From" : ""}
                 </Label>
-                <Input
-                  id="filter-value"
-                  placeholder="Enter value"
-                  value={filterValue}
-                  onChange={(e) => setFilterValue(e.target.value)}
-                  disabled={!filterColumn}
-                  className="h-10 bg-background border-border/50"
-                />
-                {filterOperator === "between" && (
-                  <Input
-                    id="filter-value-to"
-                    className="h-10 bg-background border-border/50"
-                    placeholder="Value To"
-                    value={filterValueTo}
-                    onChange={(e) => setFilterValueTo(e.target.value)}
-                    disabled={!filterColumn}
-                  />
+                {renderValueInput(
+                  filterValue,
+                  setFilterValue,
+                  "Value",
+                  !filterColumn,
+                  "filter-value",
+                  false
                 )}
+                {filterOperator === "between" && 
+                  renderValueInput(
+                    filterValueTo,
+                    setFilterValueTo,
+                    "Value To",
+                    !filterColumn,
+                    "filter-value-to",
+                    true
+                  )
+                }
               </div>
             </div>
             <div className="flex gap-2 justify-end pt-2">
