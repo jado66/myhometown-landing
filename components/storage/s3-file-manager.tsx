@@ -7,6 +7,8 @@ import { FileList } from "./file-list";
 import { FileViewer } from "./file-viewer";
 import { TagManager } from "./tag-manager";
 import { TagFilter } from "./tag-filter";
+import { TaggedImagesSelect } from "./tagged-images-select";
+import { CommunityImagesSelect } from "./community-images-select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -23,6 +25,7 @@ import {
   Loader2,
   Lock,
   Unlock,
+  Image as ImageIcon,
 } from "lucide-react";
 import {
   Dialog,
@@ -33,6 +36,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { GenerateFolderStructureButton } from "./generate-folder-structure-button";
 import { GenerateShortcutsButton } from "./generate-shortcuts-button";
@@ -45,6 +56,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { useLocalStorage } from "@/hooks/use-local-storage";
 
 export type FileItem = {
   id: string;
@@ -63,7 +75,10 @@ export type FileItem = {
 };
 
 export function S3FileManager() {
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [viewMode, setViewMode] = useLocalStorage<"grid" | "list">(
+    "shared-storage-view-mode",
+    "grid"
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [showUpload, setShowUpload] = useState(false);
   const [currentPath, setCurrentPath] = useState<string[]>([]);
@@ -83,6 +98,9 @@ export function S3FileManager() {
   const [showHiddenFiles, setShowHiddenFiles] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [tagManagerFile, setTagManagerFile] = useState<FileItem | null>(null);
+  const [showImageSelect, setShowImageSelect] = useState(false);
+  const [showCommunityImageSelect, setShowCommunityImageSelect] =
+    useState(false);
 
   // Load files from S3 on mount and when path changes
   useEffect(() => {
@@ -529,9 +547,53 @@ export function S3FileManager() {
             <Button variant="ghost" size="icon" onClick={handleRefresh}>
               <RefreshCw className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="icon">
-              <Settings className="h-4 w-4" />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Settings className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="w-56 bg-white dark:bg-gray-900"
+              >
+                <DropdownMenuLabel>Settings & Tools</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => setShowHiddenFiles(!showHiddenFiles)}
+                  className="cursor-pointer"
+                >
+                  {showHiddenFiles ? (
+                    <Unlock className="mr-2 h-4 w-4" />
+                  ) : (
+                    <Lock className="mr-2 h-4 w-4" />
+                  )}
+                  {showHiddenFiles ? "Hide Hidden Files" : "Show Hidden Files"}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => setShowImageSelect(true)}
+                  className="cursor-pointer"
+                >
+                  <ImageIcon className="mr-2 h-4 w-4" />
+                  Test Image Select (Tag)
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => setShowCommunityImageSelect(true)}
+                  className="cursor-pointer"
+                >
+                  <ImageIcon className="mr-2 h-4 w-4" />
+                  Test Community Images
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild onSelect={(e) => e.preventDefault()}>
+                  <GenerateFolderStructureButton />
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild onSelect={(e) => e.preventDefault()}>
+                  <GenerateShortcutsButton />
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </header>
@@ -596,27 +658,10 @@ export function S3FileManager() {
               <FolderPlus className="mr-2 h-4 w-4" />
               New Folder
             </Button>
-            <GenerateFolderStructureButton />
-            <GenerateShortcutsButton />
             <TagFilter
               selectedTags={selectedTags}
               onTagsChange={setSelectedTags}
             />
-            <Button
-              variant={showHiddenFiles ? "default" : "outline"}
-              size="sm"
-              onClick={() => setShowHiddenFiles(!showHiddenFiles)}
-              title={
-                showHiddenFiles ? "Hide hidden files" : "Show hidden files"
-              }
-            >
-              {showHiddenFiles ? (
-                <Unlock className="mr-2 h-4 w-4" />
-              ) : (
-                <Lock className="mr-2 h-4 w-4" />
-              )}
-              {showHiddenFiles ? "Hide Hidden" : "Show Hidden"}
-            </Button>
             <div className="ml-2 flex items-center gap-1 rounded-md border border-border p-1">
               <Button
                 variant={viewMode === "grid" ? "secondary" : "ghost"}
@@ -940,6 +985,25 @@ export function S3FileManager() {
         file={tagManagerFile}
         onClose={() => setTagManagerFile(null)}
         onTagsUpdated={loadFiles}
+      />
+
+      <TaggedImagesSelect
+        tag="Event Photo"
+        open={showImageSelect}
+        onClose={() => setShowImageSelect(false)}
+        onSelect={(url) => {
+          toast.success(`Selected image: ${url}`);
+        }}
+      />
+
+      <CommunityImagesSelect
+        city="Ogden"
+        community="South"
+        open={showCommunityImageSelect}
+        onClose={() => setShowCommunityImageSelect(false)}
+        onSelect={(url) => {
+          toast.success(`Selected community image: ${url}`);
+        }}
       />
     </div>
   );

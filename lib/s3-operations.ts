@@ -200,7 +200,8 @@ export async function getDownloadUrl(key: string): Promise<string> {
       Key: key,
     });
 
-    const url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+    // Set expiration to 7 days (maximum allowed by AWS)
+    const url = await getSignedUrl(s3Client, command, { expiresIn: 604800 }); // 7 days = 604800 seconds
     return url;
   } catch (error) {
     console.error("Error generating download URL:", error);

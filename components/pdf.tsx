@@ -16,10 +16,23 @@ const styles = StyleSheet.create({
   header: {
     marginBottom: 20,
   },
+  reportHeader: {
+    fontSize: 12,
+    color: "#666",
+    marginBottom: 5,
+    textTransform: "uppercase",
+    letterSpacing: 1,
+  },
   title: {
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 5,
+  },
+  description: {
+    fontSize: 10,
+    color: "#444",
+    marginBottom: 10,
+    lineHeight: 1.5,
   },
   subtitle: {
     fontSize: 10,
@@ -63,11 +76,18 @@ const styles = StyleSheet.create({
   },
 });
 
+interface ReportMetadata {
+  title?: string;
+  header?: string;
+  description?: string;
+}
+
 interface PDFReportProps {
   tableName: string;
   columns: string[];
   data: any[];
   includeRelations: boolean;
+  metadata?: ReportMetadata;
 }
 
 function PDFReport({
@@ -75,6 +95,7 @@ function PDFReport({
   columns,
   data,
   includeRelations,
+  metadata,
 }: PDFReportProps) {
   const now = new Date().toLocaleString();
 
@@ -86,12 +107,22 @@ function PDFReport({
         style={styles.page}
       >
         <View style={styles.header}>
-          <Text style={styles.title}>Data Report: {tableName}</Text>
+          {metadata?.header && (
+            <Text style={styles.reportHeader}>{metadata.header}</Text>
+          )}
+          <Text style={styles.title}>
+            {metadata?.title || `Data Report: ${tableName}`}
+          </Text>
+          {metadata?.description && (
+            <Text style={styles.description}>{metadata.description}</Text>
+          )}
           <Text style={styles.subtitle}>
             {columns.length} columns • {data.length} rows
             {includeRelations && " • With relations"}
           </Text>
-          <Text style={styles.metadata}>Generated on {now}</Text>
+          <Text style={styles.metadata}>
+            Source: {tableName} • Generated on {now}
+          </Text>
         </View>
 
         <View style={styles.table}>
@@ -128,7 +159,8 @@ export async function exportToPDF(
   tableName: string,
   columns: string[],
   data: any[],
-  includeRelations: boolean
+  includeRelations: boolean,
+  metadata?: ReportMetadata
 ) {
   const blob = await pdf(
     <PDFReport
@@ -136,6 +168,7 @@ export async function exportToPDF(
       columns={columns}
       data={data}
       includeRelations={includeRelations}
+      metadata={metadata}
     />
   ).toBlob();
 

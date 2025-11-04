@@ -32,6 +32,9 @@ export interface TemplateInfo {
   includeRelations: boolean;
   filters: AdvancedFilter[];
   sorts: SortSpec[];
+  reportTitle?: string;
+  reportHeader?: string;
+  reportDescription?: string;
 }
 
 interface ReportTemplatesCardProps {

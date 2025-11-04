@@ -1,5 +1,22 @@
 "use client";
 import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import {
   Card,
   CardHeader,
   CardTitle,
@@ -13,7 +30,69 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import type { TableSchema } from "@/types/schema";
 import { formatIdentifier } from "@/lib/reporting";
-import { Columns3, CheckSquare, Square } from "lucide-react";
+import { Columns3, CheckSquare, Square, GripVertical } from "lucide-react";
+
+interface SortableColumnItemProps {
+  id: string;
+  columnName: string;
+  index: number;
+  isSelected: boolean;
+  onToggle: () => void;
+}
+
+function SortableColumnItem({
+  id,
+  columnName,
+  index,
+  isSelected,
+  onToggle,
+}: SortableColumnItemProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`flex items-start space-x-2 p-2.5 rounded-md hover:bg-background/80 transition-colors group ${
+        isDragging ? "bg-primary/10 shadow-lg z-50" : ""
+      }`}
+    >
+      <div
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing mt-0.5 touch-none"
+      >
+        <GripVertical className="h-5 w-5 text-muted-foreground hover:text-primary transition-colors" />
+      </div>
+      <Checkbox
+        id={`col-${id}`}
+        checked={isSelected}
+        onCheckedChange={onToggle}
+        className="mt-0.5 border-border/50 text-white"
+      />
+      <Label
+        htmlFor={`col-${id}`}
+        className="text-sm font-normal leading-relaxed peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-1"
+      >
+        <span className="font-medium">{index + 1}.</span>{" "}
+        {formatIdentifier(columnName)}
+      </Label>
+    </div>
+  );
+}
 
 interface ColumnsCardProps {
   schema: TableSchema[];
@@ -40,6 +119,13 @@ export function ColumnsCard({
   relatedSelections,
   setRelatedSelections,
 }: ColumnsCardProps) {
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
   const toggleColumn = (columnName: string) => {
     setSelectedColumns((prev: string[]) =>
       prev.includes(columnName)
@@ -49,6 +135,15 @@ export function ColumnsCard({
   };
 
   const toggleRelatedColumn = (table: string, col: string) => {
+    const columnPath = `${table}.${col}`;
+    setSelectedColumns((prev: string[]) => {
+      if (prev.includes(columnPath)) {
+        return prev.filter((c: string) => c !== columnPath);
+      } else {
+        return [...prev, columnPath];
+      }
+    });
+    
     setRelatedSelections((prev) => {
       const existing = prev[table] || [];
       const updated = existing.includes(col)
@@ -56,6 +151,18 @@ export function ColumnsCard({
         : [...existing, col];
       return { ...prev, [table]: updated };
     });
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      setSelectedColumns((items) => {
+        const oldIndex = items.indexOf(active.id as string);
+        const newIndex = items.indexOf(over.id as string);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
   };
 
   return (
@@ -135,63 +242,107 @@ export function ColumnsCard({
             </div>
             <ScrollArea className="h-[300px] rounded-lg border border-border/50 bg-muted/20 p-4">
               <div className="space-y-2">
-                {/* Main table columns */}
-                {currentTable.columns.map((column) => (
-                  <div
-                    key={column.name}
-                    className="flex items-start space-x-3 p-2.5 rounded-md hover:bg-background/80 transition-colors"
+                {/* All selected columns (main + related) - draggable in mixed order */}
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleDragEnd}
+                >
+                  <SortableContext
+                    items={selectedColumns}
+                    strategy={verticalListSortingStrategy}
                   >
-                    <Checkbox
-                      id={`col-${column.name}`}
-                      checked={selectedColumns.includes(column.name)}
-                      onCheckedChange={() => toggleColumn(column.name)}
-                      className="mt-0.5 border-border/50 text-white"
-                    />
-                    <Label
-                      htmlFor={`col-${column.name}`}
-                      className="text-sm font-normal leading-relaxed peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-1"
-                    >
-                      {formatIdentifier(column.name)}
-                    </Label>
-                  </div>
-                ))}
+                    {selectedColumns.map((columnPath, index) => {
+                      // Check if it's a related column (contains ".")
+                      const isRelated = columnPath.includes(".");
+                      const displayName = isRelated
+                        ? columnPath // e.g., "users.name"
+                        : columnPath;
+                      
+                      return (
+                        <SortableColumnItem
+                          key={columnPath}
+                          id={columnPath}
+                          columnName={displayName}
+                          index={index}
+                          isSelected={true}
+                          onToggle={() => {
+                            if (isRelated) {
+                              const [table, col] = columnPath.split(".");
+                              toggleRelatedColumn(table, col);
+                            } else {
+                              toggleColumn(columnPath);
+                            }
+                          }}
+                        />
+                      );
+                    })}
+                  </SortableContext>
+                </DndContext>
 
-                {/* Related table columns */}
+                {/* Unselected main table columns */}
+                {currentTable.columns
+                  .filter((c) => !selectedColumns.includes(c.name))
+                  .map((column) => (
+                    <div
+                      key={column.name}
+                      className="flex items-start space-x-2 p-2.5 rounded-md hover:bg-background/80 transition-colors opacity-60"
+                    >
+                      <div className="w-[28px]"></div>
+                      <Checkbox
+                        id={`col-${column.name}`}
+                        checked={false}
+                        onCheckedChange={() => toggleColumn(column.name)}
+                        className="mt-0.5 border-border/50 text-white"
+                      />
+                      <Label
+                        htmlFor={`col-${column.name}`}
+                        className="text-sm font-normal leading-relaxed peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-1"
+                      >
+                        {formatIdentifier(column.name)}
+                      </Label>
+                    </div>
+                  ))}
+
+                {/* Unselected related table columns */}
                 {includeRelations && relationTableNames.length > 0 && (
                   <>
                     {relationTableNames.map((rt) => {
                       const relMeta = schema.find((t) => t.name === rt);
                       if (!relMeta) return null;
-                      const selectedForTable = relatedSelections[rt] || [];
+                      
                       return (
                         <div key={rt}>
                           <Separator className="my-4" />
                           <div className="mb-3 px-2.5">
                             <span className="text-sm font-semibold text-primary">
-                              {formatIdentifier(rt)}
+                              {formatIdentifier(rt)} (Related)
                             </span>
                           </div>
-                          {relMeta.columns.map((c) => (
-                            <div
-                              key={c.name}
-                              className="flex items-start space-x-3 p-2.5 rounded-md hover:bg-background/80 transition-colors"
-                            >
-                              <Checkbox
-                                id={`rel-${rt}-${c.name}`}
-                                checked={selectedForTable.includes(c.name)}
-                                onCheckedChange={() =>
-                                  toggleRelatedColumn(rt, c.name)
-                                }
-                                className="mt-0.5 border-border/50 text-white"
-                              />
-                              <Label
-                                htmlFor={`rel-${rt}-${c.name}`}
-                                className="text-sm font-normal leading-relaxed peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-1"
+                          {relMeta.columns
+                            .filter((c) => !selectedColumns.includes(`${rt}.${c.name}`))
+                            .map((c) => (
+                              <div
+                                key={c.name}
+                                className="flex items-start space-x-2 p-2.5 rounded-md hover:bg-background/80 transition-colors opacity-60"
                               >
-                                {formatIdentifier(c.name)}
-                              </Label>
-                            </div>
-                          ))}
+                                <div className="w-[28px]"></div>
+                                <Checkbox
+                                  id={`rel-${rt}-${c.name}`}
+                                  checked={false}
+                                  onCheckedChange={() =>
+                                    toggleRelatedColumn(rt, c.name)
+                                  }
+                                  className="mt-0.5 border-border/50 text-white"
+                                />
+                                <Label
+                                  htmlFor={`rel-${rt}-${c.name}`}
+                                  className="text-sm font-normal leading-relaxed peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-1"
+                                >
+                                  {formatIdentifier(c.name)}
+                                </Label>
+                              </div>
+                            ))}
                         </div>
                       );
                     })}

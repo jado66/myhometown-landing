@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useDebounce } from "use-debounce";
 import {
   Card,
   CardContent,
@@ -35,6 +36,7 @@ import {
 } from "@/components/admin/report-templates-card";
 import { DataSourceCard } from "@/components/admin/data-source-card";
 import { FiltersSortingCard } from "@/components/admin/filters-sorting-card";
+import { ReportMetadataCard } from "@/components/admin/report-metadata-card";
 import { formatIdentifier } from "@/lib/reporting";
 
 export default function ReportBuilderPage() {
@@ -46,6 +48,10 @@ export default function ReportBuilderPage() {
   const [previewData, setPreviewData] = useState<any[]>([]);
   const [loadingPreview, setLoadingPreview] = useState(false);
   const [exportingPDF, setExportingPDF] = useState(false);
+  // Report metadata state
+  const [reportTitle, setReportTitle] = useState<string>("");
+  const [reportHeader, setReportHeader] = useState<string>("");
+  const [reportDescription, setReportDescription] = useState<string>("");
   // Filtering state
   const [filterColumn, setFilterColumn] = useState<string>("");
   const [filterOperator, setFilterOperator] = useState<string>("eq");
@@ -67,6 +73,10 @@ export default function ReportBuilderPage() {
     includeRelations: boolean;
     createdAt: number;
     updatedAt: number;
+    // Report metadata
+    reportTitle?: string;
+    reportHeader?: string;
+    reportDescription?: string;
   }
   const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
   const [savedQueryName, setSavedQueryName] = useState("");
@@ -134,6 +144,9 @@ export default function ReportBuilderPage() {
     filters: AdvancedFilter[];
     sorts: SortSpec[];
     name?: string;
+    reportTitle?: string;
+    reportHeader?: string;
+    reportDescription?: string;
   }) => {
     // Ensure table exists before applying columns
     setSelectedTable(tpl.table);
@@ -142,6 +155,9 @@ export default function ReportBuilderPage() {
     setIncludeRelations(tpl.includeRelations);
     setFilters(tpl.filters);
     setSorts(tpl.sorts);
+    setReportTitle(tpl.reportTitle || "");
+    setReportHeader(tpl.reportHeader || "");
+    setReportDescription(tpl.reportDescription || "");
     toast.success(`Loaded template: ${tpl.name || tpl.table}`);
   };
 
@@ -205,6 +221,9 @@ export default function ReportBuilderPage() {
     filters: AdvancedFilter[];
     sorts: SortSpec[];
     includeRelations: boolean;
+    reportTitle?: string;
+    reportHeader?: string;
+    reportDescription?: string;
   }): Promise<SavedQuery> {
     const now = Date.now();
     const record: SavedQuery = {
@@ -217,6 +236,9 @@ export default function ReportBuilderPage() {
       includeRelations: q.includeRelations,
       createdAt: now,
       updatedAt: now,
+      reportTitle: q.reportTitle,
+      reportHeader: q.reportHeader,
+      reportDescription: q.reportDescription,
     };
     try {
       const db = await openDB();
@@ -348,6 +370,43 @@ export default function ReportBuilderPage() {
     }
   };
 
+  // Column ordering functions
+  const moveColumnUp = (columnName: string) => {
+    setSelectedColumns((prev) => {
+      const index = prev.indexOf(columnName);
+      if (index <= 0) return prev;
+      const newCols = [...prev];
+      [newCols[index - 1], newCols[index]] = [
+        newCols[index],
+        newCols[index - 1],
+      ];
+      return newCols;
+    });
+  };
+
+  const moveColumnDown = (columnName: string) => {
+    setSelectedColumns((prev) => {
+      const index = prev.indexOf(columnName);
+      if (index < 0 || index >= prev.length - 1) return prev;
+      const newCols = [...prev];
+      [newCols[index], newCols[index + 1]] = [
+        newCols[index + 1],
+        newCols[index],
+      ];
+      return newCols;
+    });
+  };
+
+  const moveColumnToPosition = (columnName: string, newIndex: number) => {
+    setSelectedColumns((prev) => {
+      const oldIndex = prev.indexOf(columnName);
+      if (oldIndex < 0) return prev;
+      const newCols = prev.filter((c) => c !== columnName);
+      newCols.splice(newIndex, 0, columnName);
+      return newCols;
+    });
+  };
+
   const refreshPreview = async () => {
     if (!selectedTable || selectedColumns.length === 0) return;
     setLoadingPreview(true);
@@ -423,7 +482,19 @@ export default function ReportBuilderPage() {
       }
       return out;
     });
-    exportToCSV(flattened, filename);
+
+    // Add metadata as header rows if provided
+    const metadata = {
+      reportTitle: reportTitle || undefined,
+      reportHeader: reportHeader || undefined,
+      reportDescription: reportDescription || undefined,
+      generatedAt: new Date().toLocaleString(),
+      table: selectedTable,
+      rowCount: previewData.length,
+      columnCount: displayedColumns.length,
+    };
+
+    exportToCSV(flattened, filename, metadata);
     toast.success(
       `CSV exported successfully. Downloaded ${previewData.length} rows to ${filename}.csv`
     );
@@ -442,7 +513,12 @@ export default function ReportBuilderPage() {
         selectedTable,
         selectedColumns,
         previewData,
-        includeRelations
+        includeRelations,
+        {
+          title: reportTitle,
+          header: reportHeader,
+          description: reportDescription,
+        }
       );
 
       toast.success("PDF exported successfully");
@@ -472,6 +548,9 @@ export default function ReportBuilderPage() {
         filters,
         sorts,
         includeRelations,
+        reportTitle,
+        reportHeader,
+        reportDescription,
       });
       setSavedQueryName("");
       const list = await listSavedQueries();
@@ -507,6 +586,9 @@ export default function ReportBuilderPage() {
       includeRelations: t.includeRelations,
       filters: t.filters,
       sorts: t.sorts,
+      reportTitle: undefined,
+      reportHeader: undefined,
+      reportDescription: undefined,
     })),
     ...savedQueries.map((q) => ({
       id: q.id,
@@ -516,6 +598,9 @@ export default function ReportBuilderPage() {
       includeRelations: q.includeRelations,
       filters: q.filters,
       sorts: q.sorts,
+      reportTitle: q.reportTitle,
+      reportHeader: q.reportHeader,
+      reportDescription: q.reportDescription,
     })),
   ];
 
@@ -527,6 +612,9 @@ export default function ReportBuilderPage() {
     includeRelations: q.includeRelations,
     filters: q.filters,
     sorts: q.sorts,
+    reportTitle: q.reportTitle,
+    reportHeader: q.reportHeader,
+    reportDescription: q.reportDescription,
   }));
 
   // Load schema once
@@ -557,6 +645,9 @@ export default function ReportBuilderPage() {
       setFilters(q.filters);
       setSorts(q.sorts);
       setIncludeRelations(q.includeRelations);
+      setReportTitle(q.reportTitle || "");
+      setReportHeader(q.reportHeader || "");
+      setReportDescription(q.reportDescription || "");
       setPendingLoadId(null);
       toast.success(`Loaded saved query: ${q.name}`);
     })();
@@ -587,22 +678,28 @@ export default function ReportBuilderPage() {
     }
   }, [selectedTable, schema]);
 
-  // Load preview whenever relevant selections change
+  // Debounce filter/sort/column changes to avoid excessive API calls
+  const [debouncedSelectedColumns] = useDebounce(selectedColumns, 500);
+  const [debouncedFilters] = useDebounce(filters, 500);
+  const [debouncedSorts] = useDebounce(sorts, 500);
+  const [debouncedRelatedSelections] = useDebounce(relatedSelections, 500);
+
+  // Load preview whenever relevant selections change (debounced)
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      if (!selectedTable || selectedColumns.length === 0) {
+      if (!selectedTable || debouncedSelectedColumns.length === 0) {
         setPreviewData([]);
         return;
       }
       setLoadingPreview(true);
       const data = await getTableData(
         selectedTable,
-        selectedColumns,
+        debouncedSelectedColumns,
         includeRelations,
-        filters,
-        sorts.length > 0 ? sorts : undefined,
-        relatedSelections
+        debouncedFilters,
+        debouncedSorts.length > 0 ? debouncedSorts : undefined,
+        debouncedRelatedSelections
       );
       if (!cancelled) {
         setPreviewData(data);
@@ -614,12 +711,11 @@ export default function ReportBuilderPage() {
     };
   }, [
     selectedTable,
-    selectedColumns,
+    debouncedSelectedColumns,
     includeRelations,
-    filters,
-    sorts,
-    // Trigger refetch when related selections change
-    JSON.stringify(relatedSelections),
+    debouncedFilters,
+    debouncedSorts,
+    debouncedRelatedSelections,
   ]);
   return (
     <div className="min-h-screen bg-background">
@@ -689,6 +785,14 @@ export default function ReportBuilderPage() {
               setFilters={setFilters}
               sorts={sorts}
               setSorts={setSorts}
+            />
+            <ReportMetadataCard
+              reportTitle={reportTitle}
+              setReportTitle={setReportTitle}
+              reportHeader={reportHeader}
+              setReportHeader={setReportHeader}
+              reportDescription={reportDescription}
+              setReportDescription={setReportDescription}
             />
           </div>
 
@@ -805,6 +909,26 @@ export default function ReportBuilderPage() {
                   </div>
                 ) : (
                   <div className="space-y-0">
+                    {/* Report Metadata Preview */}
+                    {(reportHeader || reportTitle || reportDescription) && (
+                      <div className="px-6 py-5 bg-gradient-to-r from-primary/5 to-accent/5 border-b border-border/50">
+                        {reportHeader && (
+                          <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-2">
+                            {reportHeader}
+                          </p>
+                        )}
+                        {reportTitle && (
+                          <h3 className="text-xl font-bold text-foreground mb-2">
+                            {reportTitle}
+                          </h3>
+                        )}
+                        {reportDescription && (
+                          <p className="text-sm text-muted-foreground leading-relaxed max-w-3xl">
+                            {reportDescription}
+                          </p>
+                        )}
+                      </div>
+                    )}
                     <div className="flex items-center justify-between px-6 py-4 bg-muted/30 border-b border-border/50">
                       <div className="flex items-center gap-3">
                         <Badge

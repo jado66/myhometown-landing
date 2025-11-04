@@ -40,6 +40,33 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.145 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.145 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.985 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.234 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.234 0 0);
+  --muted-foreground: oklch(0.634 0 0);
+  --accent: oklch(0.234 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.458 0.183 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.234 0 0);
+  --input: oklch(0.234 0 0);
+  --ring: oklch(0.381 0 0);
+  --chart-1: oklch(0.819 0.149 70.729);
+  --chart-2: oklch(0.7 0.139 191.267);
+  --chart-3: oklch(0.604 0.15 229.695);
+  --chart-4: oklch(0.919 0.093 94.415);
+  --chart-5: oklch(0.868 0.132 74.439);
+}
+
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -60,6 +87,11 @@
   --color-foreground: var(--foreground);
 
   --color-border: var(--border);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
 
   --color-success: #10b981;
   --color-warning: #f59e0b;

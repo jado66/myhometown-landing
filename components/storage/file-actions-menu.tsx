@@ -27,6 +27,7 @@ import {
   EyeOff,
   Tag,
 } from "lucide-react";
+import { toast } from "sonner";
 
 interface FileActionsMenuProps {
   file: FileItem;
@@ -59,6 +60,19 @@ export function FileActionsMenu({
   const isLocked = file.status === "locked";
   const isHidden = file.status === "hidden";
   const hasStatus = isLocked || isHidden;
+
+  const handleCopyLink = async () => {
+    if (file.url) {
+      try {
+        await navigator.clipboard.writeText(file.url);
+        // You can add a toast notification here if you have toast setup
+        toast.success("Link copied to clipboard");
+        console.log("Link copied to clipboard");
+      } catch (err) {
+        console.error("Failed to copy link:", err);
+      }
+    }
+  };
 
   return (
     <DropdownMenu>
@@ -100,35 +114,7 @@ export function FileActionsMenu({
               <Edit className="mr-2 h-4 w-4" />
               Rename
             </DropdownMenuItem>
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger>
-                <Move className="mr-2 h-4 w-4" />
-                Move to
-              </DropdownMenuSubTrigger>
-              <DropdownMenuSubContent className="bg-white dark:bg-gray-900">
-                <DropdownMenuItem
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onMove(file.id, null);
-                  }}
-                >
-                  Root Folder
-                </DropdownMenuItem>
-                {allFolders
-                  .filter((f) => f.id !== file.id)
-                  .map((folder) => (
-                    <DropdownMenuItem
-                      key={folder.id}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onMove(file.id, folder.id);
-                      }}
-                    >
-                      {folder.name}
-                    </DropdownMenuItem>
-                  ))}
-              </DropdownMenuSubContent>
-            </DropdownMenuSub>
+
             <DropdownMenuSeparator />
           </>
         )}
@@ -190,14 +176,19 @@ export function FileActionsMenu({
               <Download className="mr-2 h-4 w-4" />
               Download
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
-              <Share2 className="mr-2 h-4 w-4" />
-              Share
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
-              <Copy className="mr-2 h-4 w-4" />
-              Copy Link
-            </DropdownMenuItem>
+
+            {file.type === "file" && file.url && (
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCopyLink();
+                }}
+              >
+                <Copy className="mr-2 h-4 w-4" />
+                Copy Link
+              </DropdownMenuItem>
+            )}
+
             <DropdownMenuSeparator />
           </>
         )}
