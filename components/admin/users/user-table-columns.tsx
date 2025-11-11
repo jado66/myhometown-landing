@@ -33,7 +33,7 @@ const PERMISSION_LABELS = {
   administrator: "Global Administrator",
   texting: "Texting",
   dos_admin: "Days of Service Admin",
-  content_development: "Content Development",
+  content_development: "Content Management",
   missionary_volunteer_management: "Missionary Volunteer Management",
   classes_admin: "Classes Admin",
 } as const;

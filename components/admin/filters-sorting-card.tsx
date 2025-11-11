@@ -64,29 +64,33 @@ export function FiltersSortingCard({
   // Helper function to get column type from schema
   const getColumnType = (columnName: string): string => {
     if (!selectedTable || !columnName) return "text";
-    
+
     // Handle related columns (table.column format)
     if (columnName.includes(".")) {
       const [tableName, colName] = columnName.split(".");
-      const table = schema.find(t => t.name === tableName);
-      const column = table?.columns.find(c => c.name === colName);
+      const table = schema.find((t) => t.name === tableName);
+      const column = table?.columns.find((c) => c.name === colName);
       return column?.type || "text";
     }
-    
+
     // Handle main table columns
-    const table = schema.find(t => t.name === selectedTable);
-    const column = table?.columns.find(c => c.name === columnName);
+    const table = schema.find((t) => t.name === selectedTable);
+    const column = table?.columns.find((c) => c.name === columnName);
     return column?.type || "text";
   };
 
   // Helper function to determine if a column type is numeric
   const isNumericType = (type: string): boolean => {
-    return /^(integer|bigint|smallint|decimal|numeric|real|double|float|money)/.test(type.toLowerCase());
+    return /^(integer|bigint|smallint|decimal|numeric|real|double|float|money)/.test(
+      type.toLowerCase()
+    );
   };
 
   // Helper function to determine if a column type is date/time
   const isDateTimeType = (type: string): boolean => {
-    return /^(timestamp|date|time|datetime|timestamptz)/.test(type.toLowerCase());
+    return /^(timestamp|date|time|datetime|timestamptz)/.test(
+      type.toLowerCase()
+    );
   };
 
   // Helper function to determine if a column type is boolean
@@ -166,20 +170,23 @@ export function FiltersSortingCard({
   };
 
   // Get appropriate placeholder text for column type
-  const getPlaceholderForColumn = (columnName: string, isSecondValue = false): string => {
-    if (!columnName) return "Enter value";
-    
+  const getPlaceholderForColumn = (
+    columnName: string,
+    isSecondValue = false
+  ): string => {
+    if (!columnName) return "Enter value or use {{param1}}, {{param2}}";
+
     const type = getColumnType(columnName);
     const suffix = isSecondValue ? " (to)" : "";
-    
+
     if (isBooleanType(type)) {
-      return `Select true/false${suffix}`;
+      return `Select true/false${suffix} or use {{param1}}`;
     } else if (isDateTimeType(type)) {
-      return `Select date/time${suffix}`;
+      return `Select date/time${suffix} or use {{param1}}`;
     } else if (isNumericType(type)) {
-      return `Enter number${suffix}`;
+      return `Enter number${suffix} or use {{param1}}`;
     } else {
-      return `Enter text${suffix}`;
+      return `Enter text${suffix} or use {{param1}}`;
     }
   };
 
@@ -193,7 +200,7 @@ export function FiltersSortingCard({
     isSecondValue = false
   ) => {
     const placeholder = getPlaceholderForColumn(filterColumn, isSecondValue);
-    
+
     if (!filterColumn) {
       return (
         <Input
@@ -208,11 +215,14 @@ export function FiltersSortingCard({
     }
 
     const type = getColumnType(filterColumn);
-    
+
     if (isBooleanType(type)) {
       return (
         <Select value={value} onValueChange={onChange} disabled={disabled}>
-          <SelectTrigger id={id} className="h-10 bg-background border-border/50">
+          <SelectTrigger
+            id={id}
+            className="h-10 bg-background border-border/50"
+          >
             <SelectValue placeholder={placeholder} />
           </SelectTrigger>
           <SelectContent>
@@ -223,12 +233,15 @@ export function FiltersSortingCard({
       );
     } else if (isDateTimeType(type)) {
       // Determine the appropriate date input type based on column type
-      const inputType = type.toLowerCase().includes('date') && !type.toLowerCase().includes('time') 
-        ? 'date' 
-        : type.toLowerCase().includes('time') && !type.toLowerCase().includes('date')
-        ? 'time'
-        : 'datetime-local';
-        
+      const inputType =
+        type.toLowerCase().includes("date") &&
+        !type.toLowerCase().includes("time")
+          ? "date"
+          : type.toLowerCase().includes("time") &&
+            !type.toLowerCase().includes("date")
+          ? "time"
+          : "datetime-local";
+
       return (
         <Input
           id={id}
@@ -329,7 +342,10 @@ export function FiltersSortingCard({
                     setFilterColumn(v);
                     // Reset operator to ensure it's valid for the new column type
                     const operators = getOperatorsForColumn(v);
-                    if (operators.length > 0 && !operators.find(op => op.v === filterOperator)) {
+                    if (
+                      operators.length > 0 &&
+                      !operators.find((op) => op.v === filterOperator)
+                    ) {
                       setFilterOperator(operators[0].v);
                     }
                     // Reset values when column changes
@@ -394,7 +410,7 @@ export function FiltersSortingCard({
                   "filter-value",
                   false
                 )}
-                {filterOperator === "between" && 
+                {filterOperator === "between" &&
                   renderValueInput(
                     filterValueTo,
                     setFilterValueTo,
@@ -402,8 +418,7 @@ export function FiltersSortingCard({
                     !filterColumn,
                     "filter-value-to",
                     true
-                  )
-                }
+                  )}
               </div>
             </div>
             <div className="flex gap-2 justify-end pt-2">

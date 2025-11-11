@@ -2,6 +2,8 @@
  * IndexedDB utilities for report templates
  */
 
+import type { ReportVariable } from "@/components/admin/variables-card";
+
 export interface SavedQuery {
   id: string;
   name: string;
@@ -15,6 +17,7 @@ export interface SavedQuery {
   reportTitle?: string;
   reportHeader?: string;
   reportDescription?: string;
+  variables?: ReportVariable[];
 }
 
 const DB_NAME = "reportBuilderDB";
@@ -79,11 +82,14 @@ export async function saveQuery(q: {
   reportTitle?: string;
   reportHeader?: string;
   reportDescription?: string;
+  variables?: ReportVariable[];
 }): Promise<SavedQuery> {
   // Check for duplicate names first
   const existingQueries = await listSavedQueries();
-  if (existingQueries.some(existing => existing.name === q.name)) {
-    throw new Error(`A query with the name "${q.name}" already exists. Please choose a different name.`);
+  if (existingQueries.some((existing) => existing.name === q.name)) {
+    throw new Error(
+      `A query with the name "${q.name}" already exists. Please choose a different name.`
+    );
   }
 
   const now = Date.now();
@@ -100,6 +106,7 @@ export async function saveQuery(q: {
     reportTitle: q.reportTitle,
     reportHeader: q.reportHeader,
     reportDescription: q.reportDescription,
+    variables: q.variables,
   };
 
   try {
@@ -134,7 +141,10 @@ export async function deleteQuery(id: string): Promise<void> {
   }
 }
 
-export async function updateQuery(id: string, updates: Partial<SavedQuery>): Promise<SavedQuery> {
+export async function updateQuery(
+  id: string,
+  updates: Partial<SavedQuery>
+): Promise<SavedQuery> {
   try {
     const existing = await loadQuery(id);
     if (!existing) {

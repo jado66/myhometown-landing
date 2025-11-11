@@ -19,6 +19,7 @@ import {
   RefreshCw,
   BarChart3,
   Sparkles,
+  AlertCircle,
 } from "lucide-react";
 import {
   getSchemaData,
@@ -37,6 +38,10 @@ import {
 import { DataSourceCard } from "@/components/admin/data-source-card";
 import { FiltersSortingCard } from "@/components/admin/filters-sorting-card";
 import { ReportMetadataCard } from "@/components/admin/report-metadata-card";
+import {
+  VariablesCard,
+  type ReportVariable,
+} from "@/components/admin/variables-card";
 import { formatIdentifier } from "@/lib/reporting";
 import {
   listSavedQueries,
@@ -45,6 +50,13 @@ import {
   deleteQuery,
   type SavedQuery,
 } from "@/lib/report-db";
+import {
+  processFiltersWithVariables,
+  processMetadataWithVariables,
+  validateVariableReferences,
+  createTestValues,
+  validateAllTestValues,
+} from "@/lib/variables";
 
 export default function ReportBuilderPage() {
   const [selectedTable, setSelectedTable] = useState<string>("");
@@ -59,6 +71,9 @@ export default function ReportBuilderPage() {
   const [reportTitle, setReportTitle] = useState<string>("");
   const [reportHeader, setReportHeader] = useState<string>("");
   const [reportDescription, setReportDescription] = useState<string>("");
+  // Variables state
+  const [variables, setVariables] = useState<ReportVariable[]>([]);
+  const [testValues, setTestValues] = useState<Record<string, string>>({});
   // Filtering state
   const [filterColumn, setFilterColumn] = useState<string>("");
   const [filterOperator, setFilterOperator] = useState<string>("eq");
@@ -139,6 +154,7 @@ export default function ReportBuilderPage() {
     reportTitle?: string;
     reportHeader?: string;
     reportDescription?: string;
+    variables?: ReportVariable[];
   }) => {
     // Ensure table exists before applying columns
     setSelectedTable(tpl.table);
@@ -150,10 +166,17 @@ export default function ReportBuilderPage() {
     setReportTitle(tpl.reportTitle || "");
     setReportHeader(tpl.reportHeader || "");
     setReportDescription(tpl.reportDescription || "");
+    setVariables(tpl.variables || []);
+
+    // Create default test values for any loaded variables
+    if (tpl.variables && tpl.variables.length > 0) {
+      setTestValues(createTestValues(tpl.variables));
+    } else {
+      setTestValues({});
+    }
+
     toast.success(`Loaded template: ${tpl.name || tpl.table}`);
   };
-
-
 
   const currentTable = schema.find((t) => t.name === selectedTable);
 
@@ -315,19 +338,87 @@ export default function ReportBuilderPage() {
     });
   };
 
+  // Test variables function
+  const testVariables = async (
+    variableValues: Record<string, string>
+  ): Promise<boolean> => {
+    try {
+      // Validate test values
+      const validation = validateAllTestValues(variableValues, variables);
+      if (!validation.isValid) {
+        const errors = Object.entries(validation.errors)
+          .map(([name, error]) => `${name}: ${error}`)
+          .join(", ");
+        throw new Error(`Invalid test values: ${errors}`);
+      }
+
+      // Check if all variable references have corresponding definitions
+      const varCheck = validateVariableReferences(
+        filters,
+        {
+          title: reportTitle,
+          header: reportHeader,
+          description: reportDescription,
+        },
+        variables
+      );
+
+      if (!varCheck.isValid && varCheck.missingVariables.length > 0) {
+        throw new Error(
+          `Missing variable definitions: ${varCheck.missingVariables.join(
+            ", "
+          )}`
+        );
+      }
+
+      // Try to process filters and metadata with test values
+      const processedFilters = processFiltersWithVariables(
+        filters,
+        variableValues
+      );
+      const processedMetadata = processMetadataWithVariables(
+        {
+          title: reportTitle,
+          header: reportHeader,
+          description: reportDescription,
+        },
+        variableValues
+      );
+
+      // If we get here without errors, the test passed
+      return true;
+    } catch (error) {
+      console.error("Variable test failed:", error);
+      return false;
+    }
+  };
+
   const refreshPreview = async () => {
     if (!selectedTable || selectedColumns.length === 0) return;
     setLoadingPreview(true);
-    const data = await getTableData(
-      selectedTable,
-      selectedColumns,
-      includeRelations,
-      filters,
-      sorts.length > 0 ? sorts : undefined,
-      relatedSelections
-    );
-    setPreviewData(data);
-    setLoadingPreview(false);
+
+    try {
+      // Process filters with current test values if variables are defined
+      const processedFilters =
+        variables.length > 0
+          ? processFiltersWithVariables(filters, testValues)
+          : filters;
+
+      const data = await getTableData(
+        selectedTable,
+        selectedColumns,
+        includeRelations,
+        processedFilters,
+        sorts.length > 0 ? sorts : undefined,
+        relatedSelections
+      );
+      setPreviewData(data);
+    } catch (error) {
+      console.error("Error refreshing preview:", error);
+      toast.error("Failed to load preview data");
+    } finally {
+      setLoadingPreview(false);
+    }
   };
 
   const handleAddSort = () => {
@@ -391,11 +482,21 @@ export default function ReportBuilderPage() {
       return out;
     });
 
+    // Process metadata with variables
+    const processedMetadata = processMetadataWithVariables(
+      {
+        title: reportTitle,
+        header: reportHeader,
+        description: reportDescription,
+      },
+      testValues
+    );
+
     // Add metadata as header rows if provided
     const metadata = {
-      reportTitle: reportTitle || undefined,
-      reportHeader: reportHeader || undefined,
-      reportDescription: reportDescription || undefined,
+      reportTitle: processedMetadata.title || undefined,
+      reportHeader: processedMetadata.header || undefined,
+      reportDescription: processedMetadata.description || undefined,
       generatedAt: new Date().toLocaleString(),
       table: selectedTable,
       rowCount: previewData.length,
@@ -417,15 +518,25 @@ export default function ReportBuilderPage() {
     setExportingPDF(true);
 
     try {
+      // Process metadata with variables
+      const processedMetadata = processMetadataWithVariables(
+        {
+          title: reportTitle,
+          header: reportHeader,
+          description: reportDescription,
+        },
+        testValues
+      );
+
       await exportToPDF(
         selectedTable,
         selectedColumns,
         previewData,
         includeRelations,
         {
-          title: reportTitle,
-          header: reportHeader,
-          description: reportDescription,
+          title: processedMetadata.title,
+          header: processedMetadata.header,
+          description: processedMetadata.description,
         }
       );
 
@@ -460,6 +571,7 @@ export default function ReportBuilderPage() {
         reportTitle,
         reportHeader,
         reportDescription,
+        variables,
       });
       setSavedQueryName("");
       const list = await listSavedQueries();
@@ -591,10 +703,66 @@ export default function ReportBuilderPage() {
       setReportTitle(q.reportTitle || "");
       setReportHeader(q.reportHeader || "");
       setReportDescription(q.reportDescription || "");
+      setVariables(q.variables || []);
+
+      // Create test values from loaded variables
+      if (q.variables && q.variables.length > 0) {
+        setTestValues(createTestValues(q.variables));
+      } else {
+        setTestValues({});
+      }
+
       setPendingLoadId(null);
       toast.success(`Loaded saved query: ${q.name}`);
     })();
   }, [pendingLoadId, schema]);
+
+  // Check if variables are properly configured for export
+  const variableValidation = useMemo(() => {
+    if (variables.length === 0) {
+      return { isValid: true, warnings: [] };
+    }
+
+    const validation = validateVariableReferences(
+      filters,
+      {
+        title: reportTitle,
+        header: reportHeader,
+        description: reportDescription,
+      },
+      variables
+    );
+
+    const testValidation = validateAllTestValues(testValues, variables);
+
+    const warnings: string[] = [];
+
+    if (!validation.isValid) {
+      warnings.push(
+        `Missing variable definitions: ${validation.missingVariables.join(
+          ", "
+        )}`
+      );
+    }
+
+    if (!testValidation.isValid) {
+      const errorVars = Object.keys(testValidation.errors);
+      warnings.push(`Invalid test values for: ${errorVars.join(", ")}`);
+    }
+
+    return {
+      isValid: validation.isValid && testValidation.isValid,
+      warnings,
+      hasReferences: validation.foundReferences.length > 0,
+    };
+  }, [
+    variables,
+    filters,
+    reportTitle,
+    reportHeader,
+    reportDescription,
+    testValues,
+  ]);
 
   // Auto select columns when table changes
   useEffect(() => {
@@ -719,7 +887,7 @@ export default function ReportBuilderPage() {
             onApplyTemplate={applyTemplate}
             onDeleteSaved={handleDeleteQuery}
           />
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             <DataSourceCard
               loading={loading}
               schema={schema}
@@ -741,6 +909,13 @@ export default function ReportBuilderPage() {
               sorts={sorts}
               setSorts={setSorts}
             />
+            <VariablesCard
+              variables={variables}
+              setVariables={setVariables}
+              testValues={testValues}
+              setTestValues={setTestValues}
+              onTestVariables={testVariables}
+            />
             <ReportMetadataCard
               reportTitle={reportTitle}
               setReportTitle={setReportTitle}
@@ -748,6 +923,7 @@ export default function ReportBuilderPage() {
               setReportHeader={setReportHeader}
               reportDescription={reportDescription}
               setReportDescription={setReportDescription}
+              variables={variables}
             />
           </div>
 
@@ -791,7 +967,8 @@ export default function ReportBuilderPage() {
                       disabled={
                         !selectedTable ||
                         selectedColumns.length === 0 ||
-                        previewData.length === 0
+                        previewData.length === 0 ||
+                        !variableValidation.isValid
                       }
                       className="h-10 px-4 bg-transparent"
                     >
@@ -805,7 +982,8 @@ export default function ReportBuilderPage() {
                         !selectedTable ||
                         selectedColumns.length === 0 ||
                         previewData.length === 0 ||
-                        exportingPDF
+                        exportingPDF ||
+                        !variableValidation.isValid
                       }
                       className="h-10 px-4 text-white hover:from-primary/90 hover:to-accent/90 shadow-md shadow-primary/20"
                     >
@@ -819,6 +997,30 @@ export default function ReportBuilderPage() {
                   </div>
                 </div>
               </CardHeader>
+
+              {/* Variable Validation Warnings */}
+              {variableValidation.hasReferences &&
+                variableValidation.warnings.length > 0 && (
+                  <div className="px-6 py-4 bg-amber-50 border-b border-amber-200">
+                    <div className="flex items-start gap-3">
+                      <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <h4 className="text-sm font-semibold text-amber-800">
+                          Variable Issues Detected
+                        </h4>
+                        <ul className="mt-1 text-sm text-amber-700 space-y-1">
+                          {variableValidation.warnings.map((warning, index) => (
+                            <li key={index}>• {warning}</li>
+                          ))}
+                        </ul>
+                        <p className="mt-2 text-xs text-amber-600">
+                          Please resolve these issues to enable data export.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
               <CardContent className="p-0">
                 {loading ? (
                   <div className="flex h-[500px] items-center justify-center">

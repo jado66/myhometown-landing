@@ -171,8 +171,8 @@ export default function TrainingMaterialsPage() {
           {searchQuery && (
             <p className="text-sm text-muted-foreground mt-3 max-w-2xl">
               Found {filteredMaterials.length}{" "}
-              {filteredMaterials.length === 1 ? "result" : "results"} for "
-              {searchQuery}"
+              {filteredMaterials.length === 1 ? "result" : "results"} for &quot;
+              {searchQuery}&quot;
             </p>
           )}
         </div>

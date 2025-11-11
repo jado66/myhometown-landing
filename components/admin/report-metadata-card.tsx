@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { FileText } from "lucide-react";
+import type { ReportVariable } from "./variables-card";
 
 interface ReportMetadataCardProps {
   reportTitle: string;
@@ -18,6 +19,7 @@ interface ReportMetadataCardProps {
   setReportHeader: (value: string) => void;
   reportDescription: string;
   setReportDescription: (value: string) => void;
+  variables?: ReportVariable[];
 }
 
 export function ReportMetadataCard({
@@ -27,6 +29,7 @@ export function ReportMetadataCard({
   setReportHeader,
   reportDescription,
   setReportDescription,
+  variables = [],
 }: ReportMetadataCardProps) {
   return (
     <Card className="col-span-1 border-border/50 shadow-md hover:shadow-lg transition-shadow">
@@ -56,6 +59,11 @@ export function ReportMetadataCard({
           <p className="text-xs text-muted-foreground">
             Main title that appears at the top of exported reports
           </p>
+          {variables.length > 0 && (
+            <p className="text-xs text-blue-600 mt-1">
+              💡 Use {`{{param1}}, {{param2}}`} for dynamic values
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -72,6 +80,11 @@ export function ReportMetadataCard({
           <p className="text-xs text-muted-foreground">
             Organization or department name shown above the title
           </p>
+          {variables.length > 0 && (
+            <p className="text-xs text-blue-600 mt-1">
+              💡 Use {`{{param1}}, {{param2}}`} for dynamic values
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -88,6 +101,11 @@ export function ReportMetadataCard({
           <p className="text-xs text-muted-foreground">
             Additional context or summary for the report
           </p>
+          {variables.length > 0 && (
+            <p className="text-xs text-blue-600 mt-1">
+              💡 Use {`{{param1}}, {{param2}}`} for dynamic values
+            </p>
+          )}
         </div>
       </CardContent>
     </Card>

@@ -14,8 +14,8 @@ export default function NotFound() {
             Material Not Found
           </h1>
           <p className="text-muted-foreground">
-            The training material you're looking for doesn't exist or has been
-            removed.
+            The training material you&apos;re looking for doesn&apos;t exist or
+            has been removed.
           </p>
         </div>
         <Link href="/">

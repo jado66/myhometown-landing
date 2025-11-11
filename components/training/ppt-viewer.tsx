@@ -93,7 +93,7 @@ export function PPTViewer({ url }: PPTViewerProps) {
       <div className="text-xs text-muted-foreground text-center">
         Using{" "}
         {viewerType === "office" ? "Microsoft Office Online" : "Google Docs"}{" "}
-        viewer. If the presentation doesn't load, try switching viewers or
+        viewer. If the presentation doesn&apos;t load, try switching viewers or
         downloading the file.
       </div>
     </div>

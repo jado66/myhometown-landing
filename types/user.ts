@@ -43,31 +43,30 @@ export const PERMISSION_OPTIONS = [
     value: "texting" as const,
     label: "Texting",
     description:
-      "Can send and manage text message campaigns for their assigned cities and communities.",
+      "Send and manage text message campaigns for cities and communities.",
   },
   {
     value: "dos_admin" as const,
-    label: "DOS Admin",
+    label: "Days of Service",
     description:
-      "Can lock and unlock projects, view budgets, and bypass authentication requirements for DOS projects.",
+      "View and manage days of service. Track projects and volunteers.",
   },
   {
     value: "content_development" as const,
-    label: "Content Development",
-    description:
-      "Can create and edit content on the site for their assigned cities and communities.",
+    label: "Content Management",
+    description: "Manage city and community pages, create and manage classes.",
   },
   {
     value: "missionary_volunteer_management" as const,
     label: "Missionary & Volunteer Management",
     description:
-      "Can manage missionary and volunteer hours, view reports, and manage related settings for their assigned cities and communities.",
+      "Manage your missionaries. Add, remove, or edit missionary information.",
   },
   {
     value: "classes_admin" as const,
-    label: "Classes Admin",
+    label: "Classes & Rolls",
     description:
-      "Can manage classes, view reports, and manage related settings for their assigned cities and communities.",
+      "View your classes and rolls. Take attendance and manage your classes.",
   },
   {
     value: "administrator" as const,

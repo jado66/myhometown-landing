@@ -14,7 +14,7 @@ export default function NotFound() {
             Category Not Found
           </h1>
           <p className="text-muted-foreground">
-            The training category you're looking for doesn't exist.
+            The training category you&apos;re looking for doesn&apos;t exist.
           </p>
         </div>
         <Link href="/">

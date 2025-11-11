@@ -561,8 +561,8 @@ export function UserFormDialog({
                                 )
                               : communities;
 
-                          const communityOptions = filteredCommunities.map(
-                            (community) => {
+                          const communityOptions = filteredCommunities
+                            .map((community) => {
                               const city = cities.find(
                                 (c) => c.id === community.city_id
                               );
@@ -573,8 +573,16 @@ export function UserFormDialog({
                                   ? `${city.name}, ${city.state}`
                                   : undefined,
                               };
-                            }
-                          );
+                            })
+                            .sort((a, b) => {
+                              // Sort by city (group) first, then by community name
+                              const groupA = a.group || "";
+                              const groupB = b.group || "";
+                              if (groupA !== groupB) {
+                                return groupA.localeCompare(groupB);
+                              }
+                              return a.label.localeCompare(b.label);
+                            });
 
                           return (
                             <FormItem>
@@ -625,16 +633,6 @@ export function UserFormDialog({
                         Grant access to specific features
                       </p>
                     </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={handleSelectAllPermissions}
-                      className="hover:text-white"
-                    >
-                      <Shield className="mr-2 h-4 w-4" />
-                      Grant All
-                    </Button>
                   </div>
 
                   <FormField
