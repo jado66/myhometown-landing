@@ -37,6 +37,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { formatPhoneNumber } from "@/lib/utils";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -93,8 +94,19 @@ export function UserDataTable<TData, TValue>({
       const phone = (row.original as any).contact_number?.toLowerCase() || "";
       if (phone.includes(searchValue)) return true;
 
-      // Search in cities
+      // Search in location city
+      const communities = (row.original as any).communities_details || [];
       const cities = (row.original as any).cities_details || [];
+      let locationCity = "";
+      if (communities.length > 0 && communities[0].city) {
+        locationCity =
+          `${communities[0].city.name}, ${communities[0].city.state}`.toLowerCase();
+      } else if (cities.length > 0) {
+        locationCity = `${cities[0].name}, ${cities[0].state}`.toLowerCase();
+      }
+      if (locationCity.includes(searchValue)) return true;
+
+      // Search in city access
       if (
         cities.some((city: any) =>
           `${city.name}, ${city.state}`.toLowerCase().includes(searchValue)
@@ -102,8 +114,7 @@ export function UserDataTable<TData, TValue>({
       )
         return true;
 
-      // Search in communities
-      const communities = (row.original as any).communities_details || [];
+      // Search in community access
       if (
         communities.some((community: any) =>
           community.name?.toLowerCase().includes(searchValue)
@@ -128,34 +139,140 @@ export function UserDataTable<TData, TValue>({
   });
 
   const exportToCSV = () => {
-    if (loading) return; // prevent export while loading
-    const headers = columns
-      .filter((col: any) => col.accessorKey)
-      .map((col: any) => col.header)
-      .join(",");
+    if (loading) return;
 
-    const rows = data
-      .map((row: any) => {
-        return columns
-          .filter((col: any) => col.accessorKey)
-          .map((col: any) => {
-            const value = row[col.accessorKey];
-            if (typeof value === "object" && value !== null) {
-              return `"${JSON.stringify(value)}"`;
-            }
-            return `"${value || ""}"`;
-          })
-          .join(",");
-      })
-      .join("\n");
+    // Define clean headers
+    const headers = [
+      "City",
+      "First Name",
+      "Last Name",
+      "Email",
+      "Phone",
+      "Role",
+      "City Access",
+      "Community Access",
+      "Last Active",
+      "Created At",
+    ];
 
-    const csv = `${headers}\n${rows}`;
-    const blob = new Blob([csv], { type: "text/csv" });
+    // Sort data by City, Community Access, then Last Name
+    const sortedData = [...data].sort((a: any, b: any) => {
+      // Get city location for sorting
+      const getCityLocation = (row: any) => {
+        const communities = row.communities_details || [];
+        const cities = row.cities_details || [];
+        if (communities.length > 0 && communities[0]?.city?.name) {
+          return `${communities[0].city.name}, ${communities[0].city.state}`;
+        } else if (cities.length > 0) {
+          return `${cities[0].name}, ${cities[0].state}`;
+        }
+        return "";
+      };
+
+      // Get community access for sorting
+      const getCommunityAccess = (row: any) => {
+        const communities = row.communities_details || [];
+        return communities.length > 0 ? communities[0].name || "" : "";
+      };
+
+      const cityA = getCityLocation(a).toLowerCase();
+      const cityB = getCityLocation(b).toLowerCase();
+      const communityA = getCommunityAccess(a).toLowerCase();
+      const communityB = getCommunityAccess(b).toLowerCase();
+      const lastNameA = (a.last_name || "").toLowerCase();
+      const lastNameB = (b.last_name || "").toLowerCase();
+
+      // Sort by City first
+      if (cityA !== cityB) return cityA.localeCompare(cityB);
+      // Then by Community Access
+      if (communityA !== communityB)
+        return communityA.localeCompare(communityB);
+      // Finally by Last Name
+      return lastNameA.localeCompare(lastNameB);
+    });
+
+    const rows = sortedData.map((row: any) => {
+      // Format city location from first community or city
+      const communities = row.communities_details || [];
+      const cities = row.cities_details || [];
+      let cityLocation = "";
+
+      if (communities.length > 0) {
+        // Get city from the first community's city relationship
+        const firstCommunity = communities[0];
+        if (firstCommunity?.city?.name) {
+          cityLocation = `${firstCommunity.city.name}, ${firstCommunity.city.state}`;
+        }
+      } else if (cities.length > 0) {
+        // Fallback to direct city assignment
+        cityLocation = `${cities[0].name}, ${cities[0].state}`;
+      }
+
+      // Format city access as "City, State; City, State"
+      const cityAccess = row.cities_details
+        ? row.cities_details
+            .map((city: any) => `${city.name}, ${city.state}`)
+            .join("; ")
+        : "";
+
+      // Format community access as "Community; Community"
+      const communityAccess = row.communities_details
+        ? row.communities_details.map((comm: any) => comm.name).join("; ")
+        : "";
+
+      // Format name components
+      const firstName = row.first_name || "";
+      const lastName = row.last_name || "";
+
+      // Determine role from permissions
+      let role = "";
+      if (row.permissions?.administrator) {
+        role = "Global Administrator";
+      } else {
+        const activePermissions = [];
+        if (row.permissions?.texting) activePermissions.push("Texting");
+        if (row.permissions?.dos_admin) activePermissions.push("DOS Admin");
+        if (row.permissions?.content_development)
+          activePermissions.push("Content Dev");
+        if (row.permissions?.missionary_volunteer_management)
+          activePermissions.push("Volunteer Mgmt");
+        if (row.permissions?.classes_admin)
+          activePermissions.push("Classes Admin");
+        role = activePermissions.join(", ");
+      }
+
+      // Format dates
+      const lastActive = row.last_active_at
+        ? new Date(row.last_active_at).toLocaleDateString()
+        : "Never";
+      const createdAt = row.created_at
+        ? new Date(row.created_at).toLocaleDateString()
+        : "";
+
+      return [
+        cityLocation,
+        firstName,
+        lastName,
+        row.email || "",
+        formatPhoneNumber(row.contact_number) || "",
+        role,
+        cityAccess,
+        communityAccess,
+        lastActive,
+        createdAt,
+      ]
+        .map((value) => `"${String(value).replace(/"/g, '""')}"`) // Escape quotes
+        .join(",");
+    });
+
+    const csv = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "users.csv";
+    a.download = `users-export-${new Date().toISOString().split("T")[0]}.csv`;
     a.click();
+    window.URL.revokeObjectURL(url);
   };
 
   return (

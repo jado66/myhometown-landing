@@ -22,14 +22,44 @@ export async function PUT(
       communities: Array.isArray(body.communities) ? body.communities : [],
     };
 
-    const { data, error } = await supabaseServer
+    const { data: user, error } = await supabaseServer
       .from("users")
       .update(updatePayload)
       .eq("id", id)
       .select("*")
       .single();
     if (error) throw error;
-    return NextResponse.json(data);
+
+    // Fetch expanded city & community details
+    const cityIds = Array.isArray(user.cities) ? user.cities : [];
+    const communityIds = Array.isArray(user.communities)
+      ? user.communities
+      : [];
+
+    const [citiesRes, communitiesRes] = await Promise.all([
+      cityIds.length
+        ? supabaseServer.from("cities").select("*").in("id", cityIds)
+        : Promise.resolve({ data: [], error: null }),
+      communityIds.length
+        ? supabaseServer
+            .from("communities")
+            .select(
+              `
+              *,
+              city:cities(*)
+            `
+            )
+            .in("id", communityIds)
+        : Promise.resolve({ data: [], error: null }),
+    ]);
+
+    const enrichedUser = {
+      ...user,
+      cities_details: citiesRes.data || [],
+      communities_details: communitiesRes.data || [],
+    };
+
+    return NextResponse.json(enrichedUser);
   } catch (err) {
     console.error("Error updating user:", err);
     return NextResponse.json(

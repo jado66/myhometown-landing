@@ -27,7 +27,7 @@ import {
   FilterX,
   X,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatPhoneNumber } from "@/lib/utils";
 
 const PERMISSION_LABELS = {
   administrator: "Global Administrator",
@@ -61,6 +61,66 @@ const PERMISSION_OPTIONS = [
 ];
 
 export const columns: ColumnDef<User>[] = [
+  {
+    accessorKey: "location_city",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="hover:text-white"
+        >
+          City
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => {
+      // Get city from the first community, or from cities_details if no communities
+      const communities = row.original.communities_details || [];
+      const cities = row.original.cities_details || [];
+
+      let cityName = "";
+      let stateName = "";
+
+      if (communities.length > 0) {
+        cityName = communities[0].city?.name || "";
+        stateName = communities[0].city?.state || "";
+      } else if (cities.length > 0) {
+        cityName = cities[0].name;
+        stateName = cities[0].state;
+      }
+
+      if (!cityName)
+        return <span className="text-muted-foreground text-sm">—</span>;
+
+      return (
+        <div className="text-sm">
+          {cityName}, {stateName}
+        </div>
+      );
+    },
+    sortingFn: (rowA, rowB) => {
+      const getCity = (row: any) => {
+        const communities = row.original.communities_details || [];
+        const cities = row.original.cities_details || [];
+        if (communities.length > 0 && communities[0].city?.name) {
+          return communities[0].city.name.toLowerCase();
+        }
+        if (cities.length > 0) {
+          return cities[0].name.toLowerCase();
+        }
+        return "";
+      };
+
+      const cityA = getCity(rowA);
+      const cityB = getCity(rowB);
+
+      if (cityA < cityB) return -1;
+      if (cityA > cityB) return 1;
+      return 0;
+    },
+  },
   {
     accessorKey: "name",
     header: ({ column }) => {
@@ -117,9 +177,10 @@ export const columns: ColumnDef<User>[] = [
   {
     accessorKey: "contact_number",
     header: "Phone",
-    cell: ({ row }) => (
-      <div className="text-sm">{row.getValue("contact_number") || "—"}</div>
-    ),
+    cell: ({ row }) => {
+      const phone = row.getValue("contact_number") as string | undefined;
+      return <div className="text-sm">{formatPhoneNumber(phone) || "—"}</div>;
+    },
   },
   {
     accessorKey: "permissions",
@@ -128,7 +189,7 @@ export const columns: ColumnDef<User>[] = [
 
       return (
         <div className="flex items-center gap-2">
-          <span>Permissions</span>
+          <span>Role</span>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -285,7 +346,7 @@ export const columns: ColumnDef<User>[] = [
 
       return (
         <div className="flex items-center gap-2">
-          <span>Cities</span>
+          <span>City Access</span>
           {allCities.length > 0 && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -401,7 +462,7 @@ export const columns: ColumnDef<User>[] = [
 
       return (
         <div className="flex items-center gap-2">
-          <span>Communities</span>
+          <span>Community Access</span>
           {allCommunities.length > 0 && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

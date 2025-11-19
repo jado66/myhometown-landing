@@ -47,7 +47,15 @@ export async function GET() {
         ? supabase.from("cities").select("*").in("id", cityIds)
         : Promise.resolve({ data: [], error: null }),
       communityIds.length
-        ? supabase.from("communities").select("*").in("id", communityIds)
+        ? supabase
+            .from("communities")
+            .select(
+              `
+              *,
+              city:cities(*)
+            `
+            )
+            .in("id", communityIds)
         : Promise.resolve({ data: [], error: null }),
     ]);
 

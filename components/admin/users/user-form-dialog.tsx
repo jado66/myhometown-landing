@@ -26,6 +26,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -69,7 +76,7 @@ const userFormSchema = z.object({
   contact_number: z
     .string()
     .regex(/^[0-9]{10}$/i, "Contact number must be exactly 10 digits"),
-  cities: z.array(z.string()).optional(),
+  city: z.string().optional(),
   communities: z.array(z.string()).optional(),
   permissions: z.object({
     texting: z.boolean().optional(),
@@ -162,7 +169,7 @@ export function UserFormDialog({
       contact_number: initialData?.contact_number
         ? initialData.contact_number.replace(/\D/g, "")
         : "",
-      cities: initialData?.cities || [],
+      city: initialData?.cities?.[0] || undefined,
       communities: initialData?.communities || [],
       permissions: {
         texting: initialData?.permissions?.texting || false,
@@ -187,7 +194,7 @@ export function UserFormDialog({
           contact_number: initialData.contact_number
             ? initialData.contact_number.replace(/\D/g, "")
             : "",
-          cities: initialData.cities || [],
+          city: initialData.cities?.[0] || undefined,
           communities: initialData.communities || [],
           permissions: {
             texting: initialData.permissions?.texting || false,
@@ -207,7 +214,7 @@ export function UserFormDialog({
           first_name: "",
           last_name: "",
           contact_number: "",
-          cities: [],
+          city: undefined,
           communities: [],
           permissions: {
             texting: false,
@@ -225,9 +232,9 @@ export function UserFormDialog({
   // Watch for administrator permission changes
   const isAdministrator = form.watch("permissions.administrator");
   React.useEffect(() => {
-    // Clear cities and communities when user becomes global admin
+    // Clear city and communities when user becomes global admin
     if (isAdministrator) {
-      form.setValue("cities", []);
+      form.setValue("city", undefined);
       form.setValue("communities", []);
     }
   }, [isAdministrator, form]);
@@ -235,10 +242,11 @@ export function UserFormDialog({
   const handleSubmit = async (values: UserFormValues) => {
     setIsSubmitting(true);
     try {
-      // Get city details for the selected city IDs
-      const selectedCities = cities.filter((city) =>
-        values.cities?.includes(city.id)
-      );
+      // Get city details for the selected city
+      const selectedCity = values.city
+        ? cities.find((city) => city.id === values.city)
+        : undefined;
+      const selectedCities = selectedCity ? [selectedCity] : [];
 
       // Values.contact_number already digits-only; ensure max 10 digits
       const cleanedContactNumber = values.contact_number
@@ -522,44 +530,49 @@ export function UserFormDialog({
                     <div className="space-y-4">
                       <FormField
                         control={form.control}
-                        name="cities"
+                        name="city"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Cities</FormLabel>
-                            <FormControl>
-                              <MultiSelect
-                                options={cities.map((city) => ({
-                                  label: `${city.name}, ${city.state}`,
-                                  value: city.id,
-                                }))}
-                                selected={field.value || []}
-                                onChange={field.onChange}
-                                placeholder="Select cities..."
-                                emptyMessage="No cities available."
-                                disabled={
-                                  loadingData || loading || isSubmitting
-                                }
-                              />
-                            </FormControl>
-                            <FormDescription>
-                              Cities this user can manage
+                            <FormLabel>City</FormLabel>
+                            <Select
+                              onValueChange={field.onChange}
+                              value={field.value}
+                              disabled={loadingData || loading || isSubmitting}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select a city..." />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {cities.map((city) => (
+                                  <SelectItem key={city.id} value={city.id}>
+                                    {city.name}, {city.state}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormDescription className="text-primary">
+                              The city this user can manage
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
 
+                      <hr className="my-2" />
+
                       <FormField
                         control={form.control}
                         name="communities"
                         render={({ field }) => {
-                          const selectedCities = form.watch("cities") || [];
-                          const filteredCommunities =
-                            selectedCities.length > 0
-                              ? communities.filter((community) =>
-                                  selectedCities.includes(community.city_id)
-                                )
-                              : communities;
+                          const selectedCity = form.watch("city");
+                          const filteredCommunities = selectedCity
+                            ? communities.filter(
+                                (community) =>
+                                  community.city_id === selectedCity
+                              )
+                            : communities;
 
                           const communityOptions = filteredCommunities
                             .map((community) => {
@@ -594,8 +607,8 @@ export function UserFormDialog({
                                   onChange={field.onChange}
                                   placeholder="Select communities..."
                                   emptyMessage={
-                                    selectedCities.length > 0
-                                      ? "No communities in selected cities."
+                                    selectedCity
+                                      ? "No communities in selected city."
                                       : "No communities available."
                                   }
                                   disabled={
@@ -603,7 +616,7 @@ export function UserFormDialog({
                                   }
                                 />
                               </FormControl>
-                              <FormDescription>
+                              <FormDescription className="text-primary">
                                 Communities this user can manage
                               </FormDescription>
                               <FormMessage />
