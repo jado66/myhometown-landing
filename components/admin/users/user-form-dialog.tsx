@@ -477,38 +477,51 @@ export function UserFormDialog({
                     control={form.control}
                     name="contact_number"
                     render={({ field }) => {
-                      // Format digits-only value for display
+                      // Format digits-only value for display with mask
                       const formatPhone = (raw: string) => {
                         const digits = raw.replace(/\D/g, "").slice(0, 10);
-                        const len = digits.length;
-                        if (len === 0) return "";
-                        if (len < 4) return `(${digits}`; // opening paren
-                        if (len < 7)
-                          return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
-                        return `(${digits.slice(0, 3)}) ${digits.slice(
-                          3,
-                          6
-                        )}-${digits.slice(6)}`;
+                        if (digits.length === 10) {
+                          return `${digits.slice(0, 3)}-${digits.slice(
+                            3,
+                            6
+                          )}-${digits.slice(6)}`;
+                        } else if (digits.length > 6) {
+                          return `${digits.slice(0, 3)}-${digits.slice(
+                            3,
+                            6
+                          )}-${digits.slice(6)}`;
+                        } else if (digits.length > 3) {
+                          return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+                        }
+                        return digits;
                       };
+
+                      const handleChange = (
+                        e: React.ChangeEvent<HTMLInputElement>
+                      ) => {
+                        const digits = e.target.value
+                          .replace(/\D/g, "")
+                          .slice(0, 10);
+                        field.onChange(digits);
+                      };
+
                       return (
                         <FormItem>
                           <FormLabel>Contact Number</FormLabel>
                           <FormControl>
                             <Input
-                              placeholder="(555) 123-4567"
+                              type="tel"
+                              placeholder="555-123-4567"
                               value={formatPhone(field.value || "")}
-                              onChange={(e) => {
-                                const digits = e.target.value
-                                  .replace(/\D/g, "")
-                                  .slice(0, 10);
-                                field.onChange(digits);
-                              }}
+                              onChange={handleChange}
                               onBlur={field.onBlur}
                               inputMode="tel"
                               autoComplete="tel"
                             />
                           </FormControl>
-
+                          <FormDescription className="text-xs text-muted-foreground">
+                            Enter 10-digit phone number
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       );
