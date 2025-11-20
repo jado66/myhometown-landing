@@ -144,6 +144,7 @@ export function UserDataTable<TData, TValue>({
     // Define clean headers
     const headers = [
       "City",
+      "Notes",
       "First Name",
       "Last Name",
       "Email",
@@ -251,6 +252,7 @@ export function UserDataTable<TData, TValue>({
 
       return [
         cityLocation,
+        row.notes || "",
         firstName,
         lastName,
         row.email || "",

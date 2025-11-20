@@ -122,6 +122,25 @@ export const columns: ColumnDef<User>[] = [
     },
   },
   {
+    accessorKey: "notes",
+    header: "Notes",
+    cell: ({ row }) => {
+      const notes = row.getValue("notes") as string | undefined;
+      if (!notes)
+        return <span className="text-muted-foreground text-sm">—</span>;
+
+      // Truncate long notes
+      const displayNotes =
+        notes.length > 50 ? notes.substring(0, 50) + "..." : notes;
+
+      return (
+        <div className="text-sm max-w-xs" title={notes}>
+          {displayNotes}
+        </div>
+      );
+    },
+  },
+  {
     accessorKey: "name",
     header: ({ column }) => {
       return (

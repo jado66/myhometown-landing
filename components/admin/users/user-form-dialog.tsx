@@ -76,6 +76,7 @@ const userFormSchema = z.object({
   contact_number: z
     .string()
     .regex(/^[0-9]{10}$/i, "Contact number must be exactly 10 digits"),
+  notes: z.string().optional(),
   city: z.string().optional(),
   communities: z.array(z.string()).optional(),
   permissions: z.object({
@@ -169,6 +170,7 @@ export function UserFormDialog({
       contact_number: initialData?.contact_number
         ? initialData.contact_number.replace(/\D/g, "")
         : "",
+      notes: initialData?.notes || "",
       city: initialData?.cities?.[0] || undefined,
       communities: initialData?.communities || [],
       permissions: {
@@ -194,6 +196,7 @@ export function UserFormDialog({
           contact_number: initialData.contact_number
             ? initialData.contact_number.replace(/\D/g, "")
             : "",
+          notes: initialData.notes || "",
           city: initialData.cities?.[0] || undefined,
           communities: initialData.communities || [],
           permissions: {
@@ -214,6 +217,7 @@ export function UserFormDialog({
           first_name: "",
           last_name: "",
           contact_number: "",
+          notes: "",
           city: undefined,
           communities: [],
           permissions: {
@@ -526,6 +530,27 @@ export function UserFormDialog({
                         </FormItem>
                       );
                     }}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="notes"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Notes</FormLabel>
+                        <FormControl>
+                          <textarea
+                            placeholder="Add any additional notes about this user..."
+                            className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Optional notes for internal reference
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
                 </TabsContent>
 

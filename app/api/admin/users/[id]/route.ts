@@ -16,6 +16,7 @@ export async function PUT(
       permissions: body.permissions || {},
       first_name: body.first_name || null,
       last_name: body.last_name || null,
+      notes: body.notes || null,
       cities: Array.isArray(body.cities)
         ? body.cities.map((c: any) => c.id || c)
         : [],

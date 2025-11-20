@@ -100,6 +100,7 @@ interface InviteLikeBody {
   first_name: string;
   last_name: string;
   contact_number?: string | null;
+  notes?: string | null;
   permissions?: UserPermissions;
   cities?: Array<{ id: string } | string>;
   communities?: Array<{ id: string } | string>;
@@ -214,6 +215,7 @@ export async function POST(request: NextRequest) {
             first_name,
             last_name,
             contact_number: body.contact_number || null,
+            notes: body.notes || null,
             permissions: body.permissions || {},
             cities: cityIds,
             communities: communityIds,
@@ -231,6 +233,7 @@ export async function POST(request: NextRequest) {
               first_name,
               last_name,
               contact_number: body.contact_number || null,
+              notes: body.notes || null,
               permissions: body.permissions || {},
               cities: cityIds,
               communities: communityIds,
