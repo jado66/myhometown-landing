@@ -12,6 +12,7 @@ export interface User {
   last_active_at?: string;
   communities?: string[];
   cities?: string[];
+  notes?: string;
   // Extended fields for display
   cities_details?: City[];
   communities_details?: Community[];
@@ -33,6 +34,7 @@ export interface UserFormData {
   first_name: string;
   last_name: string;
   contact_number?: string;
+  notes?: string;
   permissions: UserPermissions;
   cities: City[];
   communities: string[];
