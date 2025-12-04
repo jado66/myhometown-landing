@@ -54,7 +54,7 @@ const PERMISSION_OPTIONS = [
   { value: "content_development", label: "Content Dev", icon: Pencil },
   {
     value: "missionary_volunteer_management",
-    label: "Volunteer Mgmt",
+    label: "MVMS",
     icon: HandHeart,
   },
   { value: "classes_admin", label: "Classes Admin", icon: School },
