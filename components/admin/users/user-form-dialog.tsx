@@ -100,6 +100,7 @@ interface UserFormDialogProps {
   onResendInvitation?: (user: User) => Promise<{ success: boolean }>;
   initialData?: User | null;
   loading?: boolean;
+  allUsers?: User[];
 }
 
 const PERMISSION_ICONS = {
@@ -120,6 +121,7 @@ export function UserFormDialog({
   onResendInvitation,
   initialData,
   loading = false,
+  allUsers = [],
 }: UserFormDialogProps) {
   const isNewUser = !initialData?.id;
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -127,6 +129,21 @@ export function UserFormDialog({
   const [communities, setCommunities] = React.useState<Community[]>([]);
   const [loadingData, setLoadingData] = React.useState(true);
   const [activeTab, setActiveTab] = React.useState("basic");
+
+  // Extract unique notes from all users for suggestions
+  const allNoteSuggestions = React.useMemo(() => {
+    const notesSet = new Set<string>();
+    allUsers.forEach((user) => {
+      if (user.notes && user.notes.trim()) {
+        // Split by comma to get individual note items
+        user.notes.split(",").forEach((note) => {
+          const trimmed = note.trim();
+          if (trimmed) notesSet.add(trimmed);
+        });
+      }
+    });
+    return Array.from(notesSet).sort((a, b) => a.localeCompare(b));
+  }, [allUsers]);
 
   // Fetch cities and communities
   React.useEffect(() => {
@@ -535,22 +552,81 @@ export function UserFormDialog({
                   <FormField
                     control={form.control}
                     name="notes"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Notes</FormLabel>
-                        <FormControl>
-                          <textarea
-                            placeholder="Add any additional notes about this user..."
-                            className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          Optional notes for internal reference
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    render={({ field }) => {
+                      const currentValue = field.value || "";
+
+                      // Get the text after the last comma (or full text if no comma)
+                      const lastCommaIndex = currentValue.lastIndexOf(",");
+                      const searchText =
+                        lastCommaIndex >= 0
+                          ? currentValue
+                              .substring(lastCommaIndex + 1)
+                              .trim()
+                              .toLowerCase()
+                          : currentValue.trim().toLowerCase();
+
+                      // Filter suggestions based on current search text (starts with)
+                      const filteredSuggestions =
+                        searchText.length > 0
+                          ? allNoteSuggestions.filter((note) =>
+                              note.toLowerCase().startsWith(searchText)
+                            )
+                          : [];
+
+                      const handleSelectSuggestion = (suggestion: string) => {
+                        let newValue: string;
+                        if (lastCommaIndex >= 0) {
+                          // Replace text after last comma with suggestion
+                          newValue =
+                            currentValue.substring(0, lastCommaIndex + 1) +
+                            " " +
+                            suggestion;
+                        } else {
+                          // Replace entire value with suggestion
+                          newValue = suggestion;
+                        }
+                        field.onChange(newValue);
+                      };
+
+                      return (
+                        <FormItem>
+                          <FormLabel>Notes</FormLabel>
+                          <FormControl>
+                            <textarea
+                              placeholder="Add any additional notes about this user..."
+                              className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                              value={field.value || ""}
+                              onChange={field.onChange}
+                              onBlur={field.onBlur}
+                            />
+                          </FormControl>
+                          {filteredSuggestions.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 mt-2">
+                              {filteredSuggestions
+                                .slice(0, 8)
+                                .map((suggestion) => (
+                                  <Button
+                                    key={suggestion}
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-7 text-xs hover:text-white"
+                                    onClick={() =>
+                                      handleSelectSuggestion(suggestion)
+                                    }
+                                  >
+                                    {suggestion}
+                                  </Button>
+                                ))}
+                            </div>
+                          )}
+                          <FormDescription>
+                            Optional notes for internal reference
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
                   />
                 </TabsContent>
 

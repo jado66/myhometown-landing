@@ -69,7 +69,7 @@ export default function ManagementPage() {
   };
 
   return (
-    <div className="container mx-auto py-10">
+    <div className="px-4 mx-auto py-10">
       <div className="text-center mb-8">
         <div className="space-y-2">
           <p className="text-sm font-medium text-primary uppercase tracking-wide">
@@ -119,6 +119,7 @@ export default function ManagementPage() {
         onPasswordReset={handlePasswordReset}
         onResendInvitation={handleResendInvitation}
         loading={loading}
+        allUsers={users}
       />
 
       <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>

@@ -129,13 +129,9 @@ export const columns: ColumnDef<User>[] = [
       if (!notes)
         return <span className="text-muted-foreground text-sm">—</span>;
 
-      // Truncate long notes
-      const displayNotes =
-        notes.length > 50 ? notes.substring(0, 50) + "..." : notes;
-
       return (
-        <div className="text-sm max-w-xs" title={notes}>
-          {displayNotes}
+        <div className="text-sm max-w-[200px] whitespace-normal break-words">
+          {notes}
         </div>
       );
     },
@@ -614,6 +610,34 @@ export const columns: ColumnDef<User>[] = [
       return (
         <span className="text-sm" title={date.toLocaleString()}>
           {displayText}
+        </span>
+      );
+    },
+  },
+  {
+    accessorKey: "created_at",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="hover:text-white"
+        >
+          Added
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => {
+      const createdAt = row.original.created_at;
+      if (!createdAt) {
+        return <span className="text-muted-foreground text-sm">—</span>;
+      }
+
+      const date = new Date(createdAt);
+      return (
+        <span className="text-sm" title={date.toLocaleString()}>
+          {date.toLocaleDateString()}
         </span>
       );
     },

@@ -122,6 +122,10 @@ export function UserDataTable<TData, TValue>({
       )
         return true;
 
+      // Search in notes
+      const notes = (row.original as any).notes?.toLowerCase() || "";
+      if (notes.includes(searchValue)) return true;
+
       return false;
     },
     state: {
