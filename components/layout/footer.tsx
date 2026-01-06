@@ -107,7 +107,7 @@ export function Footer({ cities, allCities }: FooterProps) {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-5 gap-8 mb-8">
           <div className="md:col-span-1">
-            <MyHometownLogo type="dark-full" size={36} className="mb-4" />
+            <MyHometownLogo type="h" size={36} className="mb-4" />
             <p className="text-sm text-gray-600">{t("about")}</p>
           </div>
           <div className="md:col-span-2">

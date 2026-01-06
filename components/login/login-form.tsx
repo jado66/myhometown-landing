@@ -30,12 +30,12 @@ import {
 } from "@/components/ui/card";
 import {
   checkEmailExists,
-  signInWithPassword,
   verifyMissionaryToken,
   sendMissionaryToken,
   resendMissionaryToken,
   type UserType,
 } from "@/app/actions/auth/auth-actions";
+import { supabase } from "@/util/supabase";
 import { toast } from "sonner";
 
 const emailSchema = z.object({
@@ -139,13 +139,21 @@ export function LoginForm() {
   async function onPasswordSubmit(values: z.infer<typeof passwordSchema>) {
     setIsLoading(true);
     try {
-      const result = await signInWithPassword(email, values.password);
-      if (result.success) {
+      // Use client-side Supabase to sign in so session is stored in browser
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password: values.password,
+      });
+
+      if (error) {
+        toast.error(error.message || "Invalid password");
+        return;
+      }
+
+      if (data.user) {
         toast.success("Successfully signed in!");
-        // Redirect to dashboard or home
-        window.location.href = "/dashboard";
-      } else {
-        toast.error(result.error || "Invalid password");
+        // Redirect to admin page
+        window.location.href = "/admin";
       }
     } catch (error) {
       toast.error("An error occurred. Please try again.");
@@ -160,8 +168,8 @@ export function LoginForm() {
       const result = await verifyMissionaryToken(email, values.token);
       if (result.success) {
         toast.success("Successfully verified!");
-        // Redirect to missionary dashboard
-        window.location.href = "/missionary-dashboard";
+        // Redirect to admin page
+        window.location.href = "/admin";
       } else {
         toast.error(result.error || "Invalid token");
       }

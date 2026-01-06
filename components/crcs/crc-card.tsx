@@ -4,17 +4,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin, Phone, Mail, Navigation } from "lucide-react";
 import type { CRC, CRCWithDistance } from "@/types/crc";
+import { getCRCClassesUrl } from "@/lib/crcs";
+import Link from "next/link";
 
 interface CRCCardProps {
   crc: CRC | CRCWithDistance;
   onSelect?: (crc: CRC) => void;
   showSelectButton?: boolean;
+  useDirectLink?: boolean; // New prop to control whether to use direct link or callback
 }
 
 export function CRCCard({
   crc,
   onSelect,
   showSelectButton = false,
+  useDirectLink = false,
 }: CRCCardProps) {
   const hasDistance = "distance" in crc;
 
@@ -57,15 +61,20 @@ export function CRCCard({
           )}
         </div>
 
-        {showSelectButton && onSelect && (
-          <Button
-            onClick={() => onSelect(crc)}
-            className="w-full mt-4 text-white"
-            size="lg"
-          >
-            View Classes
-          </Button>
-        )}
+        {showSelectButton &&
+          (useDirectLink ? (
+            <Button asChild className="w-full mt-4 text-white" size="lg">
+              <Link href={getCRCClassesUrl(crc)}>View Classes</Link>
+            </Button>
+          ) : onSelect ? (
+            <Button
+              onClick={() => onSelect(crc)}
+              className="w-full mt-4 text-white"
+              size="lg"
+            >
+              View Classes
+            </Button>
+          ) : null)}
       </CardContent>
     </Card>
   );

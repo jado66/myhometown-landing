@@ -144,3 +144,49 @@ export async function fetchCRCsServer(): Promise<CRC[]> {
     return [];
   }
 }
+
+/**
+ * Convert CRC name to slug format
+ */
+export function createCRCSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/g, "")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+/**
+ * Server-side function to fetch a single CRC by slug
+ */
+export async function fetchCRCBySlugServer(slug: string): Promise<CRC | null> {
+  try {
+    const allCRCs = await fetchCRCsServer();
+    return allCRCs.find((crc) => createCRCSlug(crc.name) === slug) || null;
+  } catch (error) {
+    console.error("Error fetching CRC by slug:", error);
+    return null;
+  }
+}
+
+/**
+ * Generate URL for a CRC classes page
+ */
+export function getCRCClassesUrl(crc: CRC): string {
+  const slug = createCRCSlug(crc.name);
+  return `/classes/${slug}`;
+}
+
+/**
+ * Get all CRC slugs for static generation
+ */
+export async function getAllCRCSlugs(): Promise<string[]> {
+  try {
+    const allCRCs = await fetchCRCsServer();
+    return allCRCs.map((crc) => createCRCSlug(crc.name));
+  } catch (error) {
+    console.error("Error getting CRC slugs:", error);
+    return [];
+  }
+}

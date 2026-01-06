@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,9 +11,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Filter } from "lucide-react";
+import { Filter, Loader2, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import type { CRC } from "@/types/crc";
-import { classes } from "@/util/mock-data/mock-classes";
+import { useClasses } from "@/hooks/use-classes";
 import { ClassCard } from "./class-card";
 
 interface ClassesListProps {
@@ -21,101 +22,81 @@ interface ClassesListProps {
 }
 
 export function ClassesList({ selectedCRC }: ClassesListProps) {
-  const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [levelFilter, setLevelFilter] = useState<string>("all");
 
+  // Get the community ID from the selected CRC
+  const communityId = selectedCRC.community?.id;
+
+  // Fetch classes from the database
+  const {
+    classes: databaseClasses,
+    loading,
+    error,
+  } = useClasses({
+    communityId,
+    autoFetch: !!communityId,
+  });
+
+  // Transform database classes to match the mock format for existing components
   const crcClasses = useMemo(() => {
-    return classes.filter((c) => c.crcId === String(selectedCRC.id));
-  }, [selectedCRC.id]);
+    return databaseClasses.map((dbClass) => ({
+      id: dbClass.id,
+      title: dbClass.title,
+      description: dbClass.description,
+      category: "education" as const, // Default category since we don't have categories yet
+      instructor: dbClass.instructor || "TBD",
+      schedule: dbClass.schedule,
+      duration: dbClass.duration,
+      capacity: dbClass.capacity,
+      enrolled: dbClass.enrolled,
+      level: dbClass.level,
+      ageGroup: dbClass.ageGroup,
+      crcId: dbClass.crcId,
+    }));
+  }, [databaseClasses]);
 
   const filteredClasses = useMemo(() => {
     return crcClasses.filter((c) => {
-      const matchesCategory =
-        categoryFilter === "all" || c.category === categoryFilter;
+      // Since we don't have categories yet, just filter by level
       const matchesLevel = levelFilter === "all" || c.level === levelFilter;
-      return matchesCategory && matchesLevel;
+      return matchesLevel;
     });
-  }, [crcClasses, categoryFilter, levelFilter]);
+  }, [crcClasses, levelFilter]);
 
-  const categories = useMemo(() => {
-    return Array.from(new Set(crcClasses.map((c) => c.category)));
-  }, [crcClasses]);
+  // For now, we'll just show a basic level filter since categories don't exist yet
+  const showFilters = crcClasses.length > 0;
 
   return (
     <div className="space-y-8">
       {/* Filters */}
-      <Card className="border-2">
-        <CardContent className="p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Filter className="h-5 w-5 text-muted-foreground" />
-            <h3 className="font-semibold text-lg">Filter Classes</h3>
-          </div>
-          <div className="grid sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">
-                Category
-              </label>
-              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="h-11">
-                  <SelectValue placeholder="All categories" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover">
-                  <SelectItem value="all">All Categories</SelectItem>
-                  {categories.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category
-                        .split("-")
-                        .map(
-                          (word) => word.charAt(0).toUpperCase() + word.slice(1)
-                        )
-                        .join(" ")}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">
-                Level
-              </label>
-              <Select value={levelFilter} onValueChange={setLevelFilter}>
-                <SelectTrigger className="h-11">
-                  <SelectValue placeholder="All levels" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover">
-                  <SelectItem value="all">All Levels</SelectItem>
-                  <SelectItem value="beginner">Beginner</SelectItem>
-                  <SelectItem value="intermediate">Intermediate</SelectItem>
-                  <SelectItem value="advanced">Advanced</SelectItem>
-                  <SelectItem value="all-levels">All Levels</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {(categoryFilter !== "all" || levelFilter !== "all") && (
-            <div className="mt-4 flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
-                Showing {filteredClasses.length} of {crcClasses.length} classes
-              </p>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setCategoryFilter("all");
-                  setLevelFilter("all");
-                }}
-              >
-                Clear Filters
-              </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
 
       {/* Classes Grid */}
-      {filteredClasses.length > 0 ? (
+      {loading ? (
+        <Card className="border-2">
+          <CardContent className="text-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
+            <h3 className="text-lg font-semibold text-foreground mb-2">
+              Loading Classes
+            </h3>
+            <p className="text-muted-foreground">
+              Fetching the latest classes for {selectedCRC.name}...
+            </p>
+          </CardContent>
+        </Card>
+      ) : error ? (
+        <Card className="border-2 border-destructive/50">
+          <CardContent className="text-center py-12">
+            <AlertCircle className="h-8 w-8 mx-auto mb-4 text-destructive" />
+            <h3 className="text-lg font-semibold text-foreground mb-2">
+              Error Loading Classes
+            </h3>
+            <p className="text-muted-foreground mb-4">{error}</p>
+            <Button variant="outline" onClick={() => window.location.reload()}>
+              Try Again
+            </Button>
+          </CardContent>
+        </Card>
+      ) : filteredClasses.length > 0 ? (
         <motion.div
           className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
           initial="hidden"
@@ -140,11 +121,23 @@ export function ClassesList({ selectedCRC }: ClassesListProps) {
             </motion.div>
           ))}
         </motion.div>
+      ) : crcClasses.length === 0 ? (
+        <Card className="border-2 border-dashed">
+          <CardContent className="text-center py-12">
+            <h3 className="text-lg font-semibold text-foreground mb-2">
+              No Classes Available
+            </h3>
+            <p className="text-muted-foreground mb-4">
+              {selectedCRC.name} doesn&apos;t have any classes scheduled at the
+              moment. Check back soon for updates!
+            </p>
+          </CardContent>
+        </Card>
       ) : (
         <Card className="border-2 border-dashed">
           <CardContent className="text-center py-12">
             <h3 className="text-lg font-semibold text-foreground mb-2">
-              No Classes Found
+              No Classes Match Your Filters
             </h3>
             <p className="text-muted-foreground mb-4">
               Try adjusting your filters to see more classes
@@ -152,7 +145,6 @@ export function ClassesList({ selectedCRC }: ClassesListProps) {
             <Button
               variant="outline"
               onClick={() => {
-                setCategoryFilter("all");
                 setLevelFilter("all");
               }}
             >

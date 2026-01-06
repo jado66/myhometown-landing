@@ -11,6 +11,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { MapPin, Phone } from "lucide-react";
 import { CRC, CRCWithDistance } from "@/types/crc";
+import { getCRCClassesUrl } from "@/lib/crcs";
+import Link from "next/link";
 
 interface CRCCardProps {
   crc: CRC | CRCWithDistance;
@@ -73,8 +75,10 @@ export function CRCCard({ crc }: CRCCardProps) {
               </div>
             </div>
           )}
-          <Button className="w-full mt-4 bg-primary text-white hover:bg-primary/90">
-            View Schedule & Sign Up
+          <Button asChild className="w-full mt-4 bg-primary text-white hover:bg-primary/90">
+            <Link href={getCRCClassesUrl(crc)}>
+              View Schedule & Sign Up
+            </Link>
           </Button>
         </CardContent>
       </Card>

@@ -146,7 +146,7 @@ export function GenerateFolderStructureButton() {
                           key={index}
                           className="text-xs bg-red-50 dark:bg-red-900/20 p-2 rounded"
                         >
-                          <div className="font-mono">{error.folder}</div>
+                          <div>{error.folder}</div>
                           <div className="text-red-600 dark:text-red-400 mt-1">
                             {error.error}
                           </div>

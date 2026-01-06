@@ -13,10 +13,14 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { X } from "lucide-react";
+import { X, LogOut, Settings } from "lucide-react";
 import { MyHometownLogo } from "../logo/my-hometown";
 import { CitySelectOption } from "@/lib/cities";
 import { useTranslations } from "next-intl";
+import { useCurrentUser } from "@/hooks/use-current-user";
+import { supabase } from "@/util/supabase";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface MobileNavProps {
   open: boolean;
@@ -27,6 +31,23 @@ interface MobileNavProps {
 export function MobileNav({ open, onClose, cities }: MobileNavProps) {
   const headerT = useTranslations("header");
   const navT = useTranslations("nav");
+  const router = useRouter();
+  const { user, isLoading } = useCurrentUser();
+
+  const handleLogout = async () => {
+    try {
+      window.localStorage.removeItem("impersonatedUser");
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      toast.success("Logged out successfully");
+      onClose();
+      router.push("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast.error("Failed to log out");
+    }
+  };
+
   return (
     <Sheet open={open} onOpenChange={onClose}>
       <SheetContent
@@ -125,13 +146,34 @@ export function MobileNav({ open, onClose, cities }: MobileNavProps) {
             {headerT("what_we_do")}
           </Link>
 
-          <Link
-            href="/login"
-            onClick={onClose}
-            className="text-white font-semibold text-lg hover:text-white/80 hover:bg-white/10 rounded-lg px-4 py-3 transition-colors"
-          >
-            {headerT("login")}
-          </Link>
+          {/* Auth Section */}
+          {!isLoading && user ? (
+            <>
+              <Link
+                href="/admin"
+                onClick={onClose}
+                className="text-white font-semibold text-lg hover:text-white/80 hover:bg-white/10 rounded-lg px-4 py-3 transition-colors flex items-center gap-2"
+              >
+                <Settings className="h-5 w-5" />
+                Admin Dashboard
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="text-white font-semibold text-lg hover:text-white/80 hover:bg-white/10 rounded-lg px-4 py-3 transition-colors flex items-center gap-2 w-full text-left"
+              >
+                <LogOut className="h-5 w-5" />
+                Log Out
+              </button>
+            </>
+          ) : (
+            <Link
+              href="/login"
+              onClick={onClose}
+              className="text-white font-semibold text-lg hover:text-white/80 hover:bg-white/10 rounded-lg px-4 py-3 transition-colors"
+            >
+              {headerT("login")}
+            </Link>
+          )}
         </nav>
       </SheetContent>
     </Sheet>

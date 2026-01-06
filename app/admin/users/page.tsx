@@ -5,10 +5,11 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { UserDataTable } from "@/components/admin/users/user-data-table";
 import { UserFormDialog } from "@/components/admin/users/user-form-dialog";
-import { columns } from "@/components/admin/users/user-table-columns";
+import { createColumns } from "@/components/admin/users/user-table-columns";
 import type { User, UserFormData } from "@/types/user";
 import { useAdminUsers } from "@/hooks/admin/use-admin-users";
-import { AlertCircle, AlertTriangle } from "lucide-react";
+import { useCurrentUser } from "@/hooks/use-current-user";
+import { AlertCircle, AlertTriangle, UserCog } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -18,6 +19,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export default function ManagementPage() {
   const {
@@ -31,10 +33,19 @@ export default function ManagementPage() {
     handleResendInvitation,
   } = useAdminUsers();
 
+  const { impersonateUser } = useCurrentUser();
+
   const [showUserForm, setShowUserForm] = React.useState(false);
   const [userToEdit, setUserToEdit] = React.useState<User | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
   const [userToDelete, setUserToDelete] = React.useState<User | null>(null);
+  const [showImpersonateConfirm, setShowImpersonateConfirm] =
+    React.useState(false);
+  const [userToImpersonate, setUserToImpersonate] = React.useState<User | null>(
+    null
+  );
+  const [isImpersonatingLoading, setIsImpersonatingLoading] =
+    React.useState(false);
 
   const handleCloseUserForm = () => {
     setShowUserForm(false);
@@ -67,6 +78,40 @@ export default function ManagementPage() {
       handleCloseUserForm();
     }
   };
+
+  const handleImpersonate = (user: User) => {
+    setUserToImpersonate(user);
+    setShowImpersonateConfirm(true);
+  };
+
+  const handleConfirmImpersonate = async () => {
+    if (!userToImpersonate) return;
+
+    setIsImpersonatingLoading(true);
+    try {
+      await impersonateUser(userToImpersonate.id, userToImpersonate.email);
+      toast.success(
+        `Now viewing as ${
+          userToImpersonate.first_name || userToImpersonate.email
+        }`
+      );
+      setShowImpersonateConfirm(false);
+      setUserToImpersonate(null);
+    } catch (error) {
+      console.error("Impersonation error:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to impersonate user"
+      );
+    } finally {
+      setIsImpersonatingLoading(false);
+    }
+  };
+
+  // Create columns with impersonate handler
+  const columns = React.useMemo(
+    () => createColumns({ onImpersonate: handleImpersonate }),
+    []
+  );
 
   return (
     <div className="px-4 mx-auto py-10">
@@ -160,6 +205,54 @@ export default function ManagementPage() {
               disabled={loading}
             >
               {loading ? "Deleting..." : "Delete User"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Impersonate Confirmation Dialog */}
+      <Dialog
+        open={showImpersonateConfirm}
+        onOpenChange={setShowImpersonateConfirm}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserCog className="h-5 w-5 text-primary" />
+              Impersonate User
+            </DialogTitle>
+            <DialogDescription>
+              You are about to view the app as{" "}
+              <strong>
+                {userToImpersonate?.first_name} {userToImpersonate?.last_name}
+              </strong>{" "}
+              ({userToImpersonate?.email}).
+              <br />
+              <br />
+              Your session will remain active. You can return to your account at
+              any time by clicking the &quot;Stop&quot; button in the banner.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setShowImpersonateConfirm(false);
+                setUserToImpersonate(null);
+              }}
+              disabled={isImpersonatingLoading}
+              className="hover:text-white"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={handleConfirmImpersonate}
+              disabled={isImpersonatingLoading}
+              className="text-white"
+            >
+              {isImpersonatingLoading ? "Loading..." : "View as User"}
             </Button>
           </DialogFooter>
         </DialogContent>

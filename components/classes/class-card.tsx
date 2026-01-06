@@ -60,11 +60,6 @@ export function ClassCard({ classData }: ClassCardProps) {
           >
             <Icon className="h-6 w-6" />
           </div>
-          <div className="flex flex-wrap gap-2 justify-end">
-            <Badge variant="outline" className={levelColors[classData.level]}>
-              {classData.level.replace("-", " ")}
-            </Badge>
-          </div>
         </div>
         <CardTitle className="text-xl leading-tight">
           {classData.title}
@@ -72,18 +67,12 @@ export function ClassCard({ classData }: ClassCardProps) {
       </CardHeader>
       <CardContent className="space-y-4 flex-1 flex flex-col">
         <p className="text-sm text-muted-foreground leading-relaxed flex-1">
-          {classData.description}
+          {classData.description.length > 120
+            ? `${classData.description.substring(0, 120)}...`
+            : classData.description}
         </p>
 
         <div className="space-y-2 text-sm">
-          <div className="flex items-center gap-2">
-            <GraduationCap className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-            <span className="font-medium">Instructor:</span>
-            <span className="text-muted-foreground">
-              {classData.instructor}
-            </span>
-          </div>
-
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
             <span className="text-muted-foreground">{classData.schedule}</span>
@@ -97,8 +86,7 @@ export function ClassCard({ classData }: ClassCardProps) {
           <div className="flex items-center gap-2">
             <Users className="h-4 w-4 text-muted-foreground flex-shrink-0" />
             <span className="text-muted-foreground">
-              {classData.ageGroup} • {classData.enrolled}/{classData.capacity}{" "}
-              enrolled
+              {classData.enrolled}/{classData.capacity} enrolled
             </span>
           </div>
         </div>

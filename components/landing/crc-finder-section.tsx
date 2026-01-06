@@ -157,7 +157,7 @@ export function CRCFinderSection({ crcs }: CRCFinderSectionProps) {
           <Card className="shadow-lg border-2 h-fit">
             <CardHeader className="pb-4">
               <CardTitle className="text-xl">{p("searchCardTitle")}</CardTitle>
-              <CardDescription>{p("searchCardDesc")}</CardDescription>
+              <CardDescription>{p("searchCardDesc")}</CardDescription> 
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Use My Location Button */}
