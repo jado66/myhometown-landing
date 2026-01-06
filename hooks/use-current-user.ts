@@ -127,7 +127,7 @@ export function useCurrentUser(): UseCurrentUserReturn {
           );
           setIsImpersonating(true);
           setUser(userData);
-          
+
           // Dispatch custom event for same-tab updates
           window.dispatchEvent(new CustomEvent("impersonation-changed"));
         }
@@ -147,7 +147,7 @@ export function useCurrentUser(): UseCurrentUserReturn {
     setIsLoading(true);
     window.localStorage.removeItem(IMPERSONATION_KEY);
     setIsImpersonating(false);
-    
+
     // Dispatch custom event for same-tab updates
     window.dispatchEvent(new CustomEvent("impersonation-changed"));
 
@@ -206,7 +206,10 @@ export function useCurrentUser(): UseCurrentUserReturn {
 
     return () => {
       window.removeEventListener("storage", handleStorageChange);
-      window.removeEventListener("impersonation-changed", handleImpersonationChange);
+      window.removeEventListener(
+        "impersonation-changed",
+        handleImpersonationChange
+      );
     };
   }, [authUser, initializeUser]);
 

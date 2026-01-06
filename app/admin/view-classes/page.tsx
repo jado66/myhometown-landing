@@ -1460,8 +1460,8 @@ export default function SignupPage() {
                               htmlFor="waitlist"
                               className="text-sm font-normal cursor-pointer"
                             >
-                              I understand this class is full and I&apos;m joining
-                              the waitlist
+                              I understand this class is full and I&apos;m
+                              joining the waitlist
                             </Label>
                           </div>
                         )}

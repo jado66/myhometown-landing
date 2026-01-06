@@ -3,9 +3,9 @@ import { ClassesPageForCRC } from "@/components/classes/classes-page-for-crc";
 import { notFound } from "next/navigation";
 
 interface Props {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 // Generate static paths for all CRCs
@@ -23,7 +23,8 @@ export async function generateStaticParams() {
 }
 
 export default async function ClassesForCRCPage({ params }: Props) {
-  const crc = await fetchCRCBySlugServer(params.slug);
+  const { slug } = await params;
+  const crc = await fetchCRCBySlugServer(slug);
 
   if (!crc) {
     notFound();
