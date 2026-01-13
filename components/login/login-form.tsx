@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Loader2, Mail, Lock, Hash } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -56,6 +57,8 @@ const tokenSchema = z.object({
 type LoginStep = "email" | "password" | "token" | "not_found";
 
 export function LoginForm() {
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect") || "/admin";
   const [step, setStep] = useState<LoginStep>("email");
   const [email, setEmail] = useState("");
   const [userType, setUserType] = useState<UserType>("not_found");
@@ -152,8 +155,8 @@ export function LoginForm() {
 
       if (data.user) {
         toast.success("Successfully signed in!");
-        // Redirect to admin page
-        window.location.href = "/admin";
+        // Redirect to the intended page or admin by default
+        window.location.href = redirectTo;
       }
     } catch (error) {
       toast.error("An error occurred. Please try again.");
@@ -168,8 +171,8 @@ export function LoginForm() {
       const result = await verifyMissionaryToken(email, values.token);
       if (result.success) {
         toast.success("Successfully verified!");
-        // Redirect to admin page
-        window.location.href = "/admin";
+        // Redirect to the intended page or admin by default
+        window.location.href = redirectTo;
       } else {
         toast.error(result.error || "Invalid token");
       }
