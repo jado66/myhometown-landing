@@ -46,7 +46,10 @@ export default async function RootLayout({
       <body className="font-sans antialiased">
         <I18nProvider locale={locale} messages={messages}>
           <UserProvider>
-            <MainLayoutClient visibleCities={visibleCities} allCities={allCities}>
+            <MainLayoutClient
+              visibleCities={visibleCities}
+              allCities={allCities}
+            >
               {children}
             </MainLayoutClient>
           </UserProvider>

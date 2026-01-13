@@ -188,7 +188,7 @@ export function UserFormDialog({
         ? initialData.contact_number.replace(/\D/g, "")
         : "",
       notes: initialData?.notes || "",
-      city: initialData?.cities?.[0] || undefined,
+      city: initialData?.cities?.[0] || "",
       communities: initialData?.communities || [],
       permissions: {
         texting: initialData?.permissions?.texting || false,
@@ -214,7 +214,7 @@ export function UserFormDialog({
             ? initialData.contact_number.replace(/\D/g, "")
             : "",
           notes: initialData.notes || "",
-          city: initialData.cities?.[0] || undefined,
+          city: initialData.cities?.[0] || "",
           communities: initialData.communities || [],
           permissions: {
             texting: initialData.permissions?.texting || false,
@@ -235,7 +235,7 @@ export function UserFormDialog({
           last_name: "",
           contact_number: "",
           notes: "",
-          city: undefined,
+          city: "",
           communities: [],
           permissions: {
             texting: false,
@@ -255,7 +255,7 @@ export function UserFormDialog({
   React.useEffect(() => {
     // Clear city and communities when user becomes global admin
     if (isAdministrator) {
-      form.setValue("city", undefined);
+      form.setValue("city", "");
       form.setValue("communities", []);
     }
   }, [isAdministrator, form]);
@@ -264,7 +264,7 @@ export function UserFormDialog({
     setIsSubmitting(true);
     try {
       // Get city details for the selected city
-      const selectedCity = values.city
+      const selectedCity = values.city && values.city !== ""
         ? cities.find((city) => city.id === values.city)
         : undefined;
       const selectedCities = selectedCity ? [selectedCity] : [];
@@ -648,29 +648,40 @@ export function UserFormDialog({
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>City</FormLabel>
-                            <Select
-                              onValueChange={(value) => field.onChange(value === "none" ? undefined : value)}
-                              value={field.value || "none"}
-                              disabled={loadingData || loading || isSubmitting}
-                            >
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select a city..." />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="none">
-                                  <span className="text-muted-foreground">None</span>
-                                </SelectItem>
-                                {cities.map((city) => (
-                                  <SelectItem key={city.id} value={city.id}>
-                                    {city.name}, {city.state}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                            <div className="flex gap-2">
+                              <Select
+                                onValueChange={field.onChange}
+                                value={field.value || ""}
+                                disabled={loadingData || loading || isSubmitting}
+                              >
+                                <FormControl>
+                                  <SelectTrigger className="flex-1">
+                                    <SelectValue placeholder="No city selected (click to select)" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {cities.map((city) => (
+                                    <SelectItem key={city.id} value={city.id}>
+                                      {city.name}, {city.state}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              {field.value && (
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="icon"
+                                  onClick={() => field.onChange("")}
+                                  disabled={loadingData || loading || isSubmitting}
+                                  title="Clear city selection"
+                                >
+                                  ✕
+                                </Button>
+                              )}
+                            </div>
                             <FormDescription className="text-primary">
-                              The city this user can manage
+                              The city this user can manage (optional)
                             </FormDescription>
                             <FormMessage />
                           </FormItem>

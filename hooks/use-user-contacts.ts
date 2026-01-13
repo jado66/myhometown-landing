@@ -44,23 +44,26 @@ export function useUserContacts(
   const [error, setError] = useState<string | null>(null);
 
   // Create stable string keys from arrays to prevent infinite loops
-  const communityIdsKey = useMemo(() => communityIds.join(','), [communityIds]);
-  const cityIdsKey = useMemo(() => cityIds.join(','), [cityIds]);
+  const communityIdsKey = useMemo(() => communityIds.join(","), [communityIds]);
+  const cityIdsKey = useMemo(() => cityIds.join(","), [cityIds]);
 
   // Transform database row to Contact type
-  const transformContact = useCallback((row: any): Contact => ({
-    id: row.id,
-    first_name: row.first_name,
-    last_name: row.last_name,
-    middle_name: row.middle_name || "",
-    email: row.email || "",
-    phone: row.phone || "",
-    owner_type: row.owner_type as OwnerType,
-    owner_id: row.owner_id,
-    groups: parseGroups(row.groups),
-    created_at: row.created_at,
-    updated_at: row.updated_at,
-  }), []);
+  const transformContact = useCallback(
+    (row: any): Contact => ({
+      id: row.id,
+      first_name: row.first_name,
+      last_name: row.last_name,
+      middle_name: row.middle_name || "",
+      email: row.email || "",
+      phone: row.phone || "",
+      owner_type: row.owner_type as OwnerType,
+      owner_id: row.owner_id,
+      groups: parseGroups(row.groups),
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+    }),
+    []
+  );
 
   // Fetch all contacts for the user
   const fetchContacts = useCallback(async () => {
@@ -164,7 +167,14 @@ export function useUserContacts(
     } finally {
       setLoading(false);
     }
-  }, [userId, communityIdsKey, cityIdsKey, communityIds, cityIds, transformContact]);
+  }, [
+    userId,
+    communityIdsKey,
+    cityIdsKey,
+    communityIds,
+    cityIds,
+    transformContact,
+  ]);
 
   // Initial fetch
   useEffect(() => {

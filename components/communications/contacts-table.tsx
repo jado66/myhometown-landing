@@ -153,8 +153,8 @@ export function ContactsTable({
   const handleSendText = () => {
     const contactIds = Array.from(selectedContacts);
     // Store selected contact IDs in sessionStorage for the send page
-    sessionStorage.setItem('selectedContactIds', JSON.stringify(contactIds));
-    router.push('/admin/communications/send-texts');
+    sessionStorage.setItem("selectedContactIds", JSON.stringify(contactIds));
+    router.push("/admin/communications/send-texts");
   };
 
   const copyToClipboard = (text: string, type: string) => {

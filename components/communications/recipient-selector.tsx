@@ -7,7 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Users, Building2, MapPin, Search, X, UserPlus } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import {
   Command,
@@ -57,23 +63,27 @@ export function RecipientSelector({
   contacts,
 }: RecipientSelectorProps) {
   const [selectedGroups, setSelectedGroups] = useState<Set<string>>(new Set());
-  const [individualContacts, setIndividualContacts] = useState<Set<string>>(new Set());
+  const [individualContacts, setIndividualContacts] = useState<Set<string>>(
+    new Set()
+  );
   const [addContactOpen, setAddContactOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   // Build audience options (groups to select from)
   const audienceOptions = useMemo(() => {
-    const options: Array<{ 
-      id: string; 
-      label: string; 
-      icon: any; 
+    const options: Array<{
+      id: string;
+      label: string;
+      icon: any;
       count: number;
       contacts: RecipientOption[];
     }> = [];
 
     // Personal Contacts
     if (contacts.userContacts?.length > 0) {
-      const personalContacts = allContacts.filter(c => c.ownerType === "user");
+      const personalContacts = allContacts.filter(
+        (c) => c.ownerType === "user"
+      );
       if (personalContacts.length > 0) {
         options.push({
           id: "personal",
@@ -87,44 +97,54 @@ export function RecipientSelector({
 
     // Communities
     if (contacts.communityContacts) {
-      Object.entries(contacts.communityContacts).forEach(([communityId, contactsList]) => {
-        if (contactsList.length > 0) {
-          const communityContacts = allContacts.filter(
-            c => c.ownerType === "community" && c.ownerId === communityId
-          );
-          if (communityContacts.length > 0) {
-            const name = user?.communities_details?.find((c: { id: string; name: string }) => c.id === communityId)?.name || "Community";
-            options.push({
-              id: `community-${communityId}`,
-              label: name,
-              icon: Building2,
-              count: communityContacts.length,
-              contacts: communityContacts,
-            });
+      Object.entries(contacts.communityContacts).forEach(
+        ([communityId, contactsList]) => {
+          if (contactsList.length > 0) {
+            const communityContacts = allContacts.filter(
+              (c) => c.ownerType === "community" && c.ownerId === communityId
+            );
+            if (communityContacts.length > 0) {
+              const name =
+                user?.communities_details?.find(
+                  (c: { id: string; name: string }) => c.id === communityId
+                )?.name || "Community";
+              options.push({
+                id: `community-${communityId}`,
+                label: name,
+                icon: Building2,
+                count: communityContacts.length,
+                contacts: communityContacts,
+              });
+            }
           }
         }
-      });
+      );
     }
 
     // Cities
     if (contacts.cityContacts) {
-      Object.entries(contacts.cityContacts).forEach(([cityId, contactsList]) => {
-        if (contactsList.length > 0) {
-          const cityContacts = allContacts.filter(
-            c => c.ownerType === "city" && c.ownerId === cityId
-          );
-          if (cityContacts.length > 0) {
-            const name = user?.cities_details?.find((c: { id: string; name: string }) => c.id === cityId)?.name || "City";
-            options.push({
-              id: `city-${cityId}`,
-              label: name,
-              icon: MapPin,
-              count: cityContacts.length,
-              contacts: cityContacts,
-            });
+      Object.entries(contacts.cityContacts).forEach(
+        ([cityId, contactsList]) => {
+          if (contactsList.length > 0) {
+            const cityContacts = allContacts.filter(
+              (c) => c.ownerType === "city" && c.ownerId === cityId
+            );
+            if (cityContacts.length > 0) {
+              const name =
+                user?.cities_details?.find(
+                  (c: { id: string; name: string }) => c.id === cityId
+                )?.name || "City";
+              options.push({
+                id: `city-${cityId}`,
+                label: name,
+                icon: MapPin,
+                count: cityContacts.length,
+                contacts: cityContacts,
+              });
+            }
           }
         }
-      });
+      );
     }
 
     return options;
@@ -136,10 +156,10 @@ export function RecipientSelector({
     const phoneSet = new Set<string>();
 
     // Add all contacts from selected groups
-    selectedGroups.forEach(groupId => {
-      const audience = audienceOptions.find(a => a.id === groupId);
+    selectedGroups.forEach((groupId) => {
+      const audience = audienceOptions.find((a) => a.id === groupId);
       if (audience) {
-        audience.contacts.forEach(contact => {
+        audience.contacts.forEach((contact) => {
           if (contact.phone && !phoneSet.has(contact.phone)) {
             phoneSet.add(contact.phone);
             recipients.push(contact);
@@ -149,8 +169,10 @@ export function RecipientSelector({
     });
 
     // Add individual contacts
-    individualContacts.forEach(contactId => {
-      const contact = allContacts.find(c => (c.contactId || c.value) === contactId);
+    individualContacts.forEach((contactId) => {
+      const contact = allContacts.find(
+        (c) => (c.contactId || c.value) === contactId
+      );
       if (contact && contact.phone && !phoneSet.has(contact.phone)) {
         phoneSet.add(contact.phone);
         recipients.push(contact);
@@ -166,7 +188,7 @@ export function RecipientSelector({
   }, [finalRecipients, onRecipientChange]);
 
   const toggleGroup = (groupId: string) => {
-    setSelectedGroups(prev => {
+    setSelectedGroups((prev) => {
       const next = new Set(prev);
       if (next.has(groupId)) {
         next.delete(groupId);
@@ -178,13 +200,13 @@ export function RecipientSelector({
   };
 
   const addIndividualContact = (contactId: string) => {
-    setIndividualContacts(prev => new Set([...prev, contactId]));
+    setIndividualContacts((prev) => new Set([...prev, contactId]));
     setAddContactOpen(false);
     setSearchQuery("");
   };
 
   const removeIndividualContact = (contactId: string) => {
-    setIndividualContacts(prev => {
+    setIndividualContacts((prev) => {
       const next = new Set(prev);
       next.delete(contactId);
       return next;
@@ -194,10 +216,13 @@ export function RecipientSelector({
   const searchResults = useMemo(() => {
     if (!searchQuery.trim()) return [];
     const query = searchQuery.toLowerCase();
-    return allContacts.filter(c => 
-      c.label.toLowerCase().includes(query) ||
-      c.phone?.toLowerCase().includes(query)
-    ).slice(0, 20); // Limit results
+    return allContacts
+      .filter(
+        (c) =>
+          c.label.toLowerCase().includes(query) ||
+          c.phone?.toLowerCase().includes(query)
+      )
+      .slice(0, 20); // Limit results
   }, [searchQuery, allContacts]);
 
   return (
@@ -213,10 +238,10 @@ export function RecipientSelector({
         <div className="space-y-3">
           <Label>Contact Groups</Label>
           <div className="space-y-2">
-            {audienceOptions.map(audience => {
+            {audienceOptions.map((audience) => {
               const Icon = audience.icon;
               const isSelected = selectedGroups.has(audience.id);
-              
+
               return (
                 <div
                   key={audience.id}
@@ -253,22 +278,30 @@ export function RecipientSelector({
               </PopoverTrigger>
               <PopoverContent className="w-80 p-0" align="end">
                 <Command>
-                  <CommandInput 
-                    placeholder="Search contacts..." 
+                  <CommandInput
+                    placeholder="Search contacts..."
                     value={searchQuery}
                     onValueChange={setSearchQuery}
                   />
                   <CommandList>
                     <CommandEmpty>No contacts found.</CommandEmpty>
                     <CommandGroup>
-                      {searchResults.map(contact => (
+                      {searchResults.map((contact) => (
                         <CommandItem
                           key={contact.contactId || contact.value}
-                          onSelect={() => addIndividualContact(contact.contactId || contact.value)}
+                          onSelect={() =>
+                            addIndividualContact(
+                              contact.contactId || contact.value
+                            )
+                          }
                         >
                           <div className="flex flex-col">
-                            <span className="font-medium">{contact.firstName} {contact.lastName}</span>
-                            <span className="text-sm text-muted-foreground">{contact.phone}</span>
+                            <span className="font-medium">
+                              {contact.firstName} {contact.lastName}
+                            </span>
+                            <span className="text-sm text-muted-foreground">
+                              {contact.phone}
+                            </span>
                           </div>
                         </CommandItem>
                       ))}
@@ -281,10 +314,12 @@ export function RecipientSelector({
 
           {individualContacts.size > 0 && (
             <div className="flex flex-wrap gap-2">
-              {Array.from(individualContacts).map(contactId => {
-                const contact = allContacts.find(c => (c.contactId || c.value) === contactId);
+              {Array.from(individualContacts).map((contactId) => {
+                const contact = allContacts.find(
+                  (c) => (c.contactId || c.value) === contactId
+                );
                 if (!contact) return null;
-                
+
                 return (
                   <Badge key={contactId} variant="secondary" className="gap-2">
                     {contact.firstName} {contact.lastName}
@@ -313,8 +348,10 @@ export function RecipientSelector({
           </div>
           {selectedGroups.size > 0 && (
             <p className="text-xs text-muted-foreground mt-2">
-              {selectedGroups.size} group{selectedGroups.size !== 1 ? 's' : ''} selected
-              {individualContacts.size > 0 && ` + ${individualContacts.size} individual`}
+              {selectedGroups.size} group{selectedGroups.size !== 1 ? "s" : ""}{" "}
+              selected
+              {individualContacts.size > 0 &&
+                ` + ${individualContacts.size} individual`}
             </p>
           )}
         </div>

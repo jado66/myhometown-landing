@@ -66,7 +66,7 @@ const getGroupMembers = (
         Array.isArray(contact.groups) &&
         contact.groups.includes(groupName)
     )
-    .map(contact => ({
+    .map((contact) => ({
       ...contact,
       sourceGroup: groupName,
       sourceType: "group" as const,
@@ -120,23 +120,25 @@ export function RecipientsList({
         const groupName = recipient.originalValue;
         const groupContacts = getGroupMembers(groupName, contacts);
 
-        const processedContacts: RecipientContact[] = groupContacts.map((contact) => {
-          const phone = contact.value;
-          if (!phoneNumberTracker.has(phone)) {
-            phoneNumberTracker.set(phone, 0);
+        const processedContacts: RecipientContact[] = groupContacts.map(
+          (contact) => {
+            const phone = contact.value;
+            if (!phoneNumberTracker.has(phone)) {
+              phoneNumberTracker.set(phone, 0);
+            }
+
+            const occurrenceIndex = phoneNumberTracker.get(phone)!;
+            phoneNumberTracker.set(phone, occurrenceIndex + 1);
+
+            return {
+              ...contact,
+              sourceGroup: groupName,
+              sourceType: "group" as const,
+              occurrenceIndex,
+              isDuplicate: occurrenceIndex > 0,
+            };
           }
-
-          const occurrenceIndex = phoneNumberTracker.get(phone)!;
-          phoneNumberTracker.set(phone, occurrenceIndex + 1);
-
-          return {
-            ...contact,
-            sourceGroup: groupName,
-            sourceType: "group" as const,
-            occurrenceIndex,
-            isDuplicate: occurrenceIndex > 0,
-          };
-        });
+        );
 
         return {
           groupName,
@@ -265,7 +267,9 @@ export function RecipientsList({
           return (
             <Button
               key={sectionNumber}
-              variant={selectedSection === sectionNumber ? "default" : "outline"}
+              variant={
+                selectedSection === sectionNumber ? "default" : "outline"
+              }
               size="sm"
               onClick={() => handleSectionSelect(groupIndex, sectionNumber)}
             >
@@ -293,10 +297,15 @@ export function RecipientsList({
 
     return (
       <div className="space-y-1">
-        {initialContacts.map((contact, index) => renderContactItem(contact, index))}
+        {initialContacts.map((contact, index) =>
+          renderContactItem(contact, index)
+        )}
 
         {shouldShowExpand && (
-          <Collapsible open={isExpanded} onOpenChange={() => toggleGroupExpansion(groupIndex)}>
+          <Collapsible
+            open={isExpanded}
+            onOpenChange={() => toggleGroupExpansion(groupIndex)}
+          >
             <CollapsibleTrigger asChild>
               <Button
                 variant="ghost"

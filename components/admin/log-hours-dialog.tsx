@@ -116,7 +116,9 @@ export function LogHoursDialog({
   useEffect(() => {
     if (!open) return;
     setActivities((prev: DetailedActivity[]) => {
-      const byCategory = new Map(prev.map((a: DetailedActivity) => [a.category, a]));
+      const byCategory = new Map(
+        prev.map((a: DetailedActivity) => [a.category, a])
+      );
       let changed = false;
       const normalized = categories.map((cat) => {
         if (byCategory.has(cat.value)) return byCategory.get(cat.value)!;
@@ -231,7 +233,10 @@ export function LogHoursDialog({
 
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                         <div className="space-y-1">
-                          <Label htmlFor={`hours-${category.value}`} className="text-xs">
+                          <Label
+                            htmlFor={`hours-${category.value}`}
+                            className="text-xs"
+                          >
                             Hours
                           </Label>
                           <Input
@@ -253,7 +258,10 @@ export function LogHoursDialog({
                         </div>
 
                         <div className="space-y-1 sm:col-span-2">
-                          <Label htmlFor={`desc-${category.value}`} className="text-xs">
+                          <Label
+                            htmlFor={`desc-${category.value}`}
+                            className="text-xs"
+                          >
                             Description (optional)
                           </Label>
                           <Input

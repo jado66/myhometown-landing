@@ -162,11 +162,11 @@ function BulkMMSMessagingContent({
 
   // Get pre-selected contacts from sessionStorage
   const preselectedContactIds = useMemo(() => {
-    if (typeof window === 'undefined') return [];
-    
-    const stored = sessionStorage.getItem('selectedContactIds');
+    if (typeof window === "undefined") return [];
+
+    const stored = sessionStorage.getItem("selectedContactIds");
     if (stored) {
-      sessionStorage.removeItem('selectedContactIds'); // Clean up after reading
+      sessionStorage.removeItem("selectedContactIds"); // Clean up after reading
       return JSON.parse(stored);
     }
     return [];
@@ -266,16 +266,22 @@ function BulkMMSMessagingContent({
 
   // Auto-select contacts from URL params
   useEffect(() => {
-    if (preselectedContactIds.length > 0 && allContacts.length > 0 && selectedRecipients.length === 0) {
-      const preselected = allContacts.filter((contact) => 
-        preselectedContactIds.includes(contact.contactId || '')
+    if (
+      preselectedContactIds.length > 0 &&
+      allContacts.length > 0 &&
+      selectedRecipients.length === 0
+    ) {
+      const preselected = allContacts.filter((contact) =>
+        preselectedContactIds.includes(contact.contactId || "")
       );
-      
+
       if (preselected.length > 0) {
         setSelectedRecipients(preselected);
         toast({
           title: "Recipients Selected",
-          description: `${preselected.length} contact${preselected.length !== 1 ? 's' : ''} pre-selected from your contacts`,
+          description: `${preselected.length} contact${
+            preselected.length !== 1 ? "s" : ""
+          } pre-selected from your contacts`,
         });
       }
     }
