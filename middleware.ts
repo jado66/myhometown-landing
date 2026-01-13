@@ -13,14 +13,11 @@ export async function middleware(request: NextRequest) {
   // Supabase stores session tokens in cookies with dynamic project-specific names
   // They typically contain "-auth-token" in the name
   const cookies = request.cookies;
-  let hasAuthCookie = false;
-
-  // Look for any Supabase auth cookie
-  cookies.getAll().forEach((cookie) => {
+  
+  // Look for any Supabase auth cookie (use some() for early termination)
+  const hasAuthCookie = cookies.getAll().some((cookie) => {
     // Supabase auth cookies contain "-auth-token" in their name
-    if (cookie.name.includes("-auth-token")) {
-      hasAuthCookie = true;
-    }
+    return cookie.name.includes("-auth-token");
   });
 
   // If no auth cookies found, redirect to login
@@ -30,8 +27,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // User appears to be authenticated (has session cookie), allow the request
-  // Note: This is a basic check. Full authentication verification happens client-side
+  // User has a valid session cookie, allow the request
+  // The client-side UserContext provides additional UX features like user info and permissions
   return NextResponse.next();
 }
 
