@@ -59,6 +59,9 @@ import {
   ChevronDown,
   Pin,
   PinOff,
+  School,
+  Check,
+  Shovel,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import {
@@ -124,7 +127,7 @@ const getNavSections = (): NavSection[] => {
 
   return [
     {
-      title: "Management",
+      title: "Data Management",
       id: "management-pages",
       requiredPermission: "administrator || content_development",
       pages: [
@@ -151,12 +154,35 @@ const getNavSections = (): NavSection[] => {
       ],
     },
     {
+      title: "Content Development",
+      id: "content-dev-pages",
+      requiredPermission: "content_development",
+      pages: [
+        // Manage City and Community Landing Page
+        {
+          title: "City Page Editor",
+          href: rootUrl + "/admin-dashboard/city-pages",
+          icon: PanelLeftClose,
+          requiredPermission: "content_development",
+          external: !!rootUrl,
+        },
+        {
+          title: "Community Page Editor",
+          href: rootUrl + "/admin-dashboard/community-pages",
+          icon: PanelLeftClose,
+          requiredPermission: "content_development",
+          external: !!rootUrl,
+        },
+      ],
+    },
+
+    {
       title: "Missionaries & Volunteers",
       id: "missionary-volunteer-pages",
       requiredPermission: "missionary_volunteer_management",
       pages: [
         {
-          title: "Roster",
+          title: "Roster (MVMS)",
           href: rootUrl + "/admin-dashboard/missionaries",
           icon: UserCheck,
           requiredPermission: "missionary_volunteer_management",
@@ -164,63 +190,85 @@ const getNavSections = (): NavSection[] => {
         },
         {
           title: "Log Service Hours",
-          href: rootUrl + "/admin-dashboard/log-hours",
+          href: "/admin/log-hours",
           icon: Clock,
-          external: !!rootUrl,
         },
       ],
     },
+
     {
-      title: "Texting",
-      id: "texting-pages",
-      requiredPermission: "texting",
-      pages: [
-        {
-          title: "Contact Directory",
-          href: rootUrl + "/admin-dashboard/texting/directory",
-          icon: Phone,
-          requiredPermission: "texting",
-          external: !!rootUrl,
-        },
-        {
-          title: "Send Messages",
-          href: rootUrl + "/admin-dashboard/texting/send",
-          icon: Send,
-          requiredPermission: "texting",
-          external: !!rootUrl,
-        },
-        {
-          title: "Scheduled Messages",
-          href: rootUrl + "/admin-dashboard/texting/scheduled-messages",
-          icon: CalendarClock,
-          requiredPermission: "texting",
-          external: !!rootUrl,
-        },
-        {
-          title: "Texting Logs",
-          href: rootUrl + "/admin-dashboard/texting/logs",
-          icon: FileText,
-          requiredPermission: "texting",
-          external: !!rootUrl,
-        },
-      ],
-    },
-    {
-      title: "Tools",
-      id: "tools-pages",
+      title: "Resource Centers (CRCs)",
+      id: "crc-pages",
       requiredPermission: "any",
       pages: [
         {
-          title: "Classes and Rolls",
+          title: "Manage Classes",
+          href: rootUrl + "/admin-dashboard/crc-classes",
+          icon: School,
+          external: !!rootUrl,
+        },
+        {
+          title: "Take Attendance",
           href: rootUrl + "/admin-dashboard/classes",
           icon: GraduationCap,
           external: !!rootUrl,
         },
+      ],
+    },
+
+    {
+      title: "Days Of Service",
+      id: "dos-pages",
+      requiredPermission: "day_of_service_management",
+      pages: [
         {
-          title: "Days Of Service",
-          href: rootUrl + "/admin-dashboard/days-of-service",
+          title: "Days of Service",
+          href: "/admin/days-of-service",
           icon: Calendar,
+          requiredPermission: "day_of_service_management",
+        },
+        {
+          title: "Manage Projects",
+          href: rootUrl + "/admin-dashboard/dos-projects",
+          icon: Shovel,
+          requiredPermission: "day_of_service_management",
           external: !!rootUrl,
+        },
+        {
+          title: "Event Check-In",
+          href: rootUrl + "/admin-dashboard/dos-checkin",
+          icon: Check,
+          requiredPermission: "day_of_service_management",
+          external: !!rootUrl,
+        },
+      ],
+    },
+    {
+      title: "Tools & Communications",
+      id: "communications-pages",
+      pages: [
+        {
+          title: "Contact Directory",
+          href: "/admin/communications/directory",
+          icon: Phone,
+        },
+        {
+          title: "Send Text Messages",
+          href: "/admin/communications/send-texts",
+          icon: Send,
+          requiredPermission: "texting",
+        },
+        {
+          title: "View Scheduled Messages",
+          href: "/admin/communications/scheduled",
+          icon: CalendarClock,
+          requiredPermission: "texting",
+        },
+        {
+          title: "Texting Logs",
+          href: "/admin/communications/logs",
+          icon: FileText,
+          requiredPermission: "texting",
         },
       ],
     },
@@ -229,6 +277,13 @@ const getNavSections = (): NavSection[] => {
       id: "support-pages",
       requiredPermission: "any",
       pages: [
+        {
+          title: "Training Resources",
+          href: rootUrl + "/training",
+          icon: GraduationCap,
+          requiredPermission: "any",
+          external: !!rootUrl,
+        },
         {
           title: "Bug Report",
           href: rootUrl + "/bug-report",
@@ -266,12 +321,6 @@ const getNavSections = (): NavSection[] => {
           title: "Bugs and Feature Requests",
           href: rootUrl + "/admin-dashboard/bugs-and-features",
           icon: AlertCircle,
-          external: !!rootUrl,
-        },
-        {
-          title: "Upload Media",
-          href: rootUrl + "/admin-dashboard/tools/media-upload",
-          icon: Upload,
           external: !!rootUrl,
         },
       ],

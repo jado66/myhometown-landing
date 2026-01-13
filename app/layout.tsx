@@ -10,6 +10,7 @@ import {
 import { MainLayoutClient } from "@/layout/main-layout-client";
 import { detectLocale, getMessages } from "@/i18n/getMessages";
 import { I18nProvider } from "@/components/i18n-provider";
+import { UserProvider } from "@/contexts/user-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -44,9 +45,11 @@ export default async function RootLayout({
     >
       <body className="font-sans antialiased">
         <I18nProvider locale={locale} messages={messages}>
-          <MainLayoutClient visibleCities={visibleCities} allCities={allCities}>
-            {children}
-          </MainLayoutClient>
+          <UserProvider>
+            <MainLayoutClient visibleCities={visibleCities} allCities={allCities}>
+              {children}
+            </MainLayoutClient>
+          </UserProvider>
         </I18nProvider>
         <Toaster position="top-center" closeButton richColors theme="light" />
       </body>

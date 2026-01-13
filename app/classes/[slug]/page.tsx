@@ -12,7 +12,7 @@ interface Props {
 export async function generateStaticParams() {
   try {
     const slugs = await getAllCRCSlugs();
-    
+
     return slugs.map((slug) => ({
       slug: slug,
     }));

@@ -649,8 +649,8 @@ export function UserFormDialog({
                           <FormItem>
                             <FormLabel>City</FormLabel>
                             <Select
-                              onValueChange={field.onChange}
-                              value={field.value}
+                              onValueChange={(value) => field.onChange(value === "none" ? undefined : value)}
+                              value={field.value || "none"}
                               disabled={loadingData || loading || isSubmitting}
                             >
                               <FormControl>
@@ -659,6 +659,9 @@ export function UserFormDialog({
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
+                                <SelectItem value="none">
+                                  <span className="text-muted-foreground">None</span>
+                                </SelectItem>
                                 {cities.map((city) => (
                                   <SelectItem key={city.id} value={city.id}>
                                     {city.name}, {city.state}
