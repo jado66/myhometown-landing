@@ -169,7 +169,19 @@ export function LoginForm() {
     setIsLoading(true);
     try {
       const result = await verifyMissionaryToken(email, values.token);
-      if (result.success) {
+      if (result.success && result.session) {
+        // Set the session on the client-side Supabase instance
+        const { error: sessionError } = await supabase.auth.setSession({
+          access_token: result.session.access_token,
+          refresh_token: result.session.refresh_token,
+        });
+
+        if (sessionError) {
+          console.error("Failed to set session:", sessionError);
+          toast.error("Failed to create session. Please try again.");
+          return;
+        }
+
         toast.success("Successfully verified!");
         // Redirect to the intended page or admin by default
         window.location.href = redirectTo;
