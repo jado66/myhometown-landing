@@ -169,7 +169,19 @@ export function LoginForm() {
     setIsLoading(true);
     try {
       const result = await verifyMissionaryToken(email, values.token);
-      if (result.success) {
+      if (result.success && result.hashedToken) {
+        // Verify the token hash to create a session
+        const { error: verifyError } = await supabase.auth.verifyOtp({
+          type: "magiclink",
+          token_hash: result.hashedToken,
+        });
+
+        if (verifyError) {
+          console.error("Failed to verify auth token:", verifyError);
+          toast.error("Failed to create session. Please try again.");
+          return;
+        }
+
         toast.success("Successfully verified!");
         // Redirect to the intended page or admin by default
         window.location.href = redirectTo;

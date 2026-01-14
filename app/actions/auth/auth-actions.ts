@@ -62,7 +62,7 @@ export async function verifyMissionaryToken(email: string, token: string) {
   // Ensure missionary exists
   const { data: missionary, error: missionaryError } = await supabaseServer
     .from("missionaries")
-    .select("id,email")
+    .select("id,email,first_name,last_name")
     .eq("email", email)
     .single();
 
@@ -111,7 +111,67 @@ export async function verifyMissionaryToken(email: string, token: string) {
     .update({ used: true })
     .eq("id", record.id);
 
-  return { success: true, missionary };
+  // Create or get auth user for the missionary
+  // Check if auth user already exists
+  const { data: existingUsers } = await supabaseServer.auth.admin.listUsers();
+  const existingAuthUser = existingUsers?.users.find((u: any) => u.email === email);
+
+  if (!existingAuthUser) {
+    // Create auth user for missionary
+    const { data: newAuthUser, error: createAuthError } =
+      await supabaseServer.auth.admin.createUser({
+        email,
+        email_confirm: true,
+        user_metadata: {
+          first_name: missionary.first_name,
+          last_name: missionary.last_name,
+          is_missionary: true,
+        },
+      });
+
+    if (createAuthError || !newAuthUser.user) {
+      console.error("Failed to create auth user for missionary:", createAuthError);
+      return {
+        success: false,
+        error: "Failed to create authentication session",
+      };
+    }
+  }
+
+  // Generate a magic link to get session tokens
+  const { data: linkData, error: linkError } =
+    await supabaseServer.auth.admin.generateLink({
+      type: "magiclink",
+      email,
+    });
+
+  if (linkError || !linkData) {
+    console.error("Failed to generate auth link for missionary:", linkError);
+    return {
+      success: false,
+      error: "Failed to create authentication session",
+    };
+  }
+
+  // Extract the hashed token from the action link
+  // The action_link format: auth/v1/verify?type=magiclink&token={hashed_token}...
+  const url = new URL(linkData.properties.action_link, "https://dummy.com");
+  const hashedToken = url.searchParams.get("token");
+
+  if (!hashedToken) {
+    console.error("Failed to extract token from magic link");
+    return {
+      success: false,
+      error: "Failed to create authentication session",
+    };
+  }
+
+  return {
+    success: true,
+    missionary,
+    hashedToken,
+    email,
+  };
 }
 
 /**
