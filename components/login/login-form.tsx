@@ -169,15 +169,15 @@ export function LoginForm() {
     setIsLoading(true);
     try {
       const result = await verifyMissionaryToken(email, values.token);
-      if (result.success && result.session) {
-        // Set the session on the client-side Supabase instance
-        const { error: sessionError } = await supabase.auth.setSession({
-          access_token: result.session.access_token,
-          refresh_token: result.session.refresh_token,
+      if (result.success && result.hashedToken) {
+        // Verify the token hash to create a session
+        const { error: verifyError } = await supabase.auth.verifyOtp({
+          type: "magiclink",
+          token_hash: result.hashedToken,
         });
 
-        if (sessionError) {
-          console.error("Failed to set session:", sessionError);
+        if (verifyError) {
+          console.error("Failed to verify auth token:", verifyError);
           toast.error("Failed to create session. Please try again.");
           return;
         }

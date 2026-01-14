@@ -112,15 +112,11 @@ export async function verifyMissionaryToken(email: string, token: string) {
     .eq("id", record.id);
 
   // Create or get auth user for the missionary
-  let authUserId: string;
-  
   // Check if auth user already exists
   const { data: existingUsers } = await supabaseServer.auth.admin.listUsers();
   const existingAuthUser = existingUsers?.users.find((u: any) => u.email === email);
 
-  if (existingAuthUser) {
-    authUserId = existingAuthUser.id;
-  } else {
+  if (!existingAuthUser) {
     // Create auth user for missionary
     const { data: newAuthUser, error: createAuthError } =
       await supabaseServer.auth.admin.createUser({
@@ -140,18 +136,30 @@ export async function verifyMissionaryToken(email: string, token: string) {
         error: "Failed to create authentication session",
       };
     }
-
-    authUserId = newAuthUser.user.id;
   }
 
-  // Generate a session for the auth user
-  const { data: sessionData, error: sessionError } =
-    await supabaseServer.auth.admin.createSession({
-      user_id: authUserId,
+  // Generate a magic link to get session tokens
+  const { data: linkData, error: linkError } =
+    await supabaseServer.auth.admin.generateLink({
+      type: "magiclink",
+      email,
     });
 
-  if (sessionError || !sessionData) {
-    console.error("Failed to create session for missionary:", sessionError);
+  if (linkError || !linkData) {
+    console.error("Failed to generate auth link for missionary:", linkError);
+    return {
+      success: false,
+      error: "Failed to create authentication session",
+    };
+  }
+
+  // Extract the hashed token from the action link
+  // The action_link format: auth/v1/verify?type=magiclink&token={hashed_token}...
+  const url = new URL(linkData.properties.action_link, "https://dummy.com");
+  const hashedToken = url.searchParams.get("token");
+
+  if (!hashedToken) {
+    console.error("Failed to extract token from magic link");
     return {
       success: false,
       error: "Failed to create authentication session",
@@ -161,7 +169,8 @@ export async function verifyMissionaryToken(email: string, token: string) {
   return {
     success: true,
     missionary,
-    session: sessionData.session,
+    hashedToken,
+    email,
   };
 }
 
