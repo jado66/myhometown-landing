@@ -33,8 +33,10 @@ export async function middleware(request: NextRequest) {
 }
 
 // Configure which routes the middleware should run on
+// Auth is now handled at the layout level, so middleware is disabled
 export const config = {
   matcher: [
-    "/admin/:path*",
+    // Empty matcher - middleware is disabled
+    // Auth enforcement moved to admin layout
   ],
 };

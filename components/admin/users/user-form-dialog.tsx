@@ -264,9 +264,10 @@ export function UserFormDialog({
     setIsSubmitting(true);
     try {
       // Get city details for the selected city
-      const selectedCity = values.city && values.city !== ""
-        ? cities.find((city) => city.id === values.city)
-        : undefined;
+      const selectedCity =
+        values.city && values.city !== ""
+          ? cities.find((city) => city.id === values.city)
+          : undefined;
       const selectedCities = selectedCity ? [selectedCity] : [];
 
       // Values.contact_number already digits-only; ensure max 10 digits
@@ -652,7 +653,9 @@ export function UserFormDialog({
                               <Select
                                 onValueChange={field.onChange}
                                 value={field.value || ""}
-                                disabled={loadingData || loading || isSubmitting}
+                                disabled={
+                                  loadingData || loading || isSubmitting
+                                }
                               >
                                 <FormControl>
                                   <SelectTrigger className="flex-1">
@@ -673,7 +676,9 @@ export function UserFormDialog({
                                   variant="outline"
                                   size="icon"
                                   onClick={() => field.onChange("")}
-                                  disabled={loadingData || loading || isSubmitting}
+                                  disabled={
+                                    loadingData || loading || isSubmitting
+                                  }
                                   title="Clear city selection"
                                 >
                                   ✕
